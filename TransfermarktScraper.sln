@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransfermarktScraper.AppHost", "TransfermarktScraper.AppHost\TransfermarktScraper.AppHost.csproj", "{887A5655-6A38-4DDD-B76C-9EE7E3974C51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransfermarktScraper.ServiceDefaults", "TransfermarktScraper.ServiceDefaults\TransfermarktScraper.ServiceDefaults.csproj", "{2B9E11EA-472B-41E0-ABCF-C2ED732462E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransfermarktScraper.ApiService", "TransfermarktScraper.ApiService\TransfermarktScraper.ApiService.csproj", "{A108433B-3740-4347-8AC1-EE58B1CDF8E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransfermarktScraper.Web", "TransfermarktScraper.Web\TransfermarktScraper.Web.csproj", "{8DC2F5D2-0D72-44D5-B18E-2034CB82CA6C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{887A5655-6A38-4DDD-B76C-9EE7E3974C51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{887A5655-6A38-4DDD-B76C-9EE7E3974C51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{887A5655-6A38-4DDD-B76C-9EE7E3974C51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{887A5655-6A38-4DDD-B76C-9EE7E3974C51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B9E11EA-472B-41E0-ABCF-C2ED732462E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B9E11EA-472B-41E0-ABCF-C2ED732462E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B9E11EA-472B-41E0-ABCF-C2ED732462E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B9E11EA-472B-41E0-ABCF-C2ED732462E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A108433B-3740-4347-8AC1-EE58B1CDF8E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A108433B-3740-4347-8AC1-EE58B1CDF8E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A108433B-3740-4347-8AC1-EE58B1CDF8E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A108433B-3740-4347-8AC1-EE58B1CDF8E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DC2F5D2-0D72-44D5-B18E-2034CB82CA6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DC2F5D2-0D72-44D5-B18E-2034CB82CA6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DC2F5D2-0D72-44D5-B18E-2034CB82CA6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DC2F5D2-0D72-44D5-B18E-2034CB82CA6C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

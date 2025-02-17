@@ -1,10 +1,22 @@
-var builder = DistributedApplication.CreateBuilder(args);
+using Aspire.Hosting;
 
-var apiService = builder.AddProject<Projects.TransfermarktScraper_ApiService>("apiservice");
+namespace TransfermarktScraper.AppHost
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.TransfermarktScraper_Web>("webfrontend")
-    .WithExternalHttpEndpoints()
-    .WithReference(apiService)
-    .WaitFor(apiService);
+            var apiService = builder.AddProject<Projects.TransfermarktScraper_ApiService>("apiservice");
 
-builder.Build().Run();
+            builder.AddProject<Projects.TransfermarktScraper_Web>("webfrontend")
+                .WithExternalHttpEndpoints()
+                .WithReference(apiService)
+                .WaitFor(apiService);
+
+            builder.Build().Run();
+        }
+    }
+}
+

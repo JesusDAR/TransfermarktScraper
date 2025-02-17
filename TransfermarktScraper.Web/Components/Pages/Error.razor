@@ -1,5 +1,6 @@
 ﻿@page "/Error"
 @using System.Diagnostics
+@using Microsoft.AspNetCore.Http
 
 <PageTitle>Error</PageTitle>
 
@@ -24,7 +25,7 @@
     and restarting the app.
 </p>
 
-@code{
+@code {
     [CascadingParameter]
     public HttpContext? HttpContext { get; set; }
 

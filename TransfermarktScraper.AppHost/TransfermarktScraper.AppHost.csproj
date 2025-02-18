@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TransfermarktScraper.ApiService\TransfermarktScraper.ApiService.csproj" />
-    <ProjectReference Include="..\TransfermarktScraper.Data\TransfermarktScraper.Data.csproj" />
     <ProjectReference Include="..\TransfermarktScraper.Web\TransfermarktScraper.Web.csproj" />
   </ItemGroup>
 

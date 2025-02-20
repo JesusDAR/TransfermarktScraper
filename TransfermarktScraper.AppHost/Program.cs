@@ -2,9 +2,16 @@ using Aspire.Hosting;
 
 namespace TransfermarktScraper.AppHost
 {
-    class Program
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// The main function that serves as the entry point for the application.
+        /// </summary>
+        /// <param name="args">An array of command-line arguments.</param>
+        public static void Main(string[] args)
         {
             var builder = DistributedApplication.CreateBuilder(args);
 
@@ -19,4 +26,3 @@ namespace TransfermarktScraper.AppHost
         }
     }
 }
-

@@ -5,9 +5,16 @@ using TransfermarktScraper.Web.Components;
 
 namespace TransfermarktScraper.Web
 {
-    class Program
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// The main function that serves as the entry point for the application.
+        /// </summary>
+        /// <param name="args">An array of command-line arguments.</param>
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +29,7 @@ namespace TransfermarktScraper.Web
 
             builder.Services.AddHttpClient<WeatherApiClient>(client =>
             {
-                client.BaseAddress = new("https+http://apiservice");
+                client.BaseAddress = new ("https+http://apiservice");
             });
 
             var app = builder.Build();

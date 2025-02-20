@@ -6,9 +6,16 @@ using Microsoft.Extensions.Hosting;
 
 namespace TransfermarktScraper.ApiService
 {
-    class Program
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// The main function that serves as the entry point for the application.
+        /// </summary>
+        /// <param name="args">An array of command-line arguments.</param>
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -43,9 +50,10 @@ namespace TransfermarktScraper.ApiService
 
             app.Run();
         }
-        record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+
+        record WeatherForecast(DateOnly date, int temperatureC, string? summary)
         {
-            public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+            public int TemperatureF => 32 + (int)(temperatureC / 0.5556);
         }
     }
 }

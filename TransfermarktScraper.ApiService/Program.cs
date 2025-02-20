@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TransfermarktScraper.BLL;
 
 namespace TransfermarktScraper.ApiService
 {
@@ -24,6 +25,8 @@ namespace TransfermarktScraper.ApiService
 
             // Add services to the container.
             builder.Services.AddProblemDetails();
+
+            builder.Services.AddBusinessLogicServices();
 
             var app = builder.Build();
 

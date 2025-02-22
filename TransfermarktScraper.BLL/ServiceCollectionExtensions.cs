@@ -1,5 +1,8 @@
 ﻿using AngleSharp;
+using AngleSharp.Io;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace TransfermarktScraper.BLL
 {
@@ -12,13 +15,29 @@ namespace TransfermarktScraper.BLL
         /// Registers the necessary services for the BLL in the dependency injection container.
         /// </summary>
         /// <param name="services">The service collection to which the services will be added.</param>
+        /// <param name="configuration">The application configuration.</param>
         /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
-        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services)
+        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
-            // Scraper
-            services.AddSingleton<IConfiguration>(Configuration.Default);
-            services.AddScoped<IBrowsingContext>(provider =>
-                BrowsingContext.New(Configuration.Default));
+            // Bind ScraperSettings from appsettings.json
+            services.Configure<ScraperSettings>(options =>
+                configuration.GetSection("ScraperSettings").Bind(options));
+
+            // Register AngleSharp services
+            services.AddSingleton(provider =>
+            {
+                var settings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+
+                var config = Configuration.Default
+                    .WithDefaultLoader(new LoaderOptions
+                    {
+                        IsResourceLoadingEnabled = true,
+                    });
+
+                var context = BrowsingContext.New(config);
+
+                return context;
+            });
 
             return services;
         }

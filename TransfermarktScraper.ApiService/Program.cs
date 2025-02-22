@@ -26,7 +26,7 @@ namespace TransfermarktScraper.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddBusinessLogicServices();
+            builder.Services.AddBusinessLogicServices(builder.Configuration);
 
             var app = builder.Build();
 

@@ -1,7 +1,13 @@
 ﻿namespace TransfermarktScraper.BLL
 {
+    /// <summary>
+    /// Represents the settings for the web scraper.
+    /// </summary>
     public class ScraperSettings
     {
-        public string BaseUrl { get; set; }
+        /// <summary>
+        /// Gets or sets the base URL that the scraper will use for making HTTP requests.
+        /// </summary>
+        public string? BaseUrl { get; set; }
     }
 }

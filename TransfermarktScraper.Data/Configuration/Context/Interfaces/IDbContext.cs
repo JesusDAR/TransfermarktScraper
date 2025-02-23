@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
+using TransfermarktScraper.Domain.Entities;
 
-namespace TransfermarktScraper.Data.Context.Interfaces
+namespace TransfermarktScraper.Data.Configuration.Context.Interfaces
 {
     /// <summary>
     /// Represents the database context for interacting with MongoDB.
@@ -11,5 +12,10 @@ namespace TransfermarktScraper.Data.Context.Interfaces
         /// Gets the MongoDB database instance for performing database operations.
         /// </summary>
         IMongoDatabase Database { get; }
+
+        /// <summary>
+        /// Gets the collection of countries.
+        /// </summary>
+        IMongoCollection<Country> Countries { get; }
     }
 }

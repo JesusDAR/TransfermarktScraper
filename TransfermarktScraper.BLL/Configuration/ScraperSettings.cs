@@ -1,4 +1,4 @@
-﻿namespace TransfermarktScraper.BLL
+﻿namespace TransfermarktScraper.BLL.Configuration
 {
     /// <summary>
     /// Represents the settings for the web scraper.

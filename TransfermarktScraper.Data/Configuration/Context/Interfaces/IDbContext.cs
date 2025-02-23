@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 
-namespace TransfermarktScraper.Data.Interfaces
+namespace TransfermarktScraper.Data.Context.Interfaces
 {
     /// <summary>
     /// Represents the database context for interacting with MongoDB.

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace TransfermarktScraper.BLL
+namespace TransfermarktScraper.BLL.Configuration
 {
     /// <summary>
     /// Provides extension methods for configuring services in the BLL.
@@ -28,7 +28,7 @@ namespace TransfermarktScraper.BLL
             {
                 var settings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
 
-                var config = Configuration.Default
+                var config = AngleSharp.Configuration.Default
                     .WithDefaultLoader(new LoaderOptions
                     {
                         IsResourceLoadingEnabled = true,

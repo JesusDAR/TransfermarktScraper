@@ -3,8 +3,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TransfermarktScraper.BLL;
-using TransfermarktScraper.Domain;
+using TransfermarktScraper.BLL.Configuration;
+using TransfermarktScraper.Domain.Configuration;
 
 namespace TransfermarktScraper.ApiService
 {

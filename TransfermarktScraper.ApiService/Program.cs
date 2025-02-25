@@ -1,8 +1,7 @@
-using System;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Scalar.AspNetCore;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.Data.Configuration;
 using TransfermarktScraper.Domain.Configuration;
@@ -31,8 +30,25 @@ namespace TransfermarktScraper.ApiService
             builder.Services.AddDomainServices();
             builder.Services.AddDataServices(builder.Configuration);
             builder.Services.AddBusinessLogicServices(builder.Configuration);
+            builder.Services.AddControllers();
+            builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+                app.MapScalarApiReference(
+                    options =>
+                        options
+                        .WithTitle("TransfermarktScraper API")
+                        .WithTheme(ScalarTheme.BluePlanet)
+                        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                        .Servers = [] // workaround to prevent scalar from taking a random generated localhost server as base url
+                );
+            }
+
+            app.MapControllers();
 
             // Configure the HTTP request pipeline.
             app.UseExceptionHandler();

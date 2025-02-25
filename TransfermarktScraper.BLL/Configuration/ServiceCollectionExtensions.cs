@@ -3,6 +3,8 @@ using AngleSharp.Io;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TransfermarktScraper.BLL.Services.Impl;
+using TransfermarktScraper.BLL.Services.Interfaces;
 
 namespace TransfermarktScraper.BLL.Configuration
 {
@@ -38,6 +40,9 @@ namespace TransfermarktScraper.BLL.Configuration
 
                 return context;
             });
+
+            // Register services
+            services.AddScoped<ICountryService, CountryService>();
 
             return services;
         }

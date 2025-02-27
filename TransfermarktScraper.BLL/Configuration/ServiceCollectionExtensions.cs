@@ -3,6 +3,7 @@ using AngleSharp.Io;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Impl;
 using TransfermarktScraper.BLL.Services.Interfaces;
 
@@ -39,6 +40,51 @@ namespace TransfermarktScraper.BLL.Configuration
                 var context = BrowsingContext.New(config);
 
                 return context;
+            });
+
+            // Register Playwright services
+            services.AddSingleton(provider =>
+            {
+                return Playwright.CreateAsync().GetAwaiter().GetResult();
+            }); // One playwright instance for all app
+
+            // One browser for all app
+            services.AddSingleton(provider =>
+            {
+                var playwright = provider.GetRequiredService<IPlaywright>();
+                return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+                {
+                    Headless = true, // set to false to see the browser
+                }).GetAwaiter().GetResult();
+            });
+
+            // One browser context per request
+            services.AddScoped(provider =>
+            {
+                var browser = provider.GetRequiredService<IBrowser>();
+                return browser.NewContextAsync().GetAwaiter().GetResult();
+            });
+
+            // One page per request
+            services.AddScoped(provider =>
+            {
+                var browserContext = provider.GetRequiredService<IBrowserContext>();
+                var page = browserContext.NewPageAsync().GetAwaiter().GetResult();
+
+                page.RouteAsync("**/*.js", route =>
+                {
+                    if (route.Request.Url.Contains("Notice", StringComparison.OrdinalIgnoreCase) &&
+                    route.Request.Url.EndsWith(".js", StringComparison.OrdinalIgnoreCase)) // cookies modal block
+                    {
+                        route.AbortAsync();
+                    }
+                    else
+                    {
+                        route.ContinueAsync();
+                    }
+                });
+
+                return page;
             });
 
             // Register services

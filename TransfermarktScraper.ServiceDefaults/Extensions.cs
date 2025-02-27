@@ -29,6 +29,8 @@ namespace Microsoft.Extensions.Hosting
 
             builder.AddDefaultHealthChecks();
 
+            builder.AddLogging();
+
             builder.Services.AddServiceDiscovery();
 
             builder.Services.ConfigureHttpClientDefaults(http =>
@@ -123,6 +125,25 @@ namespace Microsoft.Extensions.Hosting
             }
 
             return app;
+        }
+
+        /// <summary>
+        /// Extension method to configure logging services in the <see cref="IHostApplicationBuilder"/>.
+        /// </summary>
+        /// <typeparam name="TBuilder">The type of the application builder that implements <see cref="IHostApplicationBuilder"/>.</typeparam>
+        /// <param name="builder">The application builder where logging services will be added.</param>
+        /// <returns>The same application builder with configured logging services.</returns>
+        public static TBuilder AddLogging<TBuilder>(this TBuilder builder)
+            where TBuilder : IHostApplicationBuilder
+        {
+            builder.Services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.AddDebug();
+            });
+
+            return builder;
         }
 
         private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder)

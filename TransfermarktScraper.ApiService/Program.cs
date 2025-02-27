@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Scalar.AspNetCore;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.Data.Configuration;
@@ -54,6 +55,9 @@ namespace TransfermarktScraper.ApiService
             app.UseExceptionHandler();
 
             app.MapDefaultEndpoints();
+
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Starting Transfermarkt.ApiService...");
 
             app.Run();
         }

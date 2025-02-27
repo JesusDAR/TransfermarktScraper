@@ -36,7 +36,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>?> GetAllAsync()
+        public async Task<IEnumerable<Country>> GetAllAsync()
         {
             try
             {

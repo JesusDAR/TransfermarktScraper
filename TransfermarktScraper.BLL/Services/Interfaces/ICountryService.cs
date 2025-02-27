@@ -8,10 +8,10 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
     public interface ICountryService
     {
         /// <summary>
-        /// Scrapes the list of countries from Transfermarkt.
+        /// Retrieves a list of countries from the database. If the database is empty, it scrapes the data from an external source
+        /// and persists it before returning the result.
         /// </summary>
-        /// <returns>A task that represents the asynchronous operation.
-        /// The task result contains a list of <see cref="Country"/> objects.</returns>
-        public Task<IList<Country>> ScrapeCountriesAsync();
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> objects.</returns>
+        public Task<IEnumerable<Country>> GetCountriesAsync();
     }
 }

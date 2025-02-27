@@ -24,7 +24,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains a collection of countries, or null if no countries exist.
         /// </returns>
-        Task<IEnumerable<Country>?> GetAllAsync();
+        Task<IEnumerable<Country>> GetAllAsync();
 
         /// <summary>
         /// Asynchronously adds a range of countries to the repository.

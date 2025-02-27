@@ -28,7 +28,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         }
 
         /// <summary>
-        /// Scrapes country data and returns the list of countries scraped.
+        /// Gets the list of countries scraped.
         /// </summary>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects.
@@ -36,15 +36,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <response code="200">Returns the list of countries successfully scraped.</response>
         /// <response code="500">If there is an error while scraping the countries.</response>
         /// <response code="503">If there is an error when requesting a transfermarkt page.</response>
-        [HttpPost("scrape")]
-        [ProducesResponseType(typeof(List<Country>), StatusCodes.Status200OK)]
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<List<Country>>> ScrapeCountriesAsync()
+        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync()
         {
             try
             {
-                return Ok(await _countryService.ScrapeCountriesAsync());
+                return Ok(await _countryService.GetCountriesAsync());
             }
             catch (HttpRequestException e)
             {

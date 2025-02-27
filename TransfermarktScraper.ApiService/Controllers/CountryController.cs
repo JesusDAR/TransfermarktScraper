@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,12 +35,25 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </returns>
         /// <response code="200">Returns the list of countries successfully scraped.</response>
         /// <response code="500">If there is an error while scraping the countries.</response>
+        /// <response code="503">If there is an error when requesting a transfermarkt page.</response>
         [HttpPost("scrape")]
         [ProducesResponseType(typeof(List<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<List<Country>>> ScrapeCountriesAsync()
         {
-            return Ok(await _countryService.ScrapeCountriesAsync());
+            try
+            {
+                return Ok(await _countryService.ScrapeCountriesAsync());
+            }
+            catch (HttpRequestException e)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
         }
     }
 }

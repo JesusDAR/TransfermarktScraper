@@ -1,8 +1,5 @@
-﻿using AngleSharp;
-using AngleSharp.Io;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Impl;
 using TransfermarktScraper.BLL.Services.Interfaces;
@@ -25,22 +22,6 @@ namespace TransfermarktScraper.BLL.Configuration
             // Bind ScraperSettings from appsettings.json
             services.Configure<ScraperSettings>(options =>
                 configuration.GetSection("ScraperSettings").Bind(options));
-
-            // Register AngleSharp services
-            services.AddSingleton(provider =>
-            {
-                var settings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-
-                var config = AngleSharp.Configuration.Default
-                    .WithDefaultLoader(new LoaderOptions
-                    {
-                        IsResourceLoadingEnabled = true,
-                    });
-
-                var context = BrowsingContext.New(config);
-
-                return context;
-            });
 
             // Register Playwright services
             services.AddSingleton(provider =>

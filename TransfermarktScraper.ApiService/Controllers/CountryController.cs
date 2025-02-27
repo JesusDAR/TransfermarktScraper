@@ -28,23 +28,28 @@ namespace TransfermarktScraper.ApiService.Controllers
         }
 
         /// <summary>
-        /// Gets the list of countries scraped.
+        /// Retrieves a list of countries, either from the database or by scraping an external source. 
+        /// If scraping is forced or the data is unavailable, it scrapes the countries and returns them.
         /// </summary>
+        /// <param name="forceScraping">
+        /// A boolean flag that determines whether to force scraping of the country data, even if it exists in the database.
+        /// </param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects.
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects,
+        /// wrapped in a successful response or an appropriate error code.
         /// </returns>
-        /// <response code="200">Returns the list of countries successfully scraped.</response>
-        /// <response code="500">If there is an error while scraping the countries.</response>
-        /// <response code="503">If there is an error when requesting a transfermarkt page.</response>
+        /// <response code="200">Returns the list of countries successfully scraped or retrieved from the database.</response>
+        /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
+        /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync()
+        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync([FromQuery] bool forceScraping)
         {
             try
             {
-                return Ok(await _countryService.GetCountriesAsync());
+                return Ok(await _countryService.GetCountriesAsync(forceScraping));
             }
             catch (HttpRequestException e)
             {

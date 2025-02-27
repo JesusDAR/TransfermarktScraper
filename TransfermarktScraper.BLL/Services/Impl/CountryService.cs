@@ -43,13 +43,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetCountriesAsync()
+        public async Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping)
         {
             try
             {
                 var countries = await _countryRepository.GetAllAsync();
 
-                if (!countries.Any())
+                if (forceScraping || !countries.Any())
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 

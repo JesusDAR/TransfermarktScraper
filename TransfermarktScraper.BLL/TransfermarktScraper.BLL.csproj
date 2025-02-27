@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TransfermarktScraper.Data\TransfermarktScraper.Data.csproj" />
     <ProjectReference Include="..\TransfermarktScraper.Domain\TransfermarktScraper.Domain.csproj" />
+    <ProjectReference Include="..\TransfermarktScraper.ServiceDefaults\TransfermarktScraper.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

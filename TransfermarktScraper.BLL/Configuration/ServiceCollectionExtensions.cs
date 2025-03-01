@@ -17,7 +17,7 @@ namespace TransfermarktScraper.BLL.Configuration
         /// <param name="services">The service collection to which the services will be added.</param>
         /// <param name="configuration">The application configuration.</param>
         /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
-        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Bind ScraperSettings from appsettings.json
             services.Configure<ScraperSettings>(options =>

@@ -67,46 +67,51 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         {
             try
             {
-                var countryNames = countries.Select(c => c.Name).ToHashSet();
+                var countryIds = countries
+                    .Select(c => c.TransfermarktId)
+                    .ToHashSet();
 
-                var countriesToUpdate = await _countries
-                    .Find(c => countryNames.Contains(c.Name))
-                    .ToListAsync();
+                var hasExistingCountries = await _countries
+                    .Find(c => countryIds.Contains(c.TransfermarktId))
+                    .AnyAsync();
 
-                if (countriesToUpdate.Count == 0)
+                if (!hasExistingCountries)
                 {
                     await _countries.InsertManyAsync(countries);
                 }
                 else
                 {
-                    var existingCountryNames = countriesToUpdate.Select(c => c.Name).ToHashSet();
+                    var existingCountryIds = (await _countries
+                        .Find(c => countryIds.Contains(c.TransfermarktId))
+                        .Project(c => c.TransfermarktId)
+                        .ToListAsync())
+                        .ToHashSet();
 
                     var countriesToInsert = countries
-                        .Where(c => !existingCountryNames.Contains(c.Name))
+                        .Where(c => !existingCountryIds.Contains(c.TransfermarktId))
                         .ToList();
 
-                    if (countriesToInsert.Count > 0)
+                    var countriesToUpdate = countries
+                        .Where(c => existingCountryIds.Contains(c.TransfermarktId))
+                        .ToList();
+
+                    if (countriesToInsert.Any())
                     {
                         await _countries.InsertManyAsync(countriesToInsert);
                     }
 
-                    var bulkOperations = new List<WriteModel<Country>>();
-
-                    foreach (var country in countriesToUpdate)
-                    {
-                        var filter = Builders<Country>.Filter.Eq(c => c.Name, country.Name);
-
-                        var update = new ReplaceOneModel<Country>(filter, country);
-
-                        bulkOperations.Add(update);
-                    }
+                    var bulkOperations = countriesToUpdate
+                        .Select(country => new ReplaceOneModel<Country>(
+                            Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId),
+                            country))
+                        .ToList();
 
                     await _countries.BulkWriteAsync(bulkOperations);
                 }
             }
             catch (MongoException ex)
             {
-                throw new Exception("Error inserting or updating countries in the database.", ex);
+                throw new Exception($"Error inserting or updating {countries.Count()} countries in the database.", ex);
             }
         }
     }

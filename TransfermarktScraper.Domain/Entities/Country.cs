@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace TransfermarktScraper.Domain.Entities
@@ -13,7 +14,13 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the unique Transfermarkt identifier for the country.
+        /// </summary>
+        [BsonElement("transfermarktId")]
+        public string? TransfermarktId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the country.
@@ -26,5 +33,11 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonElement("flag")]
         public string? Flag { get; set; }
+
+        /// <summary>
+        /// Gets or sets the competitions of the country.
+        /// </summary>
+        [BsonElement("competitions")]
+        public List<Competition>? Competitions { get; set; }
     }
 }

@@ -19,5 +19,10 @@
         /// Gets or sets the name of the collection that stores country data.
         /// </summary>
         public string? CountryCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the collection that stores competition data.
+        /// </summary>
+        public string? CompetitionCollection { get; set; }
     }
 }

@@ -13,9 +13,9 @@
         public string? TransfermarktId { get; set; }
 
         /// <summary>
-        /// Gets or sets the competition URL in Transfermarkt.
+        /// Gets or sets the competition link in Transfermarkt.
         /// </summary>
-        public string? Url { get; set; }
+        public string? Link { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the competition.

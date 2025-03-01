@@ -85,7 +85,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var countryEntities = _mapper.Map<List<Domain.Entities.Country>>(countries);
 
-            await _countryRepository.AddRangeAsync(countryEntities);
+            await _countryRepository.InsertOrUpdateRangeAsync(countryEntities);
         }
 
         /// <summary>

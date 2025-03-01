@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using TransfermarktScraper.Data.Configuration.Context.Interfaces;
@@ -55,9 +56,57 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             {
                 await _countries.InsertManyAsync(countries);
             }
-            catch (Exception ex)
+            catch (MongoException ex)
             {
                 throw new Exception("Error adding countries to the database.", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task InsertOrUpdateRangeAsync(IEnumerable<Country> countries)
+        {
+            try
+            {
+                var countryNames = countries.Select(c => c.Name).ToHashSet();
+
+                var countriesToUpdate = await _countries
+                    .Find(c => countryNames.Contains(c.Name))
+                    .ToListAsync();
+
+                if (countriesToUpdate.Count == 0)
+                {
+                    await _countries.InsertManyAsync(countries);
+                }
+                else
+                {
+                    var existingCountryNames = countriesToUpdate.Select(c => c.Name).ToHashSet();
+
+                    var countriesToInsert = countries
+                        .Where(c => !existingCountryNames.Contains(c.Name))
+                        .ToList();
+
+                    if (countriesToInsert.Count > 0)
+                    {
+                        await _countries.InsertManyAsync(countriesToInsert);
+                    }
+
+                    var bulkOperations = new List<WriteModel<Country>>();
+
+                    foreach (var country in countriesToUpdate)
+                    {
+                        var filter = Builders<Country>.Filter.Eq(c => c.Name, country.Name);
+
+                        var update = new ReplaceOneModel<Country>(filter, country);
+
+                        bulkOperations.Add(update);
+                    }
+
+                    await _countries.BulkWriteAsync(bulkOperations);
+                }
+            }
+            catch (MongoException ex)
+            {
+                throw new Exception("Error inserting or updating countries in the database.", ex);
             }
         }
     }

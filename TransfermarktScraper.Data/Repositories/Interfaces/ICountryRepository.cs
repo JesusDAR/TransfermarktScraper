@@ -34,5 +34,15 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// A task representing the asynchronous operation.
         /// </returns>
         Task AddRangeAsync(IEnumerable<Country> countries);
+
+        /// <summary>
+        /// Inserts or updates a range of countries in the database.
+        /// If a country already exists, it will be updated. If it does not exist, it will be inserted.
+        /// </summary>
+        /// <param name="countries">The collection of countries to insert or update.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        Task InsertOrUpdateRangeAsync(IEnumerable<Country> countries);
     }
 }

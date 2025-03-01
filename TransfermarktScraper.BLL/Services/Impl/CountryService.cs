@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,6 +21,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly ScraperSettings _scraperSettings;
         private readonly IMapper _mapper;
         private readonly ILogger<CountryService> _logger;
+
+        private string? _currentTransfermarktId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountryService"/> class.
@@ -102,36 +106,142 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
             }
 
-            await _page.WaitForSelectorAsync("img[alt='Countries']");
-            var imgLocator = _page.Locator("img[alt='Countries']");
-            _logger.LogDebug("Image locator HTML: " + Environment.NewLine + Logging.FormatHtml(await imgLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            await SetTransfermarktIdInterceptor();
 
-            var parentLocator = imgLocator.Locator("..");
-            _logger.LogDebug("Parent locator HTML: " + Environment.NewLine + Logging.FormatHtml(await parentLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            var selectorLocator = await GetSelectorLocator();
+            var dropdownLocator = await GetDropdownLocator(selectorLocator);
 
-            var buttonLocator = parentLocator.Locator("div[role='button']");
-            _logger.LogDebug("Button locator HTML: " + Environment.NewLine + Logging.FormatHtml(await buttonLocator.EvaluateAsync<string>("element => element.outerHTML")));
-            await buttonLocator.ClickAsync();
-
-            await _page.WaitForSelectorAsync(".selector-dropdown");
-            var dropdownLocator = _page.Locator(".selector-dropdown");
-            _logger.LogDebug("Dropdown locator HTML: " + Environment.NewLine + Logging.FormatHtml(await dropdownLocator.EvaluateAsync<string>("element => element.outerHTML")));
-
-            var countryNames = await dropdownLocator.Locator("li").AllAsync();
-
+            var itemLocators = await dropdownLocator.Locator("li").AllAsync();
             var countries = new List<Country>();
 
-            foreach (var countryName in countryNames)
+            foreach (var itemLocator in itemLocators)
             {
                 var country = new Country
                 {
-                    Name = await countryName.TextContentAsync(),
+                    Name = await itemLocator.TextContentAsync(),
                 };
 
+                await itemLocator.ClickAsync();
+
+                country.TransfermarktId = _currentTransfermarktId;
+
+                await GetDropdownLocator(selectorLocator);
+
+                _logger.LogInformation(
+                    "Adding country:\n      " +
+                    "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
                 countries.Add(country);
             }
 
             return countries;
+        }
+
+        /// <summary>
+        /// Locates and returns the container element for the country selector on the page.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="ILocator"/> representing the container of the country selector.
+        /// </returns>
+        private async Task<ILocator> GetSelectorLocator()
+        {
+            await _page.WaitForSelectorAsync("img[alt='Countries']");
+            var imgLocator = _page.Locator("img[alt='Countries']");
+            _logger.LogDebug(
+                "Image locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await imgLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            var selectorLocator = imgLocator.Locator("..");
+            _logger.LogDebug(
+                "Selector locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await selectorLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            return selectorLocator;
+        }
+
+        /// <summary>
+        /// Locates and returns the button within the specified selector.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="ILocator"/> representing the button located within the selector.
+        /// </returns>
+        private async Task<ILocator> GetButtonLocator(ILocator selectorLocator)
+        {
+            await _page.WaitForSelectorAsync("div[role='button']");
+            var buttonLocator = selectorLocator.Locator("div[role='button']");
+            _logger.LogDebug(
+                "Button locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await buttonLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            return buttonLocator;
+        }
+
+        /// <summary>
+        /// Retrieves the locator for the dropdown menu within the specified selector.
+        /// </summary>
+        /// <param name="selectorLocator">
+        /// An <see cref="ILocator"/> representing the container where the dropdown will be searched.
+        /// </param>
+        /// <param name="maxAttempts">
+        /// The maximum number of attempts to make the dropdown visible before giving up. Default is 5.
+        /// </param>
+        /// <returns>
+        /// An <see cref="ILocator"/> representing the located dropdown menu.
+        /// </returns>
+        private async Task<ILocator> GetDropdownLocator(ILocator selectorLocator, int maxAttempts = 5)
+        {
+            var buttonLocator = await GetButtonLocator(selectorLocator);
+            int attempt = 0;
+            bool isDropdownVisible = false;
+
+            while (!isDropdownVisible && attempt < maxAttempts)
+            {
+                try
+                {
+                    attempt++;
+                    await buttonLocator.ClickAsync();
+                    await _page.WaitForSelectorAsync(".selector-dropdown", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible, Timeout = 200 });
+                    isDropdownVisible = true;
+                }
+                catch (TimeoutException)
+                {
+                    _logger.LogDebug("The country dropdown did not appear at attempt: {Attempt}.", attempt);
+                }
+            }
+
+            var dropdownLocator = selectorLocator.Locator(".selector-dropdown");
+
+            return dropdownLocator;
+        }
+
+        /// <summary>
+        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country from the URL.
+        /// </summary>
+        private async Task SetTransfermarktIdInterceptor()
+        {
+            await _page.RouteAsync("**/quickselect/competitions/**", async route =>
+            {
+                var url = route.Request.Url;
+
+                _logger.LogInformation(url);
+
+                _currentTransfermarktId = ExtractTransfermarktId(url);
+
+                await route.AbortAsync();
+            });
+        }
+
+        /// <summary>
+        /// Extracts the Transfermarkt ID from a given URL.
+        /// </summary>
+        /// /// <returns>
+        /// A string representing the extracted Transfermarkt ID. If no match is found, an empty string is returned.
+        /// </returns>
+        private string ExtractTransfermarktId(string url)
+        {
+            string pattern = @"/(\d+)$";
+            var match = Regex.Match(url, pattern);
+            string id = match.Groups[1].Value;
+            return id;
         }
     }
 }

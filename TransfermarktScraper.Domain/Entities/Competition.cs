@@ -22,6 +22,12 @@ namespace TransfermarktScraper.Domain.Entities
         public string? TransfermarktId { get; set; }
 
         /// <summary>
+        /// Gets or sets the unique Transfermarkt identifier for the competition.
+        /// </summary>
+        [BsonElement("url")]
+        public string? Url { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the competition.
         /// </summary>
         [BsonElement("name")]

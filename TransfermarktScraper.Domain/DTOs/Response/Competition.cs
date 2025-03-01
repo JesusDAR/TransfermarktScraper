@@ -13,6 +13,11 @@
         public string? TransfermarktId { get; set; }
 
         /// <summary>
+        /// Gets or sets the competition URL in Transfermarkt.
+        /// </summary>
+        public string? Url { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the competition.
         /// </summary>
         public string? Name { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Playwright;
+using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 
@@ -19,33 +20,26 @@ namespace TransfermarktScraper.BLL.Services.Impl
             throw new NotImplementedException();
         }
 
-        public async Task<List<Competition>> FormatQuickSelectCompetitionResponse(IAPIResponse response)
+        /// <inheritdoc/>
+        public async Task<List<CompetitionQuickSelectResult>> FormatQuickSelectCompetitionResponseAsync(IAPIResponse response)
         {
             var json = await response.JsonAsync();
 
-            var competitions = new List<Competition>();
+            var competitionQuickSelectResults = new List<CompetitionQuickSelectResult>();
 
-            try
+            foreach (var competitionElement in json.Value.EnumerateArray())
             {
-                foreach (var competitionElement in json.Value.EnumerateArray())
+                var competitionQuickSelectResult = new CompetitionQuickSelectResult
                 {
-                    var competition = new Competition
-                    {
-                        Name = competitionElement.GetProperty(nameof(Competition.Name).ToLower()).GetRawText(),
-                        Link = competitionElement.GetProperty(nameof(Competition.Link).ToLower()).GetRawText(),
-                        TransfermarktId = competitionElement.GetProperty(nameof(Competition.Id).ToLower()).GetRawText(),
-                    };
+                    Name = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Name).ToLower()).GetRawText(),
+                    Link = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Link).ToLower()).GetRawText(),
+                    Id = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Id).ToLower()).GetRawText(),
+                };
 
-                    competitions.Add(competition);
-                }
-            }
-            catch (Exception e)
-            {
-
-                throw e;
+                competitionQuickSelectResults.Add(competitionQuickSelectResult);
             }
 
-            return competitions;
+            return competitionQuickSelectResults;
         }
     }
 }

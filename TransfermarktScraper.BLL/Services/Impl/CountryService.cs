@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
+using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
@@ -109,46 +110,53 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
             }
 
-            string? currentTransfermarktId = null;
+            CountryQuickSelectResult currentCountryQuickSelectResult = new CountryQuickSelectResult();
             var currentCompetitions = new List<Competition>();
 
-            await SetQuickSelectCompetitionsInterceptor((transfermarktId, competitions) =>
+            var interceptorCompletedSource = new TaskCompletionSource<bool>();
+            var getCountryQuickSelectResultTask = SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
             {
-                currentTransfermarktId = transfermarktId;
-                currentCompetitions = competitions;
+                currentCountryQuickSelectResult = countryQuickSelectResult;
+
+                // Completes the TaskCompletionSource and restart it
+                interceptorCompletedSource.TrySetResult(true);
+                interceptorCompletedSource = new TaskCompletionSource<bool>();
             });
 
-            var selectorLocator = await GetSelectorLocator();
-            var dropdownLocator = await GetDropdownLocator(selectorLocator);
+            var selectorLocator = await GetSelectorLocatorAsync();
+            var dropdownLocator = await GetDropdownLocatorAsync(selectorLocator);
 
             var itemLocators = await dropdownLocator.Locator("li").AllAsync();
             var countries = new List<Country>();
+            var countryNames = new List<string>();
 
             foreach (var itemLocator in itemLocators)
             {
-                var country = new Country();
+                var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
 
-                country.Name = await GetCountryNameAsync(itemLocator, selectorLocator);
-                country.TransfermarktId = currentTransfermarktId;
-                country.Competitions = currentCompetitions;
+                // Wait until the interceptor finishes
+                await interceptorCompletedSource.Task;
 
-                await GetDropdownLocator(selectorLocator);
+                var country = CreateCountry(countryName, currentCountryQuickSelectResult);
+
+                await GetDropdownLocatorAsync(selectorLocator);
 
                 _logger.LogInformation(
                     "Adding country:\n      " +
                     "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
+                countries.Add(country);
             }
 
             return countries;
         }
 
         /// <summary>
-        /// Locates and returns the container element for the country selector on the page.
+        /// Asynchronously retrieves the locator of the country selector on the page.
         /// </summary>
         /// <returns>
-        /// An <see cref="ILocator"/> representing the container of the country selector.
+        /// A task that represents the asynchronous operation. The task result contains the <see cref="ILocator"/> representing the container of the country selector.
         /// </returns>
-        private async Task<ILocator> GetSelectorLocator()
+        private async Task<ILocator> GetSelectorLocatorAsync()
         {
             await _page.WaitForSelectorAsync("img[alt='Countries']");
             var imgLocator = _page.Locator("img[alt='Countries']");
@@ -165,12 +173,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Locates and returns the button within the specified selector.
+        /// Asynchronously retrieves the locator for the button within the selector locator.
         /// </summary>
+        /// <param name="selectorLocator">The locator og the selector element which is the parent of the button.</param>
         /// <returns>
-        /// An <see cref="ILocator"/> representing the button located within the selector.
+        /// A task that represents the asynchronous operation. The task result contains the <see cref="ILocator"/> representing the button located within the selector.
         /// </returns>
-        private async Task<ILocator> GetButtonLocator(ILocator selectorLocator)
+        private async Task<ILocator> GetButtonLocatorAsync(ILocator selectorLocator)
         {
             await _page.WaitForSelectorAsync("div[role='button']");
             var buttonLocator = selectorLocator.Locator("div[role='button']");
@@ -182,20 +191,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Retrieves the locator for the dropdown menu within the specified selector.
+        /// Asynchronously retrieves the dropdown locator by clicking on the button located using the given selector and waiting
+        /// for the dropdown element to become visible.
         /// </summary>
         /// <param name="selectorLocator">
         /// An <see cref="ILocator"/> representing the container where the dropdown will be searched.
         /// </param>
         /// <param name="maxAttempts">
-        /// The maximum number of attempts to make the dropdown visible before giving up. Default is 5.
+        /// The maximum number of attempts to make the dropdown visible before giving up.
         /// </param>
         /// <returns>
-        /// An <see cref="ILocator"/> representing the located dropdown menu.
+        /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="ILocator"/> of the dropdown element.</returns>
         /// </returns>
-        private async Task<ILocator> GetDropdownLocator(ILocator selectorLocator, int maxAttempts = 5)
+        private async Task<ILocator> GetDropdownLocatorAsync(ILocator selectorLocator, int maxAttempts = 5)
         {
-            var buttonLocator = await GetButtonLocator(selectorLocator);
+            var buttonLocator = await GetButtonLocatorAsync(selectorLocator);
             int attempt = 0;
             bool isDropdownVisible = false;
 
@@ -220,16 +230,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country from the URL intercepted.
+        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country and competition data from the URL intercepted.
         /// The competitions request is triggered when clicking on a country item from the countries dropdown.
         /// </summary>
-        /// <param name="onTransfermarktIdCaptured">
-        /// A callback action that receives the extracted Transfermarkt ID when a matching request is intercepted.
+        /// <param name="onCountryQuickSelectResultCaptured">
+        /// A callback function that will be invoked when the competition data is captured.
+        /// The callback receives a <see cref="CountryQuickSelectResult"/> containing the competition data extracted from the response.
         /// </param>
         /// <returns>
         /// A task representing the asynchronous operation.
         /// </returns>
-        private async Task SetQuickSelectCompetitionsInterceptor(Action<string, List<Competition>> onTransfermarktIdCaptured)
+        private async Task SetQuickSelectCompetitionsInterceptorAsync(Func<CountryQuickSelectResult, Task> onCountryQuickSelectResultCaptured)
         {
             await _page.RouteAsync("**/quickselect/competitions/**", async route =>
             {
@@ -240,11 +251,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var response = await route.FetchAsync();
 
-                var competitions = await _competitionService.FormatQuickSelectCompetitionResponse(response);
+                var competitionQuickSelectResults = await _competitionService.FormatQuickSelectCompetitionResponseAsync(response);
 
                 await route.AbortAsync();
 
-                onTransfermarktIdCaptured(transfermarktId, competitions);
+                var countryQuickSelectResult = new CountryQuickSelectResult
+                {
+                    Id = transfermarktId,
+                    CompetitionQuickSelectResults = competitionQuickSelectResults,
+                };
+
+                await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
             });
         }
 
@@ -256,7 +273,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="itemLocator">The locator representing the country name element.</param>
         /// <param name="selectorLocator">The locator for the dropdown selector, used if reloading is needed.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the country name.</returns>
-        private async Task<string> GetCountryNameAsync(ILocator itemLocator, ILocator selectorLocator)
+        private async Task<string?> GetCountryNameAsync(ILocator itemLocator, ILocator selectorLocator)
         {
             var name = string.Empty;
             int attempt = 0;
@@ -276,11 +293,43 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     _logger.LogInformation("The item locator is not visible at attempt: {Attempt}.", attempt);
                     await _page.ReloadAsync();
-                    await GetDropdownLocator(selectorLocator);
+                    await GetDropdownLocatorAsync(selectorLocator);
                 }
             }
 
             return name;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="Country"/> class.
+        /// </summary>
+        /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
+        /// <param name="currentCountryQuickSelectResult">The <see cref="CountryQuickSelectResult"/> containing the country ID 
+        /// and its associated competition data for creating the <see cref="Country"/>.</param>
+        /// <returns>A new instance of the <see cref="Country"/> class with the given data.</returns>
+        private Country CreateCountry(string countryName, CountryQuickSelectResult currentCountryQuickSelectResult)
+        {
+            var country = new Country();
+
+            country.Name = countryName;
+            country.TransfermarktId = currentCountryQuickSelectResult.Id;
+            country.Competitions = new List<Competition>();
+
+            var competitionQuickSelectResults = currentCountryQuickSelectResult.CompetitionQuickSelectResults;
+
+            foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
+            {
+                var competition = new Competition
+                {
+                    TransfermarktId = competitionQuickSelectResult.Id,
+                    Name = competitionQuickSelectResult.Name,
+                    Link = competitionQuickSelectResult.Link,
+                };
+
+                country.Competitions.Add(competition);
+            }
+
+            return country;
         }
 
         /// <summary>

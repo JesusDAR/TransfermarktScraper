@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Impl;
@@ -70,6 +70,7 @@ namespace TransfermarktScraper.BLL.Configuration
 
             // Register services
             services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<ICompetitionService, CompetitionService>();
 
             return services;
         }

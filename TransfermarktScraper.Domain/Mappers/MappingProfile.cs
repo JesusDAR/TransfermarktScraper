@@ -15,6 +15,10 @@ namespace TransfermarktScraper.Domain.Mappers
             // Country
             CreateMap<Entities.Country, DTOs.Response.Country>();
             CreateMap<DTOs.Response.Country, Entities.Country>();
+
+            // Competition
+            CreateMap<Entities.Competition, DTOs.Response.Competition>();
+            CreateMap<DTOs.Response.Competition, Entities.Competition>();
         }
     }
 }

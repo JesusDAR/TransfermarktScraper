@@ -52,17 +52,10 @@ namespace TransfermarktScraper.BLL.Configuration
                 var browserContext = provider.GetRequiredService<IBrowserContext>();
                 var page = browserContext.NewPageAsync().GetAwaiter().GetResult();
 
-                page.RouteAsync("**/*.js", route =>
+                // block cookies modal
+                page.RouteAsync("**/Notice.1a3ba.js", route =>
                 {
-                    if (route.Request.Url.Contains("Notice", StringComparison.OrdinalIgnoreCase) &&
-                    route.Request.Url.EndsWith(".js", StringComparison.OrdinalIgnoreCase)) // cookies modal block
-                    {
-                        route.AbortAsync();
-                    }
-                    else
-                    {
-                        route.ContinueAsync();
-                    }
+                    route.AbortAsync();
                 });
 
                 return page;

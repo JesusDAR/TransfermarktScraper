@@ -8,6 +8,7 @@ using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.ServiceDefaults.Utils;
 using Country = TransfermarktScraper.Domain.DTOs.Response.Country;
 
@@ -18,29 +19,31 @@ namespace TransfermarktScraper.BLL.Services.Impl
     {
         private readonly IPage _page;
         private readonly ICountryRepository _countryRepository;
+        private readonly ICompetitionService _competitionService;
         private readonly ScraperSettings _scraperSettings;
         private readonly IMapper _mapper;
         private readonly ILogger<CountryService> _logger;
-
-        private string? _currentTransfermarktId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountryService"/> class.
         /// </summary>
         /// <param name="page">The Playwright page used for web scraping.</param>
         /// <param name="countryRepository">The country repository for accessing and managing the country data.</param>
+        /// <param name="competitionService">The competition service for scraping competition data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
         /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public CountryService (
             IPage page,
             ICountryRepository countryRepository,
+            ICompetitionService competitionService,
             IOptions<ScraperSettings> scraperSettings,
             IMapper mapper,
             ILogger<CountryService> logger)
         {
             _page = page;
             _countryRepository = countryRepository;
+            _competitionService = competitionService;
             _scraperSettings = scraperSettings.Value;
             _mapper = mapper;
             _logger = logger;
@@ -106,7 +109,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
             }
 
-            await SetTransfermarktIdInterceptor();
+            string? currentTransfermarktId = null;
+            var currentCompetitions = new List<Competition>();
+
+            await SetQuickSelectCompetitionsInterceptor((transfermarktId, competitions) =>
+            {
+                currentTransfermarktId = transfermarktId;
+                currentCompetitions = competitions;
+            });
 
             var selectorLocator = await GetSelectorLocator();
             var dropdownLocator = await GetDropdownLocator(selectorLocator);
@@ -116,21 +126,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             foreach (var itemLocator in itemLocators)
             {
-                var country = new Country
-                {
-                    Name = await itemLocator.TextContentAsync(),
-                };
+                var country = new Country();
 
-                await itemLocator.ClickAsync();
-
-                country.TransfermarktId = _currentTransfermarktId;
+                country.Name = await GetCountryNameAsync(itemLocator, selectorLocator);
+                country.TransfermarktId = currentTransfermarktId;
+                country.Competitions = currentCompetitions;
 
                 await GetDropdownLocator(selectorLocator);
 
                 _logger.LogInformation(
                     "Adding country:\n      " +
                     "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
-                countries.Add(country);
             }
 
             return countries;
@@ -214,20 +220,67 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country from the URL.
+        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country from the URL intercepted.
+        /// The competitions request is triggered when clicking on a country item from the countries dropdown.
         /// </summary>
-        private async Task SetTransfermarktIdInterceptor()
+        /// <param name="onTransfermarktIdCaptured">
+        /// A callback action that receives the extracted Transfermarkt ID when a matching request is intercepted.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        private async Task SetQuickSelectCompetitionsInterceptor(Action<string, List<Competition>> onTransfermarktIdCaptured)
         {
             await _page.RouteAsync("**/quickselect/competitions/**", async route =>
             {
                 var url = route.Request.Url;
+                _logger.LogInformation("Intercepted competition URL: {url}", url);
 
-                _logger.LogInformation(url);
+                var transfermarktId = ExtractTransfermarktId(url);
 
-                _currentTransfermarktId = ExtractTransfermarktId(url);
+                var response = await route.FetchAsync();
+
+                var competitions = await _competitionService.FormatQuickSelectCompetitionResponse(response);
 
                 await route.AbortAsync();
+
+                onTransfermarktIdCaptured(transfermarktId, competitions);
             });
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the country name by interacting with the specified item locator.
+        /// If the locator is not visible, it retries up to a maximum number of attempts,
+        /// reloading the page and attempting to retrieve the dropdown locator if necessary.
+        /// </summary>
+        /// <param name="itemLocator">The locator representing the country name element.</param>
+        /// <param name="selectorLocator">The locator for the dropdown selector, used if reloading is needed.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the country name.</returns>
+        private async Task<string> GetCountryNameAsync(ILocator itemLocator, ILocator selectorLocator)
+        {
+            var name = string.Empty;
+            int attempt = 0;
+            int maxAttempts = 5;
+            bool isItemLocatorVisible = false;
+
+            while (!isItemLocatorVisible && attempt < maxAttempts)
+            {
+                try
+                {
+                    attempt++;
+                    name = await itemLocator.TextContentAsync(new LocatorTextContentOptions { Timeout = 500 });
+                    await itemLocator.ClickAsync(new LocatorClickOptions { Timeout = 500 });
+                    isItemLocatorVisible = true;
+                }
+                catch (TimeoutException)
+                {
+                    _logger.LogInformation("The item locator is not visible at attempt: {Attempt}.", attempt);
+                    await _page.ReloadAsync();
+                    await GetDropdownLocator(selectorLocator);
+                }
+            }
+
+            return name;
         }
 
         /// <summary>

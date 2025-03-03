@@ -28,7 +28,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         }
 
         /// <summary>
-        /// Retrieves a list of countries, either from the database or by scraping an external source. 
+        /// Retrieves a list of countries, either from the database or by scraping Transfermarkt.
         /// If scraping is forced or the data is unavailable, it scrapes the countries and returns them.
         /// </summary>
         /// <param name="forceScraping">

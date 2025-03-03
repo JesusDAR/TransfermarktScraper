@@ -12,7 +12,6 @@ namespace TransfermarktScraper.Data.Configuration.Context.Impl
         private readonly IMongoDatabase _database;
 
         private readonly string? _countryCollection;
-        private readonly string? _competitionCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbContext"/> class.
@@ -24,7 +23,6 @@ namespace TransfermarktScraper.Data.Configuration.Context.Impl
             var databaseName = options.Value.DatabaseName;
 
             _countryCollection = options.Value.CountryCollection;
-            _competitionCollection = options.Value.CompetitionCollection;
 
             try
             {
@@ -42,8 +40,5 @@ namespace TransfermarktScraper.Data.Configuration.Context.Impl
 
         /// <inheritdoc/>
         public IMongoCollection<Country> Countries => _database.GetCollection<Country>(_countryCollection);
-
-        /// <inheritdoc/>
-        public IMongoCollection<Competition> Competitions => _database.GetCollection<Competition>(_competitionCollection);
     }
 }

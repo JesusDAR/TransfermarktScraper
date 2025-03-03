@@ -32,7 +32,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception("Error retrieving the country from the database.", ex);
+                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with ID {id} from the database.", ex);
             }
         }
 
@@ -45,7 +45,29 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception("Error retrieving all countries from the database.", ex);
+                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all countries from the database.", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Competition>> GetAllAsync(string countryId)
+        {
+            try
+            {
+                var country = await GetAsync(countryId);
+
+                if (country == null)
+                {
+                    throw new InvalidOperationException($"Error in {nameof(GetAllAsync)}: Country with ID {countryId} not found in the database.");
+                }
+
+                var competitions = country.Competitions;
+
+                return competitions;
+            }
+            catch (MongoException ex)
+            {
+                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all competitions of the country with ID {countryId} from the database.", ex);
             }
         }
 
@@ -58,7 +80,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception("Error adding countries to the database.", ex);
+                throw new Exception($"Error in {nameof(AddRangeAsync)}: Failed to add countries to the database.", ex);
             }
         }
 
@@ -111,7 +133,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception($"Error inserting or updating {countries.Count()} countries in the database.", ex);
+                throw new Exception($"Error in {nameof(InsertOrUpdateRangeAsync)}: Failed inserting or updating {countries.Count()} countries in the database.", ex);
             }
         }
     }

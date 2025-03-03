@@ -22,9 +22,18 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// Asynchronously retrieves all countries.
         /// </summary>
         /// <returns>
-        /// A task representing the asynchronous operation. The task result contains a collection of countries, or null if no countries exist.
+        /// A task representing the asynchronous operation. The task result contains a collection of countries, or empty list if no countries exist.
         /// </returns>
         Task<IEnumerable<Country>> GetAllAsync();
+
+        /// <summary>
+        /// Asynchronously retrieves all competitions from a country.
+        /// </summary>
+        /// <param name="countryId">The unique identifier of the country.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains a collection of competitions from a country, or empty list if no competitions exist.
+        /// </returns>
+        Task<IEnumerable<Competition>> GetAllAsync(string countryId);
 
         /// <summary>
         /// Asynchronously adds a range of countries to the repository.

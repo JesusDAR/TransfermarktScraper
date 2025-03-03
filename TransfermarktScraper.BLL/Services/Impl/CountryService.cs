@@ -55,9 +55,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             try
             {
-                var countries = await _countryRepository.GetAllAsync();
-
-                if (forceScraping || !countries.Any())
+                if (forceScraping)
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
@@ -65,12 +63,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     return countriesScraped;
                 }
-                else
-                {
-                    var countryDtos = _mapper.Map<IEnumerable<Country>>(countries);
 
-                    return countryDtos;
+                var countries = await _countryRepository.GetAllAsync();
+
+                if (!countries.Any())
+                {
+                    var countriesScraped = await ScrapeCountriesAsync();
+
+                    await PersistCountriesAsync(countriesScraped);
+
+                    return countriesScraped;
                 }
+
+                var countryDtos = _mapper.Map<IEnumerable<Country>>(countries);
+
+                return countryDtos;
             }
             catch (HttpRequestException e)
             {

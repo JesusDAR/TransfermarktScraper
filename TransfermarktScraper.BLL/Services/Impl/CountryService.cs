@@ -110,42 +110,24 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
             }
 
-            CountryQuickSelectResult currentCountryQuickSelectResult = new CountryQuickSelectResult();
-            var currentCompetitions = new List<Competition>();
-
-            var interceptorCompletedSource = new TaskCompletionSource<bool>();
-            var getCountryQuickSelectResultTask = SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
-            {
-                currentCountryQuickSelectResult = countryQuickSelectResult;
-
-                // Completes the TaskCompletionSource and restart it
-                interceptorCompletedSource.TrySetResult(true);
-                interceptorCompletedSource = new TaskCompletionSource<bool>();
-            });
+            var countryQuickSelectInterceptorResult = InitializeCountryQuickSelectInterceptor();
 
             var selectorLocator = await GetSelectorLocatorAsync();
-            var dropdownLocator = await GetDropdownLocatorAsync(selectorLocator);
-
-            var itemLocators = await dropdownLocator.Locator("li").AllAsync();
+            var itemLocators = await GetItemLocatorsAsync(selectorLocator);
             var countries = new List<Country>();
-            var countryNames = new List<string>();
 
             foreach (var itemLocator in itemLocators)
             {
                 var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
 
-                // Wait until the interceptor finishes
-                await interceptorCompletedSource.Task;
+                await countryQuickSelectInterceptorResult.InterceptorTask;
 
-                var country = CreateCountry(countryName, currentCountryQuickSelectResult);
+                CreateAndAddCountry(ref countries, countryName);
 
                 await GetDropdownLocatorAsync(selectorLocator);
-
-                _logger.LogInformation(
-                    "Adding country:\n      " +
-                    "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
-                countries.Add(country);
             }
+
+            AddInterceptedQuickSelectResults(ref countries, countryQuickSelectInterceptorResult);
 
             return countries;
         }
@@ -245,7 +227,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             await _page.RouteAsync("**/quickselect/competitions/**", async route =>
             {
                 var url = route.Request.Url;
-                _logger.LogInformation("Intercepted competition URL: {url}", url);
+                _logger.LogDebug("Intercepted competition URL: {url}", url);
 
                 var transfermarktId = ExtractTransfermarktId(url);
 
@@ -286,7 +268,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     attempt++;
                     name = await itemLocator.TextContentAsync(new LocatorTextContentOptions { Timeout = 500 });
-                    await itemLocator.ClickAsync(new LocatorClickOptions { Timeout = 500 });
+                    await itemLocator.ClickAsync(new LocatorClickOptions { Timeout = 500 }); // This click triggers the quick select request and thus the interceptor
                     isItemLocatorVisible = true;
                 }
                 catch (TimeoutException)
@@ -301,35 +283,94 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="Country"/> class.
+        /// Initializes an interceptor to capture country and competition data and returns the result.
         /// </summary>
-        /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
-        /// <param name="currentCountryQuickSelectResult">The <see cref="CountryQuickSelectResult"/> containing the country ID 
-        /// and its associated competition data for creating the <see cref="Country"/>.</param>
-        /// <returns>A new instance of the <see cref="Country"/> class with the given data.</returns>
-        private Country CreateCountry(string countryName, CountryQuickSelectResult currentCountryQuickSelectResult)
+        /// <returns>
+        /// A <see cref="CountryQuickSelectInterceptorResult"/> containing the list of
+        /// country quick select results and the associated interceptor task.
+        /// </returns>
+        private CountryQuickSelectInterceptorResult InitializeCountryQuickSelectInterceptor()
         {
-            var country = new Country();
+            List<CountryQuickSelectResult> countryQuickSelectResults = new List<CountryQuickSelectResult>();
 
-            country.Name = countryName;
-            country.TransfermarktId = currentCountryQuickSelectResult.Id;
-            country.Competitions = new List<Competition>();
-
-            var competitionQuickSelectResults = currentCountryQuickSelectResult.CompetitionQuickSelectResults;
-
-            foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
+            var interceptorTask = SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
             {
-                var competition = new Competition
+                countryQuickSelectResults.Add(countryQuickSelectResult);
+            });
+
+            return new CountryQuickSelectInterceptorResult
+            {
+                CountryQuickSelectResults = countryQuickSelectResults,
+                InterceptorTask = interceptorTask,
+            };
+        }
+
+        /// <summary>
+        /// Retrieves a list of item locators within a dropdown menu asynchronously.
+        /// </summary>
+        /// <param name="selectorLocator">The locator used to identify the dropdown container.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation, returning a read-only list of <see cref="ILocator"/> 
+        /// representing the items within the dropdown.
+        /// </returns>
+        private async Task<IReadOnlyList<ILocator>> GetItemLocatorsAsync(ILocator selectorLocator)
+        {
+            var dropdownLocator = await GetDropdownLocatorAsync(selectorLocator);
+            var itemLocators = await dropdownLocator.Locator("li").AllAsync();
+            return itemLocators;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="Country"/> class and adds it to the provided list.
+        /// </summary>
+        /// <param name="countries">A reference to the list of <see cref="Country"/> objects where the new country will be added.</param>
+        /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
+        private void CreateAndAddCountry(ref List<Country> countries, string? countryName)
+        {
+            _logger.LogInformation("Adding country: {CountryName}", countryName);
+
+            var country = new Country()
+            {
+                Name = countryName,
+            };
+
+            countries.Add(country);
+        }
+
+        /// <summary>
+        /// Updates a list of countries with intercepted quick select results and adds related competitions.
+        /// </summary>
+        /// <param name="countries">A reference to the list of <see cref="Country"/> objects to be updated.</param>
+        /// <param name="countryQuickSelectInterceptorResult">
+        /// The result containing the intercepted quick select data for countries and their competitions.
+        /// </param>
+        private void AddInterceptedQuickSelectResults(ref List<Country> countries, CountryQuickSelectInterceptorResult countryQuickSelectInterceptorResult)
+        {
+            for (int i = 0; i < countries.Count; i++)
+            {
+                var country = countries[i];
+                var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
+
+                country.TransfermarktId = countryQuickSelectResult.Id;
+
+                var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
+
+                foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
                 {
-                    TransfermarktId = competitionQuickSelectResult.Id,
-                    Name = competitionQuickSelectResult.Name,
-                    Link = competitionQuickSelectResult.Link,
-                };
+                    var competition = new Competition
+                    {
+                        TransfermarktId = competitionQuickSelectResult.Id,
+                        Name = competitionQuickSelectResult.Name,
+                        Link = competitionQuickSelectResult.Link,
+                    };
 
-                country.Competitions.Add(competition);
+                    country.Competitions.Add(competition);
+                }
+
+                _logger.LogInformation(
+                    "Added country:\n      " +
+                    "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
             }
-
-            return country;
         }
 
         /// <summary>

@@ -38,6 +38,6 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the competitions of the country.
         /// </summary>
         [BsonElement("competitions")]
-        public List<Competition>? Competitions { get; set; }
+        public List<Competition> Competitions { get; set; } = new List<Competition>();
     }
 }

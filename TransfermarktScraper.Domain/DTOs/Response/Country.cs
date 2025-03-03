@@ -30,6 +30,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the competitions of the country.
         /// </summary>
-        public List<Competition>? Competitions { get; set; }
+        public List<Competition> Competitions { get; set; } = new List<Competition>();
     }
 }

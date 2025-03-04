@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -361,7 +361,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
 
                 country.TransfermarktId = countryQuickSelectResult.Id;
-                country.Flag = countryQuickSelectResult.Id + ".png";
+                country.Flag = string.Concat("/", countryQuickSelectResult.Id, ".png");
 
                 var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
 

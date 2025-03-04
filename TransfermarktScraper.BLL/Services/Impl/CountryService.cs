@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -151,12 +151,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             await _page.WaitForSelectorAsync("img[alt='Countries']");
             var imgLocator = _page.Locator("img[alt='Countries']");
-            _logger.LogDebug(
+            _logger.LogTrace(
                 "Image locator HTML:\n      " +
                 "{FormattedHtml}", Logging.FormatHtml(await imgLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
             var selectorLocator = imgLocator.Locator("..");
-            _logger.LogDebug(
+            _logger.LogTrace(
                 "Selector locator HTML:\n      " +
                 "{FormattedHtml}", Logging.FormatHtml(await selectorLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
@@ -174,7 +174,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             await _page.WaitForSelectorAsync("div[role='button']");
             var buttonLocator = selectorLocator.Locator("div[role='button']");
-            _logger.LogDebug(
+            _logger.LogTrace(
                 "Button locator HTML:\n      " +
                 "{FormattedHtml}", Logging.FormatHtml(await buttonLocator.EvaluateAsync<string>("element => element.outerHTML")));
 

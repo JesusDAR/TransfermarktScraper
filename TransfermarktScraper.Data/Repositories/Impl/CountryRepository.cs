@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using TransfermarktScraper.Data.Configuration.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
@@ -13,14 +14,17 @@ namespace TransfermarktScraper.Data.Repositories.Impl
     public class CountryRepository : ICountryRepository
     {
         private readonly IMongoCollection<Country> _countries;
+        private readonly ILogger<CountryRepository> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountryRepository"/> class.
         /// </summary>
         /// <param name="dbContext">the database context.</param>
-        public CountryRepository(IDbContext dbContext)
+        /// <param name="logger">The logger.</param>
+        public CountryRepository(IDbContext dbContext, ILogger<CountryRepository> logger)
         {
             _countries = dbContext.Countries;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -99,7 +103,9 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 if (!hasExistingCountries)
                 {
+                    _logger.LogInformation("Inserting {Count} countries in the database...", countryIds.Count.ToString());
                     await _countries.InsertManyAsync(countries);
+                    _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryIds.Count.ToString());
                 }
                 else
                 {
@@ -123,12 +129,17 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     }
 
                     var bulkOperations = countriesToUpdate
-                        .Select(country => new ReplaceOneModel<Country>(
+                        .Select(country => new UpdateOneModel<Country>(
                             Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId),
-                            country))
+                            Builders<Country>.Update
+                                .Set(c => c.Name, country.Name)
+                                .Set(c => c.Flag, country.Flag)
+                                .Set(c => c.Competitions, country.Competitions)))
                         .ToList();
 
+                    _logger.LogInformation("Updating {Count} countries in the database...", bulkOperations.Count);
                     await _countries.BulkWriteAsync(bulkOperations);
+                    _logger.LogInformation("Successfully updated {Count} countries in the database...", bulkOperations.Count);
                 }
             }
             catch (MongoException ex)

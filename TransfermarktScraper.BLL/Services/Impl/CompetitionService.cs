@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,7 +43,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryId, bool forceScraping)
+        public async Task<IList<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return competitionQuickSelectResults;
         }
 
-        private async Task PersistCompetitionsAsync(List<Competition> competitions)
+        private async Task PersistCompetitionsAsync(IList<Domain.Entities.Competition> competitions)
         {
             var countryEntities = _mapper.Map<List<Domain.Entities.Competition>>(competitions);
 

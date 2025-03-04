@@ -96,7 +96,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countries">The list of country DTOs to be stored.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task PersistCountriesAsync(List<Country> countries)
+        private async Task PersistCountriesAsync(IList<Country> countries)
         {
             var countryEntities = _mapper.Map<List<Domain.Entities.Country>>(countries);
 
@@ -108,7 +108,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
-        private async Task<List<Country>> ScrapeCountriesAsync()
+        private async Task<IList<Country>> ScrapeCountriesAsync()
         {
             var response = await _page.GotoAsync(_scraperSettings.BaseUrl);
 
@@ -129,12 +129,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 await countryQuickSelectInterceptorResult.InterceptorTask;
 
-                CreateAndAddCountry(ref countries, countryName);
+                CreateAndAddCountry(countries, countryName);
 
                 await GetDropdownLocatorAsync(selectorLocator);
             }
 
-            AddInterceptedQuickSelectResults(ref countries, countryQuickSelectInterceptorResult);
+            AddInterceptedQuickSelectResults(countries, countryQuickSelectInterceptorResult);
 
             return countries;
         }
@@ -298,7 +298,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private CountryQuickSelectInterceptorResult InitializeCountryQuickSelectInterceptor()
         {
-            List<CountryQuickSelectResult> countryQuickSelectResults = new List<CountryQuickSelectResult>();
+            var countryQuickSelectResults = new List<CountryQuickSelectResult>();
 
             var interceptorTask = SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
             {
@@ -330,9 +330,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Creates a new instance of the <see cref="Country"/> class and adds it to the provided list.
         /// </summary>
-        /// <param name="countries">A reference to the list of <see cref="Country"/> objects where the new country will be added.</param>
+        /// <param name="countries">The list of <see cref="Country"/> objects where the new country will be added.</param>
         /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
-        private void CreateAndAddCountry(ref List<Country> countries, string? countryName)
+        private void CreateAndAddCountry(IList<Country> countries, string? countryName)
         {
             _logger.LogInformation("Adding country: {CountryName}", countryName);
 
@@ -347,11 +347,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Updates a list of countries with intercepted quick select results and adds related competitions.
         /// </summary>
-        /// <param name="countries">A reference to the list of <see cref="Country"/> objects to be updated.</param>
+        /// <param name="countries">The list of <see cref="Country"/> objects to be updated.</param>
         /// <param name="countryQuickSelectInterceptorResult">
         /// The result containing the intercepted quick select data for countries and their competitions.
         /// </param>
-        private void AddInterceptedQuickSelectResults(ref List<Country> countries, CountryQuickSelectInterceptorResult countryQuickSelectInterceptorResult)
+        private void AddInterceptedQuickSelectResults(IList<Country> countries, CountryQuickSelectInterceptorResult countryQuickSelectInterceptorResult)
         {
             for (int i = 0; i < countries.Count; i++)
             {

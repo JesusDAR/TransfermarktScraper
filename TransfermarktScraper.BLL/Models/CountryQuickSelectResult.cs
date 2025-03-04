@@ -13,6 +13,6 @@
         /// <summary>
         /// Gets or sets the list of quick selection competitions associated with the country.
         /// </summary>
-        public List<CompetitionQuickSelectResult> CompetitionQuickSelectResults { get; set; } = new List<CompetitionQuickSelectResult>();
+        public IList<CompetitionQuickSelectResult> CompetitionQuickSelectResults { get; set; } = new List<CompetitionQuickSelectResult>();
     }
 }

@@ -14,6 +14,6 @@
         /// <summary>
         /// Gets or sets the list of quick select results for countries.
         /// </summary>
-        public List<CountryQuickSelectResult> CountryQuickSelectResults { get; set; } = new List<CountryQuickSelectResult>();
+        public IList<CountryQuickSelectResult> CountryQuickSelectResults { get; set; } = new List<CountryQuickSelectResult>();
     }
 }

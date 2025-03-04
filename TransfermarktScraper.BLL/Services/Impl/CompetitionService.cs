@@ -85,9 +85,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var competitionQuickSelectResult = new CompetitionQuickSelectResult
                 {
-                    Name = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Name).ToLower()).GetRawText(),
-                    Link = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Link).ToLower()).GetRawText(),
-                    Id = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Id).ToLower()).GetRawText(),
+                    Name = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Name).ToLower()).GetString(),
+                    Link = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Link).ToLower()).GetString(),
+                    Id = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Id).ToLower()).GetString(),
                 };
 
                 competitionQuickSelectResults.Add(competitionQuickSelectResult);

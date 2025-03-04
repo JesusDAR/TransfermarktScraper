@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using TransfermarktScraper.Data.Configuration.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
@@ -103,6 +104,15 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 if (!hasExistingCountries)
                 {
+                    // competition is a nested entity inside the country document thus its ID needs to be created manually
+                    foreach (var country in countries)
+                    {
+                        foreach (var competition in country.Competitions)
+                        {
+                            competition.Id = ObjectId.GenerateNewId().ToString();
+                        }
+                    }
+
                     _logger.LogInformation("Inserting {Count} countries in the database...", countryIds.Count.ToString());
                     await _countries.InsertManyAsync(countries);
                     _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryIds.Count.ToString());

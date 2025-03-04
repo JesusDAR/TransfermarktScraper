@@ -13,7 +13,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public required string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the unique Transfermarkt identifier for the competition.

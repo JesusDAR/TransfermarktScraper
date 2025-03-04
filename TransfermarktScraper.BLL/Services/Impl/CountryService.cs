@@ -111,7 +111,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
         private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
         {
-            var response = await _page.GotoAsync(_scraperSettings.BaseUrl);
+            var url = new Uri(_scraperSettings.BaseUrl);
+            var response = await _page.GotoAsync(url.AbsoluteUri);
 
             if (response != null && response.Status != (int)HttpStatusCode.OK)
             {
@@ -360,6 +361,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
 
                 country.TransfermarktId = countryQuickSelectResult.Id;
+                country.Flag = countryQuickSelectResult.Id + ".png";
 
                 var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
 

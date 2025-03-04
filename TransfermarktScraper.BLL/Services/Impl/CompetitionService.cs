@@ -109,7 +109,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 //competition.Id = ObjectId.GenerateNewId().ToString();
 
                 var url = new Uri(_scraperSettings.BaseUrl + competition.Link);
-
                 var response = await _page.GotoAsync(url.AbsoluteUri);
 
                 if (response != null && response.Status != (int)HttpStatusCode.OK)

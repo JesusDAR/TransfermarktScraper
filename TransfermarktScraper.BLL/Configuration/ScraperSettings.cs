@@ -9,5 +9,10 @@
         /// Gets or sets the base URL that the scraper will use for making HTTP requests.
         /// </summary>
         public string BaseUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the base URL that the scraper will use for making HTTP requests to obtain the country flags.
+        /// </summary>
+        public string FlagUrl { get; set; } = string.Empty;
     }
 }

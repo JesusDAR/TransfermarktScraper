@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Impl;
@@ -53,7 +53,8 @@ namespace TransfermarktScraper.BLL.Configuration
                 var page = browserContext.NewPageAsync().GetAwaiter().GetResult();
 
                 // block cookies modal
-                page.RouteAsync("**/Notice.1a3ba.js", route =>
+                var regex = new Regex(@"Notice\..+\.js");
+                page.RouteAsync(regex, route =>
                 {
                     route.AbortAsync();
                 });

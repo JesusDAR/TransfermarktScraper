@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.ObjectModel;
+using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using AutoMapper;
@@ -96,9 +97,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countries">The list of country DTOs to be stored.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task PersistCountriesAsync(IList<Country> countries)
+        private async Task PersistCountriesAsync(IEnumerable<Country> countries)
         {
-            var countryEntities = _mapper.Map<List<Domain.Entities.Country>>(countries);
+            var countryEntities = _mapper.Map<IEnumerable<Domain.Entities.Country>>(countries);
 
             await _countryRepository.InsertOrUpdateRangeAsync(countryEntities);
         }
@@ -108,7 +109,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
-        private async Task<IList<Country>> ScrapeCountriesAsync()
+        private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
         {
             var response = await _page.GotoAsync(_scraperSettings.BaseUrl);
 
@@ -121,7 +122,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var selectorLocator = await GetSelectorLocatorAsync();
             var itemLocators = await GetItemLocatorsAsync(selectorLocator);
-            var countries = new List<Country>();
+            var countries = new Collection<Country>();
 
             foreach (var itemLocator in itemLocators)
             {
@@ -332,7 +333,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countries">The list of <see cref="Country"/> objects where the new country will be added.</param>
         /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
-        private void CreateAndAddCountry(IList<Country> countries, string? countryName)
+        private void CreateAndAddCountry(ICollection<Country> countries, string? countryName)
         {
             _logger.LogInformation("Adding country: {CountryName}", countryName);
 

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,19 +43,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IList<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping)
+        public async Task<IEnumerable<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping)
         {
             try
             {
-                var competitions = await _countryRepository.GetAllAsync(countryId);
+                var competitions = (await _countryRepository.GetAllAsync(countryId)).ToList();
 
                 if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Id)))
                 {
-                    var competitionsScraped = await ScrapeCompetitionsAsync(countryId);
+                    var competitionsScraped = await ScrapeCompetitionsAsync(competitions);
 
-                    await PersistCompetitionsAsync(competitionsScraped);
-
-                    return competitionsScraped;
+                    await UpdateCompetitionsAsync(competitionsScraped);
                 }
 
                 var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitions);
@@ -64,7 +62,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError(e, $"Error in {nameof(GetCompetitionsAsync)} trying to access external page to scrape");
+                _logger.LogError(e, $"Error in {nameof(GetCompetitionsAsync)}: trying to access external page to scrape");
                 throw;
             }
             catch (Exception e)
@@ -77,7 +75,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<List<CompetitionQuickSelectResult>> FormatQuickSelectCompetitionResponseAsync(IAPIResponse response)
+        public async Task<IList<CompetitionQuickSelectResult>> FormatQuickSelectCompetitionResponseAsync(IAPIResponse response)
         {
             var json = await response.JsonAsync();
 
@@ -98,23 +96,32 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return competitionQuickSelectResults;
         }
 
-        private async Task PersistCompetitionsAsync(IList<Domain.Entities.Competition> competitions)
+        private async Task UpdateCompetitionsAsync(IEnumerable<Domain.Entities.Competition> competitions)
         {
-            var countryEntities = _mapper.Map<List<Domain.Entities.Competition>>(competitions);
-
             throw new NotImplementedException();
         }
 
-        private async Task<List<Competition>> ScrapeCompetitionsAsync(string countryId)
+        private async Task<IEnumerable<Domain.Entities.Competition>> ScrapeCompetitionsAsync(IEnumerable<Domain.Entities.Competition> competitions)
         {
-            var competitions = await _countryRepository.GetAllAsync(countryId);
-
-            var response = await _page.GotoAsync(_scraperSettings.BaseUrl);
-
-            if (response != null && response.Status != (int)HttpStatusCode.OK)
+            foreach (var competition in competitions)
             {
-                throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
+                // To add in the data layer
+                //competition.Id = ObjectId.GenerateNewId().ToString();
+
+                var url = new Uri(_scraperSettings.BaseUrl + competition.Link);
+
+                var response = await _page.GotoAsync(url.AbsoluteUri);
+
+                if (response != null && response.Status != (int)HttpStatusCode.OK)
+                {
+                    throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {url} status code: {response.Status}");
+                }
+
+
+
+                return competitions;
             }
+
 
             throw new NotImplementedException();
         }

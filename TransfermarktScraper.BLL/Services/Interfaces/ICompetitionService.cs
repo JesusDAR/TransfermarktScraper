@@ -19,7 +19,7 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
         /// </param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Competition"/> objects.</returns>
-        public Task<IList<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping = false);
+        public Task<IEnumerable<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping = false);
 
         /// <summary>
         /// Asynchronously formats the quick select competition response into a list of <see cref="CompetitionQuickSelectResult"/> objects.

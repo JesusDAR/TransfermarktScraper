@@ -136,5 +136,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 throw new Exception($"Error in {nameof(InsertOrUpdateRangeAsync)}: Failed inserting or updating {countries.Count()} countries in the database.", ex);
             }
         }
+
+        public Task UpdateAsync(string countryId, IEnumerable<string> competitionTransfermarktIds)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

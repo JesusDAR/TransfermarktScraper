@@ -53,5 +53,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// A task representing the asynchronous operation.
         /// </returns>
         Task InsertOrUpdateRangeAsync(IEnumerable<Country> countries);
+
+        Task UpdateAsync(string countryId, IEnumerable<string> competitionTransfermarktIds);
     }
 }

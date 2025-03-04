@@ -125,15 +125,23 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var itemLocators = await GetItemLocatorsAsync(selectorLocator);
             var countries = new Collection<Country>();
 
+            int countryLimit = _scraperSettings.CountryLimit;
+            int numberOfCountriesScraped = 0;
+
             foreach (var itemLocator in itemLocators)
             {
-                var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
+                if (numberOfCountriesScraped < countryLimit)
+                {
+                    var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
 
-                await countryQuickSelectInterceptorResult.InterceptorTask;
+                    await countryQuickSelectInterceptorResult.InterceptorTask;
 
-                CreateAndAddCountry(countries, countryName);
+                    CreateAndAddCountry(countries, countryName);
 
-                await GetDropdownLocatorAsync(selectorLocator);
+                    await GetDropdownLocatorAsync(selectorLocator);
+
+                    numberOfCountriesScraped++;
+                }
             }
 
             AddInterceptedQuickSelectResults(countries, countryQuickSelectInterceptorResult);

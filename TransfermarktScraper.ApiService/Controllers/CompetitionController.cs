@@ -52,7 +52,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
-                var result = await _competitionService.GetCompetitionsAsync(countryTransfermarktId);
+                var result = await _competitionService.GetCompetitionsAsync(countryTransfermarktId, forceScraping);
                 return Ok(result);
             }
             catch (HttpRequestException e)

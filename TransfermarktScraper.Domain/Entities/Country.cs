@@ -7,21 +7,8 @@ namespace TransfermarktScraper.Domain.Entities
     /// <summary>
     /// Represents a country entity.
     /// </summary>
-    public class Country
+    public class Country : Base
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the country.
-        /// </summary>
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public required string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique Transfermarkt identifier for the country.
-        /// </summary>
-        [BsonElement("transfermarktId")]
-        public string? TransfermarktId { get; set; }
-
         /// <summary>
         /// Gets or sets the name of the country.
         /// </summary>

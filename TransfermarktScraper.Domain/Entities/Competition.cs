@@ -1,4 +1,4 @@
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace TransfermarktScraper.Domain.Entities
@@ -6,21 +6,8 @@ namespace TransfermarktScraper.Domain.Entities
     /// <summary>
     /// Represents a competition entity.
     /// </summary>
-    public class Competition
+    public class Competition : Base
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the competition.
-        /// </summary>
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public required string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique Transfermarkt identifier for the competition.
-        /// </summary>
-        [BsonElement("transfermarktId")]
-        public string? TransfermarktId { get; set; }
-
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
         /// </summary>

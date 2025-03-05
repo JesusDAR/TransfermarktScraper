@@ -5,18 +5,8 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a country.
     /// </summary>
-    public class Country
+    public class Country : Base
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the country.
-        /// </summary>
-        public string? Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique Transfermarkt identifier for the country.
-        /// </summary>
-        public string? TransfermarktId { get; set; }
-
         /// <summary>
         /// Gets or sets the name of the country.
         /// </summary>

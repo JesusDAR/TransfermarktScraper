@@ -4,6 +4,9 @@ using MongoDB.Bson;
 
 namespace TransfermarktScraper.Domain.Entities
 {
+    /// <summary>
+    /// Represents the base entitiy.
+    /// </summary>
     public class Base
     {
         /// <summary>

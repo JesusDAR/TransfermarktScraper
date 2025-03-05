@@ -1,19 +1,12 @@
-using TransfermarktScraper.Domain.Enums;
+﻿using TransfermarktScraper.Domain.Enums;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
-    public class Competition
+    /// <summary>
+    /// Represents the response DTO for a competition.
+    /// </summary>
+    public class Competition : Base
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the competition.
-        /// </summary>
-        public string? Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique Transfermarkt identifier for the competition.
-        /// </summary>
-        public string? TransfermarktId { get; set; }
-
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
         /// </summary>

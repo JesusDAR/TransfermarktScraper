@@ -53,6 +53,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public float? AgeAverage { get; set; }
 
         /// <summary>
+        /// Gets or sets the market value of the competition.
+        /// </summary>
+        public float? MarketValue { get; set; }
+
+        /// <summary>
         /// Gets or sets the average market value of the competition.
         /// </summary>
         public float? MarketValueAverage { get; set; }
@@ -61,5 +66,15 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// Gets or sets the most valuable player of the competition.
         /// </summary>
         public string? PlayerMostValuable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current champion of the competition.
+        /// </summary>
+        public string? CurrentChampion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team most successful of the competition.
+        /// </summary>
+        public string? MostTimesChampion { get; set; }
     }
 }

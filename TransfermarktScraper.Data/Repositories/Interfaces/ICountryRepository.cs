@@ -10,13 +10,13 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
     public interface ICountryRepository
     {
         /// <summary>
-        /// Asynchronously retrieves a country by its unique identifier.
+        /// Asynchronously retrieves a country by its unique Transfermarkt identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the country.</param>
+        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the country.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains the country if found; otherwise, null.
         /// </returns>
-        Task<Country?> GetAsync(string id);
+        Task<Country?> GetAsync(string countryTransfermarktId);
 
         /// <summary>
         /// Asynchronously retrieves all countries.
@@ -29,11 +29,11 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// <summary>
         /// Asynchronously retrieves all competitions from a country.
         /// </summary>
-        /// <param name="countryId">The unique identifier of the country.</param>
+        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the country.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains a collection of competitions from a country, or empty list if no competitions exist.
         /// </returns>
-        Task<IEnumerable<Competition>> GetAllAsync(string countryId);
+        Task<IEnumerable<Competition>> GetAllAsync(string countryTransfermarktId);
 
         /// <summary>
         /// Asynchronously adds a range of countries to the repository.
@@ -45,15 +45,16 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task AddRangeAsync(IEnumerable<Country> countries);
 
         /// <summary>
-        /// Inserts or updates a range of countries in the database.
-        /// If a country already exists, it will be updated. If it does not exist, it will be inserted.
+        /// Inserts or updates a range of <see cref="Country"/> entities in the database.
+        /// If the country already exists it will be updated; otherwise, a new country will be inserted.
         /// </summary>
-        /// <param name="countries">The collection of countries to insert or update.</param>
+        /// <param name="countries">An enumerable collection of <see cref="Country"/> entities to be inserted or updated.</param>
         /// <returns>
-        /// A task representing the asynchronous operation.
+        /// A task that represents the asynchronous operation. The task result is an enumerable collection of the
+        /// updated or inserted <see cref="Country"/> entities after the operation.
         /// </returns>
-        Task InsertOrUpdateRangeAsync(IEnumerable<Country> countries);
+        Task<IEnumerable<Country>> InsertOrUpdateRangeAsync(IEnumerable<Country> countries);
 
-        Task UpdateAsync(string countryId, IEnumerable<string> competitionTransfermarktIds);
+        Task UpdateAsync(string countryTransfermarktId, IEnumerable<string> competitionTransfermarktIds);
     }
 }

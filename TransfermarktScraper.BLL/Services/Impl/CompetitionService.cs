@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,13 +43,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>>? GetCompetitionsAsync(string countryId, bool forceScraping)
+        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping)
         {
             try
             {
-                var competitions = (await _countryRepository.GetAllAsync(countryId)).ToList();
+                var competitions = (await _countryRepository.GetAllAsync(countryTransfermarktId)).ToList();
 
-                if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Id)))
+                if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.TransfermarktId)))
                 {
                     var competitionsScraped = await ScrapeCompetitionsAsync(competitions);
 

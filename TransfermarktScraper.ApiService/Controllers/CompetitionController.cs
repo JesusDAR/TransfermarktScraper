@@ -31,7 +31,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Retrieves a list of competitions for a given country, either from the database or by scraping Transfermarkt.
         /// If scraping is forced or the data is unavailable, it scrapes the countries and returns them.
         /// </summary>
-        /// <param name="countryId">The country ID used to identify the country.</param>
+        /// <param name="countryTransfermarktId">The Transfermarkt country ID used to identify the country.</param>
         /// <param name="forceScraping">
         /// A boolean flag that determines whether to force scraping of the competitions data, even if it exists in the database.
         /// </param>
@@ -47,12 +47,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IEnumerable<Competition>>> GetCompetitionsAsync(
-            [FromQuery] string countryId,
+            [FromQuery] string countryTransfermarktId,
             [FromQuery] bool forceScraping)
         {
             try
             {
-                return Ok(await _competitionService.GetCompetitionsAsync(countryId));
+                var result = await _competitionService.GetCompetitionsAsync(countryTransfermarktId);
+                return Ok(result);
             }
             catch (HttpRequestException e)
             {

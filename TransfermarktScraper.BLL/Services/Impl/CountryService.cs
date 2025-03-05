@@ -33,7 +33,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryRepository">The country repository for accessing and managing the country data.</param>
         /// <param name="competitionService">The competition service for scraping competition data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
+        /// <param name="mapper">The mapper to convert domain entities to DTOs and viceversa.</param>
         /// <param name="logger">The logger.</param>
         public CountryService (
             IPage page,
@@ -60,9 +60,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
-                    await PersistCountriesAsync(countriesScraped);
+                    var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped);
 
-                    return countriesScraped;
+                    return countriesUpdatedOrInserted;
                 }
 
                 var countries = await _countryRepository.GetAllAsync();
@@ -71,9 +71,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
-                    await PersistCountriesAsync(countriesScraped);
+                    var countriesInserted = await PersistCountriesAsync(countriesScraped);
 
-                    return countriesScraped;
+                    return countriesInserted;
                 }
 
                 var countryDtos = _mapper.Map<IEnumerable<Country>>(countries);
@@ -93,15 +93,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Persists a list of countries into the database by mapping them from DTOs to entities.
+        /// Persists a collection of countries by inserting or updating them in the database.
         /// </summary>
-        /// <param name="countries">The list of country DTOs to be stored.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task PersistCountriesAsync(IEnumerable<Country> countries)
+        /// <param name="countries">The collection of country DTOs to persist.</param>
+        /// <returns>A task that represents the asynchronous operation, containing the persisted countries.</returns>
+        private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries)
         {
             var countryEntities = _mapper.Map<IEnumerable<Domain.Entities.Country>>(countries);
 
-            await _countryRepository.InsertOrUpdateRangeAsync(countryEntities);
+            var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countryEntities);
+
+            countries = _mapper.Map<IEnumerable<Country>>(countriesInsertedOrUpdated);
+
+            return countries;
         }
 
         /// <summary>
@@ -246,7 +250,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var url = route.Request.Url;
                 _logger.LogDebug("Intercepted competition URL: {url}", url);
 
-                var transfermarktId = ExtractTransfermarktId(url);
+                var countryTransfermarktId = ExtractTransfermarktId(url);
 
                 var response = await route.FetchAsync();
 
@@ -256,7 +260,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countryQuickSelectResult = new CountryQuickSelectResult
                 {
-                    Id = transfermarktId,
+                    Id = countryTransfermarktId,
                     CompetitionQuickSelectResults = competitionQuickSelectResults,
                 };
 
@@ -401,8 +405,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             string pattern = @"/(\d+)$";
             var match = Regex.Match(url, pattern);
-            string id = match.Groups[1].Value;
-            return id;
+            string transfermarktId = match.Groups[1].Value;
+            return transfermarktId;
         }
     }
 }

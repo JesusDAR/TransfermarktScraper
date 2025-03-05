@@ -49,7 +49,8 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
-                return Ok(await _countryService.GetCountriesAsync(forceScraping));
+                var result = await _countryService.GetCountriesAsync(forceScraping);
+                return Ok(result);
             }
             catch (HttpRequestException e)
             {

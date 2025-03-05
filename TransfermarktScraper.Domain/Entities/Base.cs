@@ -10,17 +10,11 @@ namespace TransfermarktScraper.Domain.Entities
     public class Base
     {
         /// <summary>
-        /// Gets or sets the unique identifier.
-        /// </summary>
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public required string Id { get; set; }
-
-        /// <summary>
         /// Gets or sets the unique Transfermarkt identifier.
         /// </summary>
+        [BsonId]
         [BsonElement("transfermarktId")]
-        public string? TransfermarktId { get; set; }
+        public required string TransfermarktId { get; set; }
 
         /// <summary>
         /// Gets or sets the last update date.

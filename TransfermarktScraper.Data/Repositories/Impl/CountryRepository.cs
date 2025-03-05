@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,15 +29,15 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Country?> GetAsync(string id)
+        public async Task<Country?> GetAsync(string countryTransfermarktId)
         {
             try
             {
-                return await _countries.Find(country => country.Id == id).FirstOrDefaultAsync();
+                return await _countries.Find(country => country.TransfermarktId == countryTransfermarktId).FirstOrDefaultAsync();
             }
             catch (MongoException ex)
             {
-                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with ID {id} from the database.", ex);
+                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with TransfermarktId ID {countryTransfermarktId} from the database.", ex);
             }
         }
 
@@ -55,15 +55,15 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetAllAsync(string countryId)
+        public async Task<IEnumerable<Competition>> GetAllAsync(string countryTransfermarktId)
         {
             try
             {
-                var country = await GetAsync(countryId);
+                var country = await GetAsync(countryTransfermarktId);
 
                 if (country == null)
                 {
-                    throw new InvalidOperationException($"Error in {nameof(GetAllAsync)}: Country with ID {countryId} not found in the database.");
+                    throw new InvalidOperationException($"Error in {nameof(GetAllAsync)}: Country with Transfermarkt ID {countryTransfermarktId} not found in the database.");
                 }
 
                 var competitions = country.Competitions;
@@ -72,7 +72,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all competitions of the country with ID {countryId} from the database.", ex);
+                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all competitions of the country with Transfermarkt ID {countryTransfermarktId} from the database.", ex);
             }
         }
 
@@ -92,54 +92,47 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task InsertOrUpdateRangeAsync(IEnumerable<Country> countries)
+        public async Task<IEnumerable<Country>> InsertOrUpdateRangeAsync(IEnumerable<Country> countries)
         {
             try
             {
                 SetUpdateTime(countries);
 
-                var countryIds = countries
+                var countryTransfermarktIds = countries
                     .Select(c => c.TransfermarktId)
                     .ToHashSet();
 
                 var hasExistingCountries = await _countries
-                    .Find(c => countryIds.Contains(c.TransfermarktId))
+                    .Find(c => countryTransfermarktIds.Contains(c.TransfermarktId))
                     .AnyAsync();
 
                 if (!hasExistingCountries)
                 {
-                    // competition is a nested entity inside the country document thus its ID needs to be created manually
-                    foreach (var country in countries)
-                    {
-                        foreach (var competition in country.Competitions)
-                        {
-                            competition.Id = ObjectId.GenerateNewId().ToString();
-                        }
-                    }
-
-                    _logger.LogInformation("Inserting {Count} countries in the database...", countryIds.Count.ToString());
+                    _logger.LogInformation("Inserting {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                     await _countries.InsertManyAsync(countries);
-                    _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryIds.Count.ToString());
+                    _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                 }
                 else
                 {
-                    var existingCountryIds = (await _countries
-                        .Find(c => countryIds.Contains(c.TransfermarktId))
+                    var existingCountryTransfermarktIds = (await _countries
+                        .Find(c => countryTransfermarktIds.Contains(c.TransfermarktId))
                         .Project(c => c.TransfermarktId)
                         .ToListAsync())
                         .ToHashSet();
 
                     var countriesToInsert = countries
-                        .Where(c => !existingCountryIds.Contains(c.TransfermarktId))
+                        .Where(c => !existingCountryTransfermarktIds.Contains(c.TransfermarktId))
                         .ToList();
 
                     var countriesToUpdate = countries
-                        .Where(c => existingCountryIds.Contains(c.TransfermarktId))
+                        .Where(c => existingCountryTransfermarktIds.Contains(c.TransfermarktId))
                         .ToList();
 
                     if (countriesToInsert.Any())
                     {
+                        _logger.LogInformation("Inserting {Count} countries in the database...", countriesToInsert.Count.ToString());
                         await _countries.InsertManyAsync(countriesToInsert);
+                        _logger.LogInformation("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
                     }
 
                     var bulkOperations = countriesToUpdate
@@ -152,9 +145,11 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                         .ToList();
 
                     _logger.LogInformation("Updating {Count} countries in the database...", bulkOperations.Count);
-                    await _countries.BulkWriteAsync(bulkOperations);
+                    var result = await _countries.BulkWriteAsync(bulkOperations);
                     _logger.LogInformation("Successfully updated {Count} countries in the database...", bulkOperations.Count);
                 }
+
+                return countries;
             }
             catch (MongoException ex)
             {
@@ -162,7 +157,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
         }
 
-        public Task UpdateAsync(string countryId, IEnumerable<string> competitionTransfermarktIds)
+        public Task UpdateAsync(string countryTransfermarktIds, IEnumerable<string> competitionTransfermarktIds)
         {
             throw new NotImplementedException();
         }

@@ -23,9 +23,9 @@
         public string? Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the flag of the competition.
+        /// Gets or sets the logo of the competition.
         /// </summary>
-        public string? Flag { get; set; }
+        public string? Logo { get; set; }
 
         /// <summary>
         /// Gets or sets the number of teams.

@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
 namespace TransfermarktScraper.Domain.Entities
@@ -34,10 +34,10 @@ namespace TransfermarktScraper.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the flag of the competition.
+        /// Gets or sets the logo of the competition.
         /// </summary>
-        [BsonElement("flag")]
-        public string? Flag { get; set; }
+        [BsonElement("logo")]
+        public string? Logo { get; set; }
 
         /// <summary>
         /// Gets or sets the number of teams.

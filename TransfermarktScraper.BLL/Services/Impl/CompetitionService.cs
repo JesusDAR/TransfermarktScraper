@@ -105,9 +105,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             foreach (var competition in competitions)
             {
-                // To add in the data layer
-                //competition.Id = ObjectId.GenerateNewId().ToString();
-
                 var url = new Uri(_scraperSettings.BaseUrl + competition.Link);
                 var response = await _page.GotoAsync(url.AbsoluteUri);
 
@@ -115,6 +112,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {url} status code: {response.Status}");
                 }
+
+                competition.Logo = string.Concat("/", competition.TransfermarktId, ".png");
 
 
 

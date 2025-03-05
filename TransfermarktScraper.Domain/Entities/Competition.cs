@@ -1,5 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Enums;
 
 namespace TransfermarktScraper.Domain.Entities

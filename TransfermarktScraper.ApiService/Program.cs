@@ -45,8 +45,7 @@ namespace TransfermarktScraper.ApiService
                         .WithTitle("TransfermarktScraper API")
                         .WithTheme(ScalarTheme.BluePlanet)
                         .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                        .Servers = [] // workaround to prevent scalar from taking a random generated localhost server as base url
-                );
+                        .Servers = []); // workaround to prevent scalar from taking a random generated localhost server as base url
             }
 
             app.MapControllers();

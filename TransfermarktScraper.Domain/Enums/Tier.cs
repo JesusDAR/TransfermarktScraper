@@ -47,7 +47,7 @@ namespace TransfermarktScraper.Domain.Enums
                 Tier.SecondTier => "Second Tier",
                 Tier.ThirdTier => "Third Tier",
                 Tier.YouthLeague => "Youth League",
-                _ => throw new ArgumentOutOfRangeException(nameof(tier), tier, $"Error in {nameof(TierExtensions)}: {nameof(tier)} not found"),
+                _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}.{nameof(ToString)}: {tier} is not a valid {nameof(Tier)}."),
             };
         }
 
@@ -64,7 +64,7 @@ namespace TransfermarktScraper.Domain.Enums
                 "Second Tier" => Tier.SecondTier,
                 "Third Tier" => Tier.ThirdTier,
                 "Youth League" => Tier.YouthLeague,
-                _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}: {tierString} is not a valid {nameof(Tier)} string."),
+                _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}.{nameof(FromString)}: {tierString} is not a valid {nameof(Tier)} string."),
             };
         }
     }

@@ -23,17 +23,10 @@ namespace TransfermarktScraper.Domain.Entities
         public string? TransfermarktId { get; set; }
 
         /// <summary>
-        /// Gets or sets the creation date.
-        /// </summary>
-        [BsonElement("creationDate")]
-        [BsonRepresentation(BsonType.DateTime)]
-        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
-
-        /// <summary>
         /// Gets or sets the last update date.
         /// </summary>
         [BsonElement("updateDate")]
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTime UpdateDate { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdateDate { get; set; }
     }
 }

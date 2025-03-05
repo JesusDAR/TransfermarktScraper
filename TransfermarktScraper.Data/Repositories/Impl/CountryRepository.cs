@@ -81,6 +81,8 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         {
             try
             {
+                SetUpdateTime(countries);
+
                 await _countries.InsertManyAsync(countries);
             }
             catch (MongoException ex)
@@ -94,6 +96,8 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         {
             try
             {
+                SetUpdateTime(countries);
+
                 var countryIds = countries
                     .Select(c => c.TransfermarktId)
                     .ToHashSet();
@@ -161,6 +165,21 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         public Task UpdateAsync(string countryId, IEnumerable<string> competitionTransfermarktIds)
         {
             throw new NotImplementedException();
+        }
+
+        private void SetUpdateTime(IEnumerable<Country> countries)
+        {
+            var time = DateTime.UtcNow;
+
+            foreach (var country in countries)
+            {
+                country.UpdateDate = time;
+
+                foreach (var competition in country.Competitions)
+                {
+                    competition.UpdateDate = time;
+                }
+            }
         }
     }
 }

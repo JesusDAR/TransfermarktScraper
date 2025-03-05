@@ -1,4 +1,6 @@
-﻿namespace TransfermarktScraper.Domain.DTOs.Response
+using TransfermarktScraper.Domain.Enums;
+
+namespace TransfermarktScraper.Domain.DTOs.Response
 {
     public class Competition
     {
@@ -28,28 +30,43 @@
         public string? Logo { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of teams.
+        /// Gets or sets the tier of the competition.
+        /// </summary>
+        public Tier Tier { get; set; }
+
+        /// <summary>
+        /// Gets or sets the coefficient of the competition.
+        /// </summary>
+        public float? Coefficient { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of teams of the competition.
         /// </summary>
         public int? TeamsCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of players.
+        /// Gets or sets the number of players of the competition.
         /// </summary>
         public int? PlayersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of foreign players.
+        /// Gets or sets the number of foreign players of the competition.
         /// </summary>
         public int? ForeignersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the average age.
+        /// Gets or sets the average age of the players of the competition.
         /// </summary>
         public float? AgeAverage { get; set; }
 
         /// <summary>
-        /// Gets or sets the average market value.
+        /// Gets or sets the average market value of the competition.
         /// </summary>
         public float? MarketValueAverage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the most valuable player of the competition.
+        /// </summary>
+        public string? PlayerMostValuable { get; set; }
     }
 }

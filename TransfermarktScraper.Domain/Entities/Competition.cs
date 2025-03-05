@@ -70,12 +70,6 @@ namespace TransfermarktScraper.Domain.Entities
         public int? PlayersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the most valuable player of the competition.
-        /// </summary>
-        [BsonElement("playerMostValuable")]
-        public string? PlayerMostValuable { get; set; }
-
-        /// <summary>
         /// Gets or sets the tier of the competition.
         /// </summary>
         [BsonElement("tier")]

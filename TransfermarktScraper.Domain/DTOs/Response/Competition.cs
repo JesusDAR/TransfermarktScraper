@@ -23,11 +23,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public string? Logo { get; set; }
 
         /// <summary>
-        /// Gets or sets the most valuable player of the competition.
-        /// </summary>
-        public string? PlayerMostValuable { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of foreign players of the competition.
         /// </summary>
         public int? ForeignersCount { get; set; }

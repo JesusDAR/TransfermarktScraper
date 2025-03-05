@@ -10,10 +10,10 @@ namespace TransfermarktScraper.Domain.Entities
     public class Country : Base
     {
         /// <summary>
-        /// Gets or sets the name of the country.
+        /// Gets or sets the competitions of the country.
         /// </summary>
-        [BsonElement("name")]
-        public string? Name { get; set; }
+        [BsonElement("competitions")]
+        public IList<Competition> Competitions { get; set; } = new List<Competition>();
 
         /// <summary>
         /// Gets or sets the flag of the country.
@@ -22,9 +22,9 @@ namespace TransfermarktScraper.Domain.Entities
         public string? Flag { get; set; }
 
         /// <summary>
-        /// Gets or sets the competitions of the country.
+        /// Gets or sets the name of the country.
         /// </summary>
-        [BsonElement("competitions")]
-        public IList<Competition> Competitions { get; set; } = new List<Competition>();
+        [BsonElement("name")]
+        public string? Name { get; set; }
     }
 }

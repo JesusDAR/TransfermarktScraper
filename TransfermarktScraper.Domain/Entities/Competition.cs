@@ -10,28 +10,10 @@ namespace TransfermarktScraper.Domain.Entities
     public class Competition : Base
     {
         /// <summary>
-        /// Gets or sets the competition link in Transfermarkt.
+        /// Gets or sets the average age of the players of the competition.
         /// </summary>
-        [BsonElement("link")]
-        public string? Link { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name of the competition.
-        /// </summary>
-        [BsonElement("name")]
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the logo of the competition.
-        /// </summary>
-        [BsonElement("logo")]
-        public string? Logo { get; set; }
-
-        /// <summary>
-        /// Gets or sets the tier of the competition.
-        /// </summary>
-        [BsonElement("tier")]
-        public Tier Tier { get; set; }
+        [BsonElement("ageAverage")]
+        public float? AgeAverage { get; set; }
 
         /// <summary>
         /// Gets or sets the coefficient of the competition.
@@ -40,16 +22,10 @@ namespace TransfermarktScraper.Domain.Entities
         public float? Coefficient { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of teams of the competition.
+        /// Gets or sets the current champion of the competition.
         /// </summary>
-        [BsonElement("teamsCount")]
-        public int? TeamsCount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of players of the competition.
-        /// </summary>
-        [BsonElement("playersCount")]
-        public int? PlayersCount { get; set; }
+        [BsonElement("currentChampion")]
+        public string? CurrentChampion { get; set; }
 
         /// <summary>
         /// Gets or sets the number of foreign players of the competition.
@@ -58,10 +34,16 @@ namespace TransfermarktScraper.Domain.Entities
         public int? ForeignersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the average age of the players of the competition.
+        /// Gets or sets the competition link in Transfermarkt.
         /// </summary>
-        [BsonElement("ageAverage")]
-        public float? AgeAverage { get; set; }
+        [BsonElement("link")]
+        public string? Link { get; set; }
+
+        /// <summary>
+        /// Gets or sets the logo of the competition.
+        /// </summary>
+        [BsonElement("logo")]
+        public string? Logo { get; set; }
 
         /// <summary>
         /// Gets or sets the average market value of the competition.
@@ -70,8 +52,39 @@ namespace TransfermarktScraper.Domain.Entities
         public float? MarketValueAverage { get; set; }
 
         /// <summary>
+        /// Gets or sets the team most successful of the competition.
+        /// </summary>
+        [BsonElement("mostTimesChampion")]
+        public string? MostTimesChampion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the competition.
+        /// </summary>
+        [BsonElement("name")]
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of players of the competition.
+        /// </summary>
+        [BsonElement("playersCount")]
+        public int? PlayersCount { get; set; }
+
+        /// <summary>
         /// Gets or sets the most valuable player of the competition.
         /// </summary>
+        [BsonElement("playerMostValuable")]
         public string? PlayerMostValuable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tier of the competition.
+        /// </summary>
+        [BsonElement("tier")]
+        public Tier Tier { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of teams of the competition.
+        /// </summary>
+        [BsonElement("teamsCount")]
+        public int? TeamsCount { get; set; }
     }
 }

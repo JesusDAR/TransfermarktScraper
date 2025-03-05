@@ -42,12 +42,12 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <response code="200">Returns the list of competitions successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
-        [HttpGet("{countryId}")]
+        [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Competition>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IEnumerable<Competition>>> GetCompetitionsAsync(
-            [FromRoute] string countryId,
+            [FromQuery] string countryId,
             [FromQuery] bool forceScraping)
         {
             try

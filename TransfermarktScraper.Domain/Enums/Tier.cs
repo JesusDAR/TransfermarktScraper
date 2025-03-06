@@ -40,7 +40,6 @@ namespace TransfermarktScraper.Domain.Enums
         /// <returns>A user friendly string representation of the <see cref="Tier"/>.</returns>
         public static string ToString(this Tier tier)
         {
-
             return tier switch
             {
                 Tier.FirstTier => "First Tier",
@@ -58,12 +57,14 @@ namespace TransfermarktScraper.Domain.Enums
         /// <returns>The corresponding <see cref="Tier"/> enum value.</returns>
         public static Tier FromString(string tierString)
         {
+            tierString = tierString.ToLower();
+
             return tierString switch
             {
-                "First Tier" => Tier.FirstTier,
-                "Second Tier" => Tier.SecondTier,
-                "Third Tier" => Tier.ThirdTier,
-                "Youth League" => Tier.YouthLeague,
+                "first tier" => Tier.FirstTier,
+                "second tier" => Tier.SecondTier,
+                "third tier" => Tier.ThirdTier,
+                "youth league" => Tier.YouthLeague,
                 _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}.{nameof(FromString)}: {tierString} is not a valid {nameof(Tier)} string."),
             };
         }

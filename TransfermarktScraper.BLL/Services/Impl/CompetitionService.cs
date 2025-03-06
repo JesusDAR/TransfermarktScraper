@@ -115,23 +115,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var clubInfoLocator = await GetClubInfoLocatorAsync();
 
-                var labelLocators = clubInfoLocator.Locator(".data-header__label");
+                // Competition Club Info
+                await SetClubInfoValuesAsync(competition, clubInfoLocator);
 
-                var count = await labelLocators.CountAsync();
-
-                for (int i = 0; i < count; i++)
-                {
-                    var labelLocator = labelLocators.Nth(i);
-
-                    var labelText = await labelLocator.InnerTextAsync();
-
-                    var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
-
-                    if (competitionClubInfo != CompetitionClubInfo.Unknown)
-                    {
-                        await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
-                    }
-                }
+                // Competition Info Box
             }
 
             await PersistCompetitionsAsync(countryTransfermarktId, competitions);
@@ -167,6 +154,44 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 "{FormattedHtml}", Logging.FormatHtml(await clubInfoLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
             return clubInfoLocator;
+        }
+
+        /// <summary>
+        /// Extracts and assigns club information values from the provided locator to the given competition entity.
+        /// </summary>
+        /// <param name="competition">The competition entity to update with extracted club info values.</param>
+        /// <param name="clubInfoLocator">The locator pointing to the club info section on the page.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private async Task SetClubInfoValuesAsync(Domain.Entities.Competition competition, ILocator clubInfoLocator)
+        {
+            var labelLocators = clubInfoLocator.Locator(".data-header__label");
+
+            var count = await labelLocators.CountAsync();
+
+            for (int i = 0; i < count; i++)
+            {
+                var labelLocator = labelLocators.Nth(i);
+
+                var labelText = await labelLocator.InnerTextAsync();
+
+                var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
+
+                if (competitionClubInfo != CompetitionClubInfo.Unknown)
+                {
+                    await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
+                }
+            }
+        }
+
+        private async Task<ILocator> GetInfoBoxLocatorAsync()
+        {
+            await _page.WaitForSelectorAsync(".data-header__info-box");
+            var infoBoxLocator = _page.Locator(".data-header__info-box");
+            _logger.LogDebug(
+                "Info box locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await infoBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            return infoBoxLocator;
         }
     }
 }

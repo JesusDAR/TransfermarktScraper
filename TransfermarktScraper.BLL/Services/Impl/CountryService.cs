@@ -331,7 +331,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="selectorLocator">The locator used to identify the dropdown container.</param>
         /// <returns>
-        /// A task that represents the asynchronous operation, returning a read-only list of <see cref="ILocator"/> 
+        /// A task that represents the asynchronous operation, returning a read-only list of <see cref="ILocator"/>
         /// representing the items within the dropdown.
         /// </returns>
         private async Task<IReadOnlyList<ILocator>> GetItemLocatorsAsync(ILocator selectorLocator)

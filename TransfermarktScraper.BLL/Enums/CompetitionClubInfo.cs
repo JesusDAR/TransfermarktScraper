@@ -1,4 +1,5 @@
-﻿using Microsoft.Playwright;
+﻿using System.Globalization;
+using Microsoft.Playwright;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums;
 
@@ -88,7 +89,8 @@ namespace TransfermarktScraper.BLL.Enums
         /// <param name="competitionClubInfo">The type of competition information.</param>
         /// <param name="labelLocator">The label element locator who is the parent of the span elements.</param>
         /// <param name="competition">The competition entity.</param>
-        public static async void AssignToCompetitionProperty(this CompetitionClubInfo competitionClubInfo, ILocator labelLocator, Competition competition)
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public static async Task AssignToCompetitionProperty(this CompetitionClubInfo competitionClubInfo, ILocator labelLocator, Competition competition)
         {
             string spanText;
             ILocator spanLocator;
@@ -119,7 +121,7 @@ namespace TransfermarktScraper.BLL.Enums
 
                     foreach (var text in texts)
                     {
-                        var isCoefficient = float.TryParse(text, out var coefficient);
+                        var isCoefficient = float.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var coefficient);
                         if (isCoefficient)
                         {
                             competition.Coefficient = coefficient;

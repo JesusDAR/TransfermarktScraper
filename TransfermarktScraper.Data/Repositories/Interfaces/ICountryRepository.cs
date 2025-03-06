@@ -10,35 +10,35 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
     public interface ICountryRepository
     {
         /// <summary>
-        /// Asynchronously retrieves a country by its unique Transfermarkt identifier.
+        /// Asynchronously retrieves a <see cref="Country"/> by its unique Transfermarkt identifier.
         /// </summary>
-        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the country.</param>
+        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the <see cref="Country"/>.</param>
         /// <returns>
-        /// A task representing the asynchronous operation. The task result contains the country if found; otherwise, null.
+        /// A task representing the asynchronous operation. The task result contains the <see cref="Country"/> if found; otherwise, null.
         /// </returns>
         Task<Country?> GetAsync(string countryTransfermarktId);
 
         /// <summary>
-        /// Asynchronously retrieves all countries.
+        /// Asynchronously retrieves all <see cref="Country"/>.
         /// </summary>
         /// <returns>
-        /// A task representing the asynchronous operation. The task result contains a collection of countries, or empty list if no countries exist.
+        /// A task representing the asynchronous operation. The task result contains a collection of <see cref="Country"/>, or empty list if no countries exist.
         /// </returns>
         Task<IEnumerable<Country>> GetAllAsync();
 
         /// <summary>
-        /// Asynchronously retrieves all competitions from a country.
+        /// Asynchronously retrieves all competitions from a <see cref="Country"/>.
         /// </summary>
-        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the country.</param>
+        /// <param name="countryTransfermarktId">The unique Transfermarkt identifier of the <see cref="Country"/>.</param>
         /// <returns>
-        /// A task representing the asynchronous operation. The task result contains a collection of competitions from a country, or empty list if no competitions exist.
+        /// A task representing the asynchronous operation. The task result contains a collection of competitions from a <see cref="Country"/>, or empty list if no competitions exist.
         /// </returns>
         Task<IEnumerable<Competition>> GetAllAsync(string countryTransfermarktId);
 
         /// <summary>
-        /// Asynchronously adds a range of countries to the repository.
+        /// Asynchronously adds a range of  <see cref="Country"/> to the repository.
         /// </summary>
-        /// <param name="countries">The collection of countries to be added.</param>
+        /// <param name="countries">The collection of  <see cref="Country"/> to be added.</param>
         /// <returns>
         /// A task representing the asynchronous operation.
         /// </returns>
@@ -46,7 +46,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
 
         /// <summary>
         /// Inserts or updates a range of <see cref="Country"/> entities in the database.
-        /// If the country already exists it will be updated; otherwise, a new country will be inserted.
+        /// If the <see cref="Country"/> already exists it will be updated; otherwise, a new <see cref="Country"/> will be inserted.
         /// </summary>
         /// <param name="countries">An enumerable collection of <see cref="Country"/> entities to be inserted or updated.</param>
         /// <returns>
@@ -55,6 +55,15 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// </returns>
         Task<IEnumerable<Country>> InsertOrUpdateRangeAsync(IEnumerable<Country> countries);
 
-        Task UpdateAsync(string countryTransfermarktId, IEnumerable<string> competitionTransfermarktIds);
+        /// <summary>
+        /// Updates a range of <see cref="Competition"/> entities under a <see cref="Country"/> entity in the database.
+        /// </summary>
+        /// <param name="countryTransfermarktId">The <see cref="Country"/> Transfermarkt ID, which is parent of the competitions.</param>
+        /// <param name="competitions">An enumerable collection of <see cref="Competition"/> to be updated.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result is an enumerable collection of the
+        /// updated <see cref="Competition"/> entities after the operation.
+        /// </returns>
+        Task<IEnumerable<Competition>> UpdateRangeAsync(string countryTransfermarktId, IEnumerable<Competition> competitions);
     }
 }

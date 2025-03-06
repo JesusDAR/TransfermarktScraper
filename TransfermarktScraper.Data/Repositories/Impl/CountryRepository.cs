@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using TransfermarktScraper.Data.Configuration.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
@@ -157,11 +156,41 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
         }
 
-        public Task UpdateAsync(string countryTransfermarktIds, IEnumerable<string> competitionTransfermarktIds)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Competition>> UpdateRangeAsync(string countryTransfermarktId, IEnumerable<Competition> competitions)
         {
-            throw new NotImplementedException();
+            var country = await GetAsync(countryTransfermarktId);
+
+            if (country == null)
+            {
+                throw new InvalidOperationException($"Error in {nameof(UpdateRangeAsync)}: Country with Transfermarkt ID {countryTransfermarktId} not found in the database.");
+            }
+
+            SetUpdateTime(new List<Country> { country });
+
+            var filter = Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId);
+
+            var competitionsList = competitions.ToList();
+
+            var update = Builders<Country>.Update.Set(c => c.Competitions, competitionsList);
+
+            _logger.LogInformation(
+                "Updating {Count} competitions from {Country.Name} in the database...",
+                competitionsList.Count.ToString(),
+                country.Name);
+            await _countries.UpdateOneAsync(filter, update);
+            _logger.LogInformation(
+                "Successfully updated {Count} competitions from {Country.Name} in the database...",
+                competitionsList.Count.ToString(),
+                country.Name);
+
+            return competitionsList;
         }
 
+        /// <summary>
+        /// Sets the update time for a collection of countries and their associated competitions.
+        /// </summary>
+        /// <param name="countries">The collection of countries to update.</param>
         private void SetUpdateTime(IEnumerable<Country> countries)
         {
             var time = DateTime.UtcNow;

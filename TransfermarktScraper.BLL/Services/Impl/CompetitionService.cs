@@ -1,13 +1,15 @@
-using System.Net;
+﻿using System.Net;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
+using TransfermarktScraper.BLL.Enums;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.ServiceDefaults.Utils;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -51,9 +53,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.TransfermarktId)))
                 {
-                    var competitionsScraped = await ScrapeCompetitionsAsync(competitions);
-
-                    await UpdateCompetitionsAsync(competitionsScraped);
+                    var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions);
                 }
 
                 var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitions);
@@ -96,16 +96,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return competitionQuickSelectResults;
         }
 
-        private async Task UpdateCompetitionsAsync(IEnumerable<Domain.Entities.Competition> competitions)
-        {
-            throw new NotImplementedException();
-        }
-
-        private async Task<IEnumerable<Domain.Entities.Competition>> ScrapeCompetitionsAsync(IEnumerable<Domain.Entities.Competition> competitions)
+        private async Task<IEnumerable<Domain.Entities.Competition>> ScrapeCompetitionsAsync(
+            string countryTransfermarktId,
+            IEnumerable<Domain.Entities.Competition> competitions)
         {
             foreach (var competition in competitions)
             {
                 var url = new Uri(_scraperSettings.BaseUrl + competition.Link);
+
                 var response = await _page.GotoAsync(url.AbsoluteUri);
 
                 if (response != null && response.Status != (int)HttpStatusCode.OK)
@@ -115,13 +113,60 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 competition.Logo = string.Concat("/", competition.TransfermarktId, ".png");
 
+                var clubInfoLocator = await GetClubInfoLocatorAsync();
 
+                var labelLocators = clubInfoLocator.Locator(".data-header__label");
 
-                return competitions;
+                var count = await labelLocators.CountAsync();
+
+                for (int i = 0; i < count; i++)
+                {
+                    var labelLocator = labelLocators.Nth(i);
+
+                    var labelText = await labelLocator.InnerTextAsync();
+
+                    var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
+
+                    if (competitionClubInfo != CompetitionClubInfo.Unknown)
+                    {
+                        await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
+                    }
+                }
             }
 
+            await PersistCompetitionsAsync(countryTransfermarktId, competitions);
 
-            throw new NotImplementedException();
+            return competitions;
+        }
+
+        /// <summary>
+        /// Persists a collection of competitions by updating them in the repository and returns the updated competitions as DTOs.
+        /// </summary>
+        /// <param name="countryTransfermarktId">The identifier of the country in Transfermarkt.</param>
+        /// <param name="competitions">The collection of competition entities to update.</param>
+        /// <returns>A task that represents the asynchronous operation, returning the updated competitions as DTOs.</returns>
+        private async Task<IEnumerable<Competition>> PersistCompetitionsAsync(string countryTransfermarktId, IEnumerable<Domain.Entities.Competition> competitions)
+        {
+            var competitionsUpdated = await _countryRepository.UpdateRangeAsync(countryTransfermarktId, competitions);
+
+            var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitionsUpdated);
+
+            return competitionDtos;
+        }
+
+        /// <summary>
+        /// Retrieves the locator for the club information section on the page.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation, returning an <see cref="ILocator"/> for the club info section.</returns>
+        private async Task<ILocator> GetClubInfoLocatorAsync()
+        {
+            await _page.WaitForSelectorAsync(".data-header__club-info");
+            var clubInfoLocator = _page.Locator(".data-header__club-info");
+            _logger.LogDebug(
+                "Club info locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await clubInfoLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            return clubInfoLocator;
         }
     }
 }

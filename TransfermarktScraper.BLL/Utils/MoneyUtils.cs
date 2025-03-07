@@ -17,12 +17,12 @@
         }
 
         /// <summary>
-        /// Converts a monetary string with abbreviations (k, m, bn) into an integer.
+        /// Converts a monetary string with abbreviations (k, m, bn) into an float.
         /// </summary>
         /// <param name="money">The monetary string (e.g., "10k", "5m", "3bn").</param>
-        /// <returns>The numeric value as an integer.</returns>
+        /// <returns>The numeric value as an float.</returns>
         /// <exception cref="FormatException">Thrown when the input format is invalid.</exception>
-        public static int ToInt(string money)
+        public static float ToNumber(string money)
         {
             money = money.Trim().ToLower();
 
@@ -30,7 +30,7 @@
             {
                 string numericPart = money.Substring(0, money.Length - 1);
 
-                if (int.TryParse(numericPart, out int result))
+                if (float.TryParse(numericPart, out float result))
                 {
                     return result * 1000;
                 }
@@ -39,7 +39,7 @@
             {
                 string numericPart = money.Substring(0, money.Length - 1);
 
-                if (int.TryParse(numericPart, out int result))
+                if (float.TryParse(numericPart, out float result))
                 {
                     return result * 1_000_000;
                 }
@@ -48,28 +48,28 @@
             {
                 string numericPart = money.Substring(0, money.Length - 2);
 
-                if (int.TryParse(numericPart, out int result))
+                if (float.TryParse(numericPart, out float result))
                 {
                     return result * 1_000_000_000;
                 }
             }
             else
             {
-                if (int.TryParse(money, out int result))
+                if (float.TryParse(money, out float result))
                 {
                     return result;
                 }
             }
 
-            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ToInt)}: money format no valid.");
+            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ToNumber)}: money format no valid.");
         }
 
         /// <summary>
-        /// Converts an integer monetary value into an abbreviated format (k, m, bn).
+        /// Converts an float monetary value into an abbreviated format (k, m, bn).
         /// </summary>
-        /// <param name="money">The monetary value as an integer.</param>
+        /// <param name="money">The monetary value as an float.</param>
         /// <returns>A formatted string representing the value in an abbreviated format.</returns>
-        public static string ToAbb(int money)
+        public static string ToAbb(float money)
         {
             if (money >= 1_000_000_000 && money % 1_000_000_000 == 0)
             {

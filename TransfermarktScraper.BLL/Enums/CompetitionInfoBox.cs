@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Domain.Entities;
 
@@ -98,10 +97,13 @@ namespace TransfermarktScraper.BLL.Enums
         /// <param name="competition">The competition entity where the value should be assigned.</param>
         public static void AssignToCompetitionProperty(this CompetitionInfoBox competitionInfoBox, string spanText, Competition competition)
         {
+            spanText = spanText.Replace('\u00A0', ' ');
+            IReadOnlyCollection<string> spanTextParts;
+
             switch (competitionInfoBox)
             {
                 case CompetitionInfoBox.TeamsCount:
-                    var spanTextParts = spanText.Split(' ');
+                    spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
                     foreach (var spanTextPart in spanTextParts)
                     {
                         var isTeamsCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var teamsCount);
@@ -123,17 +125,21 @@ namespace TransfermarktScraper.BLL.Enums
                     break;
 
                 case CompetitionInfoBox.ForeignersCount:
-                    var isForeignersCount = int.TryParse(spanText.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var foreignersCount);
-                    if (isForeignersCount)
+                    spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
+                    foreach (var spanTextPart in spanTextParts)
                     {
-                        competition.ForeignersCount = foreignersCount;
+                        var isForeignersCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var foreignersCount);
+                        if (isForeignersCount)
+                        {
+                            competition.ForeignersCount = foreignersCount;
+                        }
                     }
 
                     break;
 
                 case CompetitionInfoBox.MarketValueAverage:
                     var money = MoneyUtils.ExtractNumericPart(spanText);
-                    competition.MarketValueAverage = MoneyUtils.ToInt(money);
+                    competition.MarketValueAverage = MoneyUtils.ToNumber(money);
                     break;
 
                 case CompetitionInfoBox.AgeAverage:

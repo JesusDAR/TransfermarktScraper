@@ -134,7 +134,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             foreach (var itemLocator in itemLocators)
             {
-                if (numberOfCountriesScraped < countryLimit)
+                if (countryLimit == 0 || numberOfCountriesScraped < countryLimit)
                 {
                     var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
 

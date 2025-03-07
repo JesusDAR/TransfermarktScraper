@@ -7,6 +7,7 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Enums;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.ServiceDefaults.Utils;
@@ -120,6 +121,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 // Competition Info Box
                 var infoBoxLocator = await GetInfoBoxLocatorAsync();
                 await SetInfoBoxValuesAsync(competition, infoBoxLocator);
+
+                // Competition Market Value Box
+                var marKetValueBoxLocator = await GetMarketValueBoxLocatorAsync();
+                await SetMarketValueAsync(competition, marKetValueBoxLocator);
             }
 
             await PersistCompetitionsAsync(countryTransfermarktId, competitions);
@@ -230,6 +235,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     _logger.LogWarning(ex.Message);
                 }
             }
+        }
+
+        private async Task<ILocator> GetMarketValueBoxLocatorAsync()
+        {
+            await _page.WaitForSelectorAsync(".data-header__box--small");
+            var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
+            _logger.LogDebug(
+                "Info box locator HTML:\n      " +
+                "{FormattedHtml}", Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            return marKetValueBoxLocator;
+        }
+
+        private async Task SetMarketValueAsync(Domain.Entities.Competition competition, ILocator marKetValueBoxLocator)
+        {
+            var boxText = (await marKetValueBoxLocator.AllInnerTextsAsync()).First();
+            var lastUpdateLocator = marKetValueBoxLocator.Locator(".data-header__last-update");
+            var lastUpdateText = await lastUpdateLocator.InnerTextAsync();
+
+            var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
+            marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
+            competition.MarketValue = MoneyUtils.ToNumber(marketValueText);
         }
     }
 }

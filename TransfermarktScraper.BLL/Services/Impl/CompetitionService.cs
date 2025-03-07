@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -113,12 +113,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 competition.Logo = string.Concat("/", competition.TransfermarktId, ".png");
 
-                var clubInfoLocator = await GetClubInfoLocatorAsync();
-
                 // Competition Club Info
+                var clubInfoLocator = await GetClubInfoLocatorAsync();
                 await SetClubInfoValuesAsync(competition, clubInfoLocator);
 
                 // Competition Info Box
+                var infoBoxLocator = await GetInfoBoxLocatorAsync();
+                await SetInfoBoxValuesAsync(competition, infoBoxLocator);
             }
 
             await PersistCompetitionsAsync(countryTransfermarktId, competitions);
@@ -157,7 +158,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts and assigns club information values from the provided locator to the given competition entity.
+        /// Extracts and assigns club info values from the provided locator to the given competition entity.
         /// </summary>
         /// <param name="competition">The competition entity to update with extracted club info values.</param>
         /// <param name="clubInfoLocator">The locator pointing to the club info section on the page.</param>
@@ -176,13 +177,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
 
-                if (competitionClubInfo != CompetitionClubInfo.Unknown)
+                try
                 {
                     await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogWarning(ex.Message);
                 }
             }
         }
 
+        /// <summary>
+        /// Retrieves the locator for the info box section on the page.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation, returning an <see cref="ILocator"/> for the info box section.</returns>
         private async Task<ILocator> GetInfoBoxLocatorAsync()
         {
             await _page.WaitForSelectorAsync(".data-header__info-box");
@@ -192,6 +201,35 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 "{FormattedHtml}", Logging.FormatHtml(await infoBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
             return infoBoxLocator;
+        }
+
+        /// <summary>
+        /// Extracts and assigns info box values from the provided locator to the given competition entity.
+        /// </summary>
+        /// <param name="competition">The competition entity to update with extracted info box values.</param>
+        /// <param name="infoBoxLocator">The locator pointing to the box info section on the page.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        private async Task SetInfoBoxValuesAsync(Domain.Entities.Competition competition, ILocator infoBoxLocator)
+        {
+            var itemLocators = await infoBoxLocator.Locator("li").AllAsync();
+
+            foreach (var itemLocator in itemLocators)
+            {
+                var itemText = await itemLocator.InnerTextAsync();
+                var spanText = (await itemLocator.Locator("span").AllInnerTextsAsync()).First();
+                var labelText = itemText.Replace(spanText, string.Empty).Trim();
+
+                var competitionInfoBox = CompetitionInfoBoxExtensions.ToEnum(labelText);
+
+                try
+                {
+                    CompetitionInfoBoxExtensions.AssignToCompetitionProperty(competitionInfoBox, spanText, competition);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogWarning(ex.Message);
+                }
+            }
         }
     }
 }

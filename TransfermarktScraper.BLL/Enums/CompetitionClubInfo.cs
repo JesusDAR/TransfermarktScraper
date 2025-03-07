@@ -84,7 +84,7 @@ namespace TransfermarktScraper.BLL.Enums
         }
 
         /// <summary>
-        /// Assigns the value to the corresponding property of the competition entity based on the CompetitionClubInfo.
+        /// Assigns the value to the corresponding property of the competition entity based on the <see cref="CompetitionClubInfo"/>.
         /// </summary>
         /// <param name="competitionClubInfo">The type of competition information.</param>
         /// <param name="labelLocator">The label element locator who is the parent of the span elements.</param>
@@ -132,7 +132,7 @@ namespace TransfermarktScraper.BLL.Enums
 
                 case CompetitionClubInfo.Unknown:
                 default:
-                    throw new ArgumentException($"Error in {nameof(CompetitionClubInfoExtensions)}.{nameof(AssignToCompetitionProperty)}: {competitionClubInfo} is not a valid {nameof(CompetitionClubInfo)}");
+                    throw new ArgumentException($"Error in {nameof(CompetitionClubInfoExtensions)}.{nameof(AssignToCompetitionProperty)} for competition {competition.Name}: {competitionClubInfo} is not a valid {nameof(CompetitionClubInfo)} ");
             }
         }
     }

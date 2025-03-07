@@ -46,6 +46,12 @@ namespace TransfermarktScraper.Domain.Entities
         public string? Logo { get; set; }
 
         /// <summary>
+        /// Gets or sets the market value of the competition.
+        /// </summary>
+        [BsonElement("marketValue")]
+        public float? MarketValue { get; set; }
+
+        /// <summary>
         /// Gets or sets the average market value of the competition.
         /// </summary>
         [BsonElement("marketValueAverage")]

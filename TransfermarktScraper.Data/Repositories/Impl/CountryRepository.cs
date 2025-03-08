@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -28,11 +29,12 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Country?> GetAsync(string countryTransfermarktId)
+        public async Task<Country?> GetAsync(string countryTransfermarktId, CancellationToken cancellationToken)
         {
             try
             {
-                return await _countries.Find(country => country.TransfermarktId == countryTransfermarktId).FirstOrDefaultAsync();
+                var country = await _countries.Find(country => country.TransfermarktId == countryTransfermarktId).FirstOrDefaultAsync(cancellationToken);
+                return country;
             }
             catch (MongoException ex)
             {
@@ -41,11 +43,12 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetAllAsync()
+        public async Task<IEnumerable<Country>> GetAllAsync(CancellationToken cancellationToken)
         {
             try
             {
-                return await _countries.Find(_ => true).ToListAsync();
+                var countries = await _countries.Find(_ => true).ToListAsync(cancellationToken);
+                return countries;
             }
             catch (MongoException ex)
             {
@@ -54,11 +57,11 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetAllAsync(string countryTransfermarktId)
+        public async Task<IEnumerable<Competition>> GetAllAsync(string countryTransfermarktId, CancellationToken cancellationToken)
         {
             try
             {
-                var country = await GetAsync(countryTransfermarktId);
+                var country = await GetAsync(countryTransfermarktId, cancellationToken);
 
                 if (country == null)
                 {
@@ -76,13 +79,13 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task AddRangeAsync(IEnumerable<Country> countries)
+        public async Task AddRangeAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {
             try
             {
                 SetUpdateTime(countries);
 
-                await _countries.InsertManyAsync(countries);
+                await _countries.InsertManyAsync(countries, cancellationToken: cancellationToken);
             }
             catch (MongoException ex)
             {
@@ -91,7 +94,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> InsertOrUpdateRangeAsync(IEnumerable<Country> countries)
+        public async Task<IEnumerable<Country>> InsertOrUpdateRangeAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {
             try
             {
@@ -103,7 +106,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 var hasExistingCountries = await _countries
                     .Find(c => countryTransfermarktIds.Contains(c.TransfermarktId))
-                    .AnyAsync();
+                    .AnyAsync(cancellationToken);
 
                 if (!hasExistingCountries)
                 {
@@ -116,7 +119,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     var existingCountryTransfermarktIds = (await _countries
                         .Find(c => countryTransfermarktIds.Contains(c.TransfermarktId))
                         .Project(c => c.TransfermarktId)
-                        .ToListAsync())
+                        .ToListAsync(cancellationToken))
                         .ToHashSet();
 
                     var countriesToInsert = countries
@@ -130,7 +133,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     if (countriesToInsert.Any())
                     {
                         _logger.LogInformation("Inserting {Count} countries in the database...", countriesToInsert.Count.ToString());
-                        await _countries.InsertManyAsync(countriesToInsert);
+                        await _countries.InsertManyAsync(countriesToInsert, cancellationToken: cancellationToken);
                         _logger.LogInformation("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
                     }
 
@@ -144,7 +147,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                         .ToList();
 
                     _logger.LogInformation("Updating {Count} countries in the database...", bulkOperations.Count);
-                    var result = await _countries.BulkWriteAsync(bulkOperations);
+                    var result = await _countries.BulkWriteAsync(bulkOperations, cancellationToken: cancellationToken);
                     _logger.LogInformation("Successfully updated {Count} countries in the database...", bulkOperations.Count);
                 }
 
@@ -157,9 +160,9 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> UpdateRangeAsync(string countryTransfermarktId, IEnumerable<Competition> competitions)
+        public async Task<IEnumerable<Competition>> UpdateRangeAsync(string countryTransfermarktId, IEnumerable<Competition> competitions, CancellationToken cancellationToken)
         {
-            var country = await GetAsync(countryTransfermarktId);
+            var country = await GetAsync(countryTransfermarktId, cancellationToken);
 
             if (country == null)
             {
@@ -178,7 +181,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 "Updating {Count} competitions from {Country.Name} in the database...",
                 competitionsList.Count.ToString(),
                 country.Name);
-            await _countries.UpdateOneAsync(filter, update);
+            await _countries.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
             _logger.LogInformation(
                 "Successfully updated {Count} competitions from {Country.Name} in the database...",
                 competitionsList.Count.ToString(),

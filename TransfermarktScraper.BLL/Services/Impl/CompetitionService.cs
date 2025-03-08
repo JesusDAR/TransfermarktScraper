@@ -46,15 +46,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping)
+        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
             try
             {
-                var competitions = (await _countryRepository.GetAllAsync(countryTransfermarktId)).ToList();
+                var competitions = (await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken)).ToList();
 
                 if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.TransfermarktId)))
                 {
                     var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions);
+
+                    await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
                 }
 
                 var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitions);
@@ -97,6 +99,15 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return competitionQuickSelectResults;
         }
 
+        /// <summary>
+        /// Scrapes competition data from a given URL for each competition in the provided list.
+        /// Updates each competition's details with data fetched from Transfermarkt.
+        /// </summary>
+        /// <param name="countryTransfermarktId">The ID of the country from Transfermarkt to associate with the competitions.</param>
+        /// <param name="competitions">The list of competitions to scrape data for.</param>
+        /// <returns>
+        /// A collection of updated <see cref="Domain.Entities.Competition"/> objects with scraped data.
+        /// </returns>
         private async Task<IEnumerable<Domain.Entities.Competition>> ScrapeCompetitionsAsync(
             string countryTransfermarktId,
             IEnumerable<Domain.Entities.Competition> competitions)
@@ -127,8 +138,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 await SetMarketValueAsync(competition, marKetValueBoxLocator);
             }
 
-            await PersistCompetitionsAsync(countryTransfermarktId, competitions);
-
             return competitions;
         }
 
@@ -137,10 +146,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countryTransfermarktId">The identifier of the country in Transfermarkt.</param>
         /// <param name="competitions">The collection of competition entities to update.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation, returning the updated competitions as DTOs.</returns>
-        private async Task<IEnumerable<Competition>> PersistCompetitionsAsync(string countryTransfermarktId, IEnumerable<Domain.Entities.Competition> competitions)
+        private async Task<IEnumerable<Competition>> PersistCompetitionsAsync(
+            string countryTransfermarktId,
+            IEnumerable<Domain.Entities.Competition> competitions,
+            CancellationToken cancellationToken)
         {
-            var competitionsUpdated = await _countryRepository.UpdateRangeAsync(countryTransfermarktId, competitions);
+            var competitionsUpdated = await _countryRepository.UpdateRangeAsync(countryTransfermarktId, competitions, cancellationToken);
 
             var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitionsUpdated);
 
@@ -237,6 +250,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
         }
 
+        /// <summary>
+        /// Asynchronously waits for and retrieves the locator for the market value box on the page.
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains the locator for the market value box element on the page.
+        /// </returns>
         private async Task<ILocator> GetMarketValueBoxLocatorAsync()
         {
             await _page.WaitForSelectorAsync(".data-header__box--small");
@@ -248,6 +267,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return marKetValueBoxLocator;
         }
 
+        /// <summary>
+        /// Asynchronously sets the market value of a competition by extracting the relevant data from the market value box located on the page.
+        /// </summary>
+        /// <param name="competition">The competition object whose market value is to be set.</param>
+        /// <param name="marKetValueBoxLocator">The locator for the market value box element on the page.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task SetMarketValueAsync(Domain.Entities.Competition competition, ILocator marKetValueBoxLocator)
         {
             var boxText = (await marKetValueBoxLocator.AllInnerTextsAsync()).First();

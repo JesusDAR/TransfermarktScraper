@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <param name="forceScraping">
         /// A boolean flag that determines whether to force scraping of the country data, even if it exists in the database.
         /// </param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects,
         /// wrapped in a successful response or an appropriate error code.
@@ -45,11 +47,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync([FromQuery] bool forceScraping)
+        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync(
+            [FromQuery] bool forceScraping,
+            CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _countryService.GetCountriesAsync(forceScraping);
+                var result = await _countryService.GetCountriesAsync(forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (HttpRequestException e)

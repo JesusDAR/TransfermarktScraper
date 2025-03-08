@@ -18,8 +18,9 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// A boolean value indicating whether to force scraping of the competitions data even if it exists in the database.
         /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
         /// </param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Competition"/> objects.</returns>
-        public Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryId, bool forceScraping = false);
+        public Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryId, bool forceScraping = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously formats the quick select competition response into a list of <see cref="CompetitionQuickSelectResult"/> objects.

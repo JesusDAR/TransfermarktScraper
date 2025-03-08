@@ -52,7 +52,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping)
+        public async Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
             try
             {
@@ -60,18 +60,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
-                    var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped);
+                    var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
                     return countriesUpdatedOrInserted;
                 }
 
-                var countries = await _countryRepository.GetAllAsync();
+                var countries = await _countryRepository.GetAllAsync(cancellationToken);
 
                 if (!countries.Any())
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
-                    var countriesInserted = await PersistCountriesAsync(countriesScraped);
+                    var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
                     return countriesInserted;
                 }
@@ -97,11 +97,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countries">The collection of country DTOs to persist.</param>
         /// <returns>A task that represents the asynchronous operation, containing the persisted countries.</returns>
-        private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries)
+        private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {
             var countryEntities = _mapper.Map<IEnumerable<Domain.Entities.Country>>(countries);
 
-            var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countryEntities);
+            var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countryEntities, cancellationToken);
 
             countries = _mapper.Map<IEnumerable<Country>>(countriesInsertedOrUpdated);
 

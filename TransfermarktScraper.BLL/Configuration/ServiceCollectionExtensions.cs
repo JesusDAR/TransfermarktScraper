@@ -22,7 +22,7 @@ namespace TransfermarktScraper.BLL.Configuration
         {
             // Bind ScraperSettings from appsettings.json
             services.Configure<ScraperSettings>(options =>
-                configuration.GetSection("ScraperSettings").Bind(options));
+                configuration.GetSection(nameof(ScraperSettings)).Bind(options));
 
             // Register Playwright services
             services.AddSingleton(provider =>

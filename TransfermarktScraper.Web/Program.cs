@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TransfermarktScraper.Web.Components;
+using TransfermarktScraper.Web.Configuration;
 
 namespace TransfermarktScraper.Web
 {
@@ -27,10 +28,7 @@ namespace TransfermarktScraper.Web
 
             builder.Services.AddOutputCache();
 
-            builder.Services.AddHttpClient<WeatherApiClient>(client =>
-            {
-                client.BaseAddress = new ("https+http://apiservice");
-            });
+            builder.Services.AddWebServices(builder.Configuration);
 
             var app = builder.Build();
 

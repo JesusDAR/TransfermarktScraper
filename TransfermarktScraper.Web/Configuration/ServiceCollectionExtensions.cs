@@ -1,0 +1,43 @@
+﻿using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using TransfermarktScraper.Web.Clients.Impl;
+using TransfermarktScraper.Web.Clients.Interfaces;
+
+namespace TransfermarktScraper.Web.Configuration
+{
+    /// <summary>
+    /// Provides extension methods for configuring services in the Web layer.
+    /// </summary>
+    public static class ServiceCollectionExtensions
+    {
+        /// <summary>
+        /// Registers the necessary services for the Web layer in the dependency injection container.
+        /// </summary>
+        /// <param name="services">The service collection to which the services will be added.</param>
+        /// <param name="configuration">The application configuration.</param>
+        /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
+        public static IServiceCollection AddWebServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Bind ClientSettings from appsettings.json
+            services.Configure<ClientSettings>(options =>
+                configuration.GetSection(nameof(ClientSettings)).Bind(options));
+
+            // Register clients
+            services.AddHttpClient<ICountryClient, CountryClient>((serviceProvider, client) =>
+            {
+                var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
+                client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CountryControllerPath);
+            });
+
+            services.AddHttpClient<ICompetitionClient, CompetitionClient>((serviceProvider, client) =>
+            {
+                var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
+                client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CompetitionControllerPath);
+            });
+
+            return services;
+        }
+    }
+}

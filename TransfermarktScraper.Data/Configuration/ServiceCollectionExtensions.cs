@@ -22,7 +22,7 @@ namespace TransfermarktScraper.Data.Configuration
         {
             // Bind DbSettings from appsettings.json
             services.Configure<DbSettings>(options =>
-                configuration.GetSection("DbSettings").Bind(options));
+                configuration.GetSection(nameof(DbSettings)).Bind(options));
 
             // Register DbContext
             services.AddScoped<IDbContext, DbContext>();

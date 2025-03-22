@@ -1,10 +1,11 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using TransfermarktScraper.Data.Configuration.Context.Interfaces;
+using TransfermarktScraper.Data.Configuration;
+using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Domain.Entities;
 
-namespace TransfermarktScraper.Data.Configuration.Context.Impl
+namespace TransfermarktScraper.Data.Context.Impl
 {
     /// <inheritdoc/>
     public class DbContext : IDbContext

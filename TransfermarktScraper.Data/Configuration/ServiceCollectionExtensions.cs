@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TransfermarktScraper.Data.Configuration.Context.Impl;
-using TransfermarktScraper.Data.Configuration.Context.Interfaces;
+using TransfermarktScraper.Data.Context.Impl;
+using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Impl;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 
@@ -13,7 +13,7 @@ namespace TransfermarktScraper.Data.Configuration
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Registers the necessary services for the BLL in the dependency injection container.
+        /// Registers the necessary services for the Data layer in the dependency injection container.
         /// </summary>
         /// <param name="services">The service collection to which the services will be added.</param>
         /// <param name="configuration">The application configuration.</param>

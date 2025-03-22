@@ -1,0 +1,41 @@
+﻿@page "/country"
+@using TransfermarktScraper.Web.Clients.Interfaces
+@attribute [StreamRendering(true)]
+
+@inject ICountryClient CountryClient
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Country</h1>
+
+@if (countries == null)
+{
+    <p><em>Scraping countries...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var country in countries)
+            {
+                <tr>
+                    <td>@country.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+	private IEnumerable<Domain.DTOs.Response.Country>? countries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        countries = await CountryClient.GetCountriesAsync();
+    }
+}

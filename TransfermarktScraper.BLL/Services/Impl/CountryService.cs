@@ -373,7 +373,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
 
                 country.TransfermarktId = countryQuickSelectResult.Id;
-                country.Flag = string.Concat("/", countryQuickSelectResult.Id, ".png");
+                country.Flag = string.Concat(_scraperSettings.FlagUrl, "/", countryQuickSelectResult.Id, ".png");
 
                 var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
 

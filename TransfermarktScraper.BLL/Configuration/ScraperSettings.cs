@@ -20,5 +20,10 @@
         /// Gets or sets the base URL that the scraper will use for making HTTP requests to obtain the country flags.
         /// </summary>
         public string FlagUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the base URL that the scraper will use for making HTTP requests to obtain the competition logo.
+        /// </summary>
+        public string LogoUrl { get; set; } = string.Empty;
     }
 }

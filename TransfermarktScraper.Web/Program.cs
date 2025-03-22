@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MudBlazor.Services;
 using TransfermarktScraper.Web.Components;
 using TransfermarktScraper.Web.Configuration;
 
@@ -18,6 +19,9 @@ namespace TransfermarktScraper.Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Add MudBlazor services
+            builder.Services.AddMudServices();
 
             // Add service defaults & Aspire client integrations.
             builder.AddServiceDefaults();

@@ -15,10 +15,17 @@
 }
 else
 {
+    <MudTextField Label="Search countries..."
+                  @bind-Value="SearchTerm"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true"
+                  @oninput="FilterCountries" />
+
     <MudGrid Spacing="4" Justify="Justify.FlexStart">
-        @foreach (var country in countries)
+        @foreach (var country in filteredCountries)
         {
-            <MudItem>
+            <MudItem Class="mt-5">
                 <MudLink Href="@($"{ClientSettings.Value.CountryControllerPath}/{country.TransfermarktId}")">
                     <MudPaper Elevation="5">
                         <MudImage Src="@country.Flag" Alt="@country.Name" />
@@ -31,10 +38,33 @@ else
 }
 
 @code {
-	private IEnumerable<Domain.DTOs.Response.Country>? countries;
+    private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
+    private List<Domain.DTOs.Response.Country> filteredCountries = new();
+    private string _searchTerm = string.Empty;
+
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            if (_searchTerm != value)
+            {
+                _searchTerm = value;
+                FilterCountries();
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         countries = await CountryClient.GetCountriesAsync();
+        filteredCountries = countries.ToList();
+    }
+
+    private void FilterCountries()
+    {
+        filteredCountries = countries?
+            .Where(country => country.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList() ?? new List<Domain.DTOs.Response.Country>();
     }
 }

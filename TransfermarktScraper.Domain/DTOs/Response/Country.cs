@@ -20,6 +20,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the name of the country.
         /// </summary>
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

@@ -1,0 +1,45 @@
+﻿@page "/competition"
+
+@using Microsoft.AspNetCore.WebUtilities
+@using TransfermarktScraper.Web.Clients.Interfaces
+@using TransfermarktScraper.Web.Services.Interfaces
+
+@attribute [StreamRendering(true)]
+
+@inject ICompetitionClient CompetitionClient
+@inject IItemSelectionService ItemSelectionService
+@inject IItemNavigationService ItemNavigationService
+@inject NavigationManager Navigation
+
+<PageTitle>Competitions</PageTitle>
+
+@if (competitions == null)
+{
+	<MudText HtmlTag="em">Scraping competitions please wait...</MudText>
+}
+
+@code {
+	private IEnumerable<Domain.DTOs.Response.Competition> competitions = null!;
+	private int? CountryTransfermarktId { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (!ItemSelectionService.IsCountrySelected)
+		{
+			ItemNavigationService.NotifyNavigateToCountries();
+		}
+
+		var uri = new Uri(Navigation.Uri);
+
+		var queryParameters = QueryHelpers.ParseQuery(uri.Query);
+
+		int.TryParse(queryParameters["countryTransfermarktId"], out var transfermarktId);
+
+		var country = ItemSelectionService.SelectedCountry;
+
+		if (transfermarktId.ToString().Equals(country?.TransfermarktId))
+		{
+			ItemNavigationService.NotifyNavigateToCompetitions();
+		}
+	}
+}

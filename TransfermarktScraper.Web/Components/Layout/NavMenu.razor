@@ -1,6 +1,69 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="country" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SouthAmerica">Countries</MudNavLink>
-    <MudNavLink Href="competition" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.EmojiEvents">Competitions</MudNavLink>
-    <MudNavLink Href="player" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsSoccer">Players</MudNavLink>
+﻿@using TransfermarktScraper.Web.Services;
+@using TransfermarktScraper.Web.Services.Interfaces;
+
+@inject IItemSelectionService ItemSelectionService
+@inject IItemNavigationService ItemNavigationService
+@inject NavigationManager Navigation
+
+<MudNavMenu>
+    <MudNavLink 
+    Href="" 
+    Match="NavLinkMatch.All" 
+    Icon="@Icons.Material.Filled.Home">
+        Home
+    </MudNavLink>
+    <MudNavLink 
+    OnClick="NavigateToCountries" 
+    Match="NavLinkMatch.Prefix" 
+    Icon="@Icons.Material.Filled.SouthAmerica">
+        Countries
+    </MudNavLink>
+    <MudNavLink 
+    OnClick="NavigateToCompetitions"
+    Match="NavLinkMatch.Prefix" 
+    Icon="@Icons.Material.Filled.EmojiEvents"
+    Disabled="@(!IsCountrySelected())">
+        Competitions
+    </MudNavLink>
+    <MudNavLink 
+    Href="player" 
+    Match="NavLinkMatch.Prefix" 
+    Icon="@Icons.Material.Filled.SportsSoccer">
+        Players
+    </MudNavLink>
 </MudNavMenu>
+
+@code {
+    private void NavigateToCountries()
+    {
+        Navigation.NavigateTo("country");
+    }
+
+    private void NavigateToCompetitions()
+    {
+        if (ItemSelectionService.IsCountrySelected)
+        {
+            var url = $"competition?countryTransfermarktId={ItemSelectionService?.SelectedCountry?.TransfermarktId}";
+
+            Navigation.NavigateTo(url);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        ItemSelectionService.OnCountrySelectionChange += StateHasChanged;
+
+        ItemNavigationService.OnNavigateToCountries += NavigateToCountries;
+        ItemNavigationService.OnNavigateToCompetitions += NavigateToCompetitions;
+    }
+
+    public void Dispose()
+    {
+        ItemSelectionService.OnCountrySelectionChange -= StateHasChanged;
+
+        ItemNavigationService.OnNavigateToCountries -= NavigateToCountries;
+        ItemNavigationService.OnNavigateToCompetitions -= NavigateToCompetitions;
+    }
+
+    public bool IsCountrySelected() => ItemSelectionService.IsCountrySelected;
+}

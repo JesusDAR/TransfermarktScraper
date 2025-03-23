@@ -1,11 +1,18 @@
 ﻿@page "/country"
+
 @using Microsoft.Extensions.Options
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Configuration
+@using TransfermarktScraper.Web.Services;
+@using TransfermarktScraper.Web.Services.Interfaces
+
 @attribute [StreamRendering(true)]
 
 @inject ICountryClient CountryClient
 @inject IOptions<ClientSettings> ClientSettings
+@inject IItemSelectionService ItemSelectionService
+@inject IItemNavigationService ItemNavigationService
+@inject NavigationManager Navigation
 
 <PageTitle>Countries</PageTitle>
 
@@ -16,17 +23,17 @@
 else
 {
     <MudTextField Label="Search countries..."
-                  @bind-Value="SearchTerm"
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Immediate="true"
-                  @oninput="FilterCountries" />
+    @bind-Value="SearchTerm"
+    Adornment="Adornment.Start"
+    AdornmentIcon="@Icons.Material.Filled.Search"
+    Immediate="true"
+    @oninput="FilterCountries" />
 
     <MudGrid Spacing="4" Justify="Justify.FlexStart">
         @foreach (var country in filteredCountries)
         {
             <MudItem Class="mt-5">
-                <MudLink Href="@($"{ClientSettings.Value.CountryControllerPath}/{country.TransfermarktId}")">
+                <MudLink OnClick="() => SelectCountry(country)">
                     <MudPaper Elevation="5">
                         <MudImage Src="@country.Flag" Alt="@country.Name" />
                         <MudText Typo="Typo.body2" Align="Align.Center">@country.Name</MudText>
@@ -66,5 +73,12 @@ else
         filteredCountries = countries?
             .Where(country => country.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
             .ToList() ?? new List<Domain.DTOs.Response.Country>();
+    }
+
+    private void SelectCountry(Domain.DTOs.Response.Country country)
+    {
+        ItemSelectionService.SelectedCountry = country;
+
+        ItemNavigationService.NotifyNavigateToCompetitions();
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Web.Clients.Impl;
 using TransfermarktScraper.Web.Clients.Interfaces;
+using TransfermarktScraper.Web.Services.Impl;
+using TransfermarktScraper.Web.Services.Interfaces;
 
 namespace TransfermarktScraper.Web.Configuration
 {
@@ -36,6 +38,12 @@ namespace TransfermarktScraper.Web.Configuration
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CompetitionControllerPath);
             });
+
+            // Register item selection service
+            services.AddScoped<IItemSelectionService, ItemSelectionService>();
+
+            // Register item navigation service
+            services.AddScoped<IItemNavigationService, ItemNavigationService>();
 
             return services;
         }

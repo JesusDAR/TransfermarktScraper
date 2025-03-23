@@ -1,34 +1,33 @@
 ﻿@page "/country"
+@using Microsoft.Extensions.Options
 @using TransfermarktScraper.Web.Clients.Interfaces
+@using TransfermarktScraper.Web.Configuration
 @attribute [StreamRendering(true)]
 
 @inject ICountryClient CountryClient
+@inject IOptions<ClientSettings> ClientSettings
 
-<PageTitle>Weather</PageTitle>
-
-<h1>Country</h1>
+<PageTitle>Countries</PageTitle>
 
 @if (countries == null)
 {
-    <p><em>Scraping countries...</em></p>
+    <MudText HtmlTag="em">Scraping countries please wait...</MudText>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var country in countries)
-            {
-                <tr>
-                    <td>@country.Name</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <MudGrid Spacing="4" Justify="Justify.FlexStart">
+        @foreach (var country in countries)
+        {
+            <MudItem>
+                <MudLink Href="@($"{ClientSettings.Value.CountryControllerPath}/{country.TransfermarktId}")">
+                    <MudPaper Elevation="5">
+                        <MudImage Src="@country.Flag" Alt="@country.Name" />
+                        <MudText Typo="Typo.body2" Align="Align.Center">@country.Name</MudText>
+                    </MudPaper>
+                </MudLink>
+            </MudItem>
+        }
+    </MudGrid>
 }
 
 @code {

@@ -123,7 +123,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {url} status code: {response.Status}");
                 }
 
-                competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId, ".png");
+                competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId.ToLower(), ".png");
 
                 // Competition Club Info
                 var clubInfoLocator = await GetClubInfoLocatorAsync();

@@ -23,11 +23,11 @@
 else
 {
     <MudTextField Label="Search countries..."
-    @bind-Value="SearchTerm"
-    Adornment="Adornment.Start"
-    AdornmentIcon="@Icons.Material.Filled.Search"
-    Immediate="true"
-    @oninput="FilterCountries" />
+                  @bind-Value="SearchedCountry"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true"
+                  @oninput="FilterCountries" />
 
     <MudGrid Spacing="4" Justify="Justify.FlexStart">
         @foreach (var country in filteredCountries)
@@ -47,16 +47,16 @@ else
 @code {
     private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
     private List<Domain.DTOs.Response.Country> filteredCountries = new();
-    private string _searchTerm = string.Empty;
+    private string _searchedCountry = string.Empty;
 
-    private string SearchTerm
+    private string SearchedCountry
     {
-        get => _searchTerm;
+        get => _searchedCountry;
         set
         {
-            if (_searchTerm != value)
+            if (_searchedCountry != value)
             {
-                _searchTerm = value;
+                _searchedCountry = value;
                 FilterCountries();
             }
         }
@@ -71,7 +71,7 @@ else
     private void FilterCountries()
     {
         filteredCountries = countries?
-            .Where(country => country.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+            .Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
             .ToList() ?? new List<Domain.DTOs.Response.Country>();
     }
 

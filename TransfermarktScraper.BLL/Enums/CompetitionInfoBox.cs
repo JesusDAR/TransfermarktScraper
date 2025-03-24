@@ -15,9 +15,9 @@ namespace TransfermarktScraper.BLL.Enums
         Unknown = 0,
 
         /// <summary>
-        /// The competition number of teams.
+        /// The competition number of clubs.
         /// </summary>
-        TeamsCount,
+        ClubsCount,
 
         /// <summary>
         /// The competition number of players.
@@ -54,7 +54,7 @@ namespace TransfermarktScraper.BLL.Enums
         {
             return competitionInfoBox switch
             {
-                CompetitionInfoBox.TeamsCount => "Number of teams",
+                CompetitionInfoBox.ClubsCount => "Number of clubs",
                 CompetitionInfoBox.PlayersCount => "Players",
                 CompetitionInfoBox.ForeignersCount => "Foreigners",
                 CompetitionInfoBox.MarketValueAverage => "ø-Market value",
@@ -80,7 +80,7 @@ namespace TransfermarktScraper.BLL.Enums
         {
             return competitionInfoBoxString switch
             {
-                string s when s.Contains("Number of teams", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.TeamsCount,
+                string s when s.Contains("Number of clubs", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.ClubsCount,
                 string s when s.Contains("Players", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.PlayersCount,
                 string s when s.Contains("Foreigners", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.ForeignersCount,
                 string s when s.Contains("ø-Market value", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.MarketValueAverage,
@@ -102,14 +102,14 @@ namespace TransfermarktScraper.BLL.Enums
 
             switch (competitionInfoBox)
             {
-                case CompetitionInfoBox.TeamsCount:
+                case CompetitionInfoBox.ClubsCount:
                     spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
                     foreach (var spanTextPart in spanTextParts)
                     {
-                        var isTeamsCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var teamsCount);
-                        if (isTeamsCount)
+                        var isClubsCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var clubsCount);
+                        if (isClubsCount)
                         {
-                            competition.TeamsCount = teamsCount;
+                            competition.ClubsCount = clubsCount;
                         }
                     }
 

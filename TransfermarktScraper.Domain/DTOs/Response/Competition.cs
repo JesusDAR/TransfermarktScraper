@@ -48,7 +48,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public float? MarketValueAverage { get; set; }
 
         /// <summary>
-        /// Gets or sets the team most successful of the competition.
+        /// Gets or sets the club most successful of the competition.
         /// </summary>
         public string? MostTimesChampion { get; set; }
 
@@ -63,9 +63,9 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public int? PlayersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of teams of the competition.
+        /// Gets or sets the number of clubs of the competition.
         /// </summary>
-        public int? TeamsCount { get; set; }
+        public int? ClubsCount { get; set; }
 
         /// <summary>
         /// Gets or sets the tier of the competition.

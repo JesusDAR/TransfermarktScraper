@@ -1,0 +1,59 @@
+﻿using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace TransfermarktScraper.Domain.Entities
+{
+    /// <summary>
+    /// Represents a club entity.
+    /// </summary>
+    public class Club : Base
+    {
+        /// <summary>
+        /// Gets or sets the average age of the players of the club.
+        /// </summary>
+        [BsonElement("ageAverage")]
+        public float? AgeAverage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of competition IDs associated with the club.
+        /// </summary>
+        [BsonElement("competitionIds")]
+        public IList<string> CompetitionIds { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the crest of the club.
+        /// </summary>
+        [BsonElement("crest")]
+        required public string Crest { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the club.
+        /// </summary>
+        [BsonElement("name")]
+        required public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of foreign players of the club.
+        /// </summary>
+        [BsonElement("foreignersCount")]
+        public int? ForeignersCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the market value of the club.
+        /// </summary>
+        [BsonElement("marketValue")]
+        public float? MarketValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of national players of the club.
+        /// </summary>
+        [BsonElement("nationalsCount")]
+        public int NationalsCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of players of the club.
+        /// </summary>
+        [BsonElement("playersCount")]
+        public int PlayersCount { get; set; }
+    }
+}

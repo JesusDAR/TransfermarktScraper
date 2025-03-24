@@ -26,7 +26,7 @@ namespace TransfermarktScraper.BLL.Enums
         CurrentChampion,
 
         /// <summary>
-        /// The team that has won the competition the most times.
+        /// The club that has won the competition the most times.
         /// </summary>
         MostTimesChampion,
 

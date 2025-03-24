@@ -21,8 +21,8 @@
         public string? CountryCollection { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the collection that stores competition data.
+        /// Gets or sets the name of the collection that stores club data.
         /// </summary>
-        public string? CompetitionCollection { get; set; }
+        public string? ClubCollection { get; set; }
     }
 }

@@ -17,5 +17,10 @@ namespace TransfermarktScraper.Data.Context.Interfaces
         /// Gets the collection of countries.
         /// </summary>
         IMongoCollection<Country> Countries { get; }
+
+        /// <summary>
+        /// Gets the collection of clubs.
+        /// </summary>
+        IMongoCollection<Club> Clubs { get; }
     }
 }

@@ -8,16 +8,16 @@
         /// <summary>
         /// Gets or sets the Transfermarkt identifier for the competition.
         /// </summary>
-        public string? Id { get; set; }
+        required public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the competition.
         /// </summary>
-        public string? Name { get; set; }
+        required public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
         /// </summary>
-        public string? Link { get; set; }
+        required public string Link { get; set; }
     }
 }

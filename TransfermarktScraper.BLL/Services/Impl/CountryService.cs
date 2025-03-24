@@ -276,7 +276,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="itemLocator">The locator representing the country name element.</param>
         /// <param name="selectorLocator">The locator for the dropdown selector, used if reloading is needed.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the country name.</returns>
-        private async Task<string?> GetCountryNameAsync(ILocator itemLocator, ILocator selectorLocator)
+        private async Task<string> GetCountryNameAsync(ILocator itemLocator, ILocator selectorLocator)
         {
             var name = string.Empty;
             int attempt = 0;
@@ -346,12 +346,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countries">The list of <see cref="Country"/> objects where the new country will be added.</param>
         /// <param name="countryName">The name of the country to be assigned to the <see cref="Country.Name"/> property.</param>
-        private void CreateAndAddCountry(ICollection<Country> countries, string? countryName)
+        private void CreateAndAddCountry(ICollection<Country> countries, string countryName)
         {
             _logger.LogInformation("Adding country: {CountryName}", countryName);
 
             var country = new Country()
             {
+                TransfermarktId = string.Empty, // Temporal assignation, interceptor obtains correct Id
                 Name = countryName,
             };
 
@@ -365,7 +366,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryQuickSelectInterceptorResult">
         /// The result containing the intercepted quick select data for countries and their competitions.
         /// </param>
-        private void AddInterceptedQuickSelectResults(IList<Country> countries, CountryQuickSelectInterceptorResult countryQuickSelectInterceptorResult)
+        private void AddInterceptedQuickSelectResults(
+            IList<Country> countries,
+            CountryQuickSelectInterceptorResult countryQuickSelectInterceptorResult)
         {
             for (int i = 0; i < countries.Count; i++)
             {

@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets or sets the unique Transfermarkt identifier.
         /// </summary>
-        public string? TransfermarktId { get; set; }
+        required public string TransfermarktId { get; set; }
     }
 }

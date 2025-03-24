@@ -9,7 +9,7 @@
         /// <summary>
         /// Gets or sets the asynchronous task associated with the interceptor execution.
         /// </summary>
-        public Task InterceptorTask { get; set; }
+        required public Task InterceptorTask { get; set; }
 
         /// <summary>
         /// Gets or sets the list of quick select results for countries.

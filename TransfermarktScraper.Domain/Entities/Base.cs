@@ -14,13 +14,13 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonId]
         [BsonElement("transfermarktId")]
-        public required string TransfermarktId { get; set; }
+        required public string TransfermarktId { get; set; }
 
         /// <summary>
         /// Gets or sets the last update date.
         /// </summary>
         [BsonElement("updateDate")]
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTime? UpdateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
     }
 }

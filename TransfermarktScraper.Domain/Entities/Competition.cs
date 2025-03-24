@@ -37,7 +37,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the competition link in Transfermarkt.
         /// </summary>
         [BsonElement("link")]
-        public string? Link { get; set; }
+        required public string Link { get; set; }
 
         /// <summary>
         /// Gets or sets the logo of the competition.
@@ -67,7 +67,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the name of the competition.
         /// </summary>
         [BsonElement("name")]
-        public string? Name { get; set; }
+        required public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the number of players of the competition.
@@ -76,15 +76,15 @@ namespace TransfermarktScraper.Domain.Entities
         public int? PlayersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the tier of the competition.
-        /// </summary>
-        [BsonElement("tier")]
-        public Tier Tier { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of teams of the competition.
         /// </summary>
         [BsonElement("teamsCount")]
         public int? TeamsCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tier of the competition.
+        /// </summary>
+        [BsonElement("tier")]
+        public Tier Tier { get; set; }
     }
 }

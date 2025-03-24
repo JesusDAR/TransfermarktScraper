@@ -25,6 +25,6 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the name of the country.
         /// </summary>
         [BsonElement("name")]
-        public string? Name { get; set; }
+        required public string Name { get; set; }
     }
 }

@@ -52,7 +52,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var competitions = (await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken)).ToList();
 
-                if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.TransfermarktId)))
+                if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
                 {
                     var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions);
 
@@ -135,7 +135,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 // Competition Market Value Box
                 var marKetValueBoxLocator = await GetMarketValueBoxLocatorAsync();
-                await SetMarketValueAsync(competition, marKetValueBoxLocator);
+
+                if (marKetValueBoxLocator != null)
+                {
+                    await SetMarketValueAsync(competition, marKetValueBoxLocator);
+                }
             }
 
             return competitions;
@@ -256,15 +260,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A task that represents the asynchronous operation. The task result contains the locator for the market value box element on the page.
         /// </returns>
-        private async Task<ILocator> GetMarketValueBoxLocatorAsync()
+        private async Task<ILocator?> GetMarketValueBoxLocatorAsync()
         {
-            await _page.WaitForSelectorAsync(".data-header__box--small");
-            var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
-            _logger.LogDebug(
-                "Info box locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            try
+            {
+                await _page.WaitForSelectorAsync(
+                    ".data-header__box--small",
+                    new PageWaitForSelectorOptions { Timeout = 1000 }
+                );
 
-            return marKetValueBoxLocator;
+                var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
+
+                _logger.LogDebug(
+                    "Info box locator HTML:\n      " +
+                    "{FormattedHtml}",
+                    Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML"))
+                );
+
+                return marKetValueBoxLocator;
+            }
+            catch (TimeoutException)
+            {
+                _logger.LogWarning("Timeout exceeded while waiting for market value box in page URL: {Url}", _page.Url);
+                return null;
+            }
         }
 
         /// <summary>

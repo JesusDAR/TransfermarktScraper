@@ -17,12 +17,66 @@
 {
 	<MudText HtmlTag="em">Scraping competitions please wait...</MudText>
 }
+else
+{
+	<MudTextField Label="Search competitions..."
+				  @bind-Value="SearchedCompetition"
+				  Adornment="Adornment.Start"
+				  AdornmentIcon="@Icons.Material.Filled.Search"
+				  Immediate="true"
+				  @oninput="FilterCompetitions" />
+
+	<MudGrid Spacing="4" Justify="Justify.FlexStart">
+		@foreach (var competition in filteredCompetitions)
+		{
+			<MudItem Class="mt-5">
+				<MudLink OnClick="() => SelectCompetition(competition)">
+					<MudPaper Elevation="5">
+						<MudImage Src="@competition.Logo" Alt="@competition.Name" />
+						<MudText Typo="Typo.body2" Align="Align.Center">@competition.Name</MudText>
+					</MudPaper>
+				</MudLink>
+			</MudItem>
+		}
+	</MudGrid>
+}
 
 @code {
 	private IEnumerable<Domain.DTOs.Response.Competition> competitions = null!;
+	private List<Domain.DTOs.Response.Competition> filteredCompetitions = new();
 	private int? CountryTransfermarktId { get; set; }
+	private string _searchedCompetition = string.Empty;
+
+	private string SearchedCompetition
+	{
+		get => _searchedCompetition;
+		set
+		{
+			if (_searchedCompetition != value)
+			{
+				_searchedCompetition = value;
+				FilterCompetitions();
+			}
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
+	{
+		NavigationCheck();
+
+		competitions = await CompetitionClient.GetCompetitionsAsync(ItemSelectionService.SelectedCountry.TransfermarktId);
+
+		filteredCompetitions = competitions.ToList();
+	}
+
+	private void FilterCompetitions()
+	{
+		filteredCompetitions = competitions?
+			.Where(competition => competition.Name.Contains(_searchedCompetition, StringComparison.OrdinalIgnoreCase))
+			.ToList() ?? new List<Domain.DTOs.Response.Competition>();
+	}
+
+	private void NavigationCheck() 
 	{
 		if (!ItemSelectionService.IsCountrySelected)
 		{
@@ -37,9 +91,16 @@
 
 		var country = ItemSelectionService.SelectedCountry;
 
-		if (transfermarktId.ToString().Equals(country?.TransfermarktId))
+		if (!transfermarktId.ToString().Equals(country?.TransfermarktId))
 		{
 			ItemNavigationService.NotifyNavigateToCompetitions();
 		}
+	}
+
+	private void SelectCompetition(Domain.DTOs.Response.Competition competition)
+	{
+		ItemSelectionService.SelectedCompetition = competition;
+
+		// ItemNavigationService.NotifyNavigateToCompetitions();
 	}
 }

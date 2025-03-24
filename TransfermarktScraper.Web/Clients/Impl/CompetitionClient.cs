@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Web.Clients.Interfaces;
@@ -29,9 +30,11 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetCompetitionsAsync()
+        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId)
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Competition>>(_clientSettings.CompetitionControllerPath);
+            var uri = QueryHelpers.AddQueryString(_clientSettings.CompetitionControllerPath, "countryTransfermarktId", countryTransfermarktId);
+
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Competition>>(uri);
 
             return result ?? new List<Competition>();
         }

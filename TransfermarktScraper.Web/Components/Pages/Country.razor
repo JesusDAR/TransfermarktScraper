@@ -65,6 +65,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         countries = await CountryClient.GetCountriesAsync();
+
         filteredCountries = countries.ToList();
     }
 

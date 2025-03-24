@@ -1,4 +1,5 @@
 ﻿using System;
+using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Web.Services.Interfaces;
 
 namespace TransfermarktScraper.Web.Services.Impl
@@ -6,13 +7,18 @@ namespace TransfermarktScraper.Web.Services.Impl
     /// <inheritdoc/>
     public class ItemSelectionService : IItemSelectionService
     {
-        private Domain.DTOs.Response.Country? _selectedCountry;
+        private Country? _selectedCountry;
+
+        private Competition? _selectedCompetition;
 
         /// <inheritdoc/>
         public event Action OnCountrySelectionChange = () => { }; // Event to notify changes
 
         /// <inheritdoc/>
-        public Domain.DTOs.Response.Country? SelectedCountry
+        public event Action OnCompetitionSelectionChange = () => { };
+
+        /// <inheritdoc/>
+        public Country? SelectedCountry
         {
             get => _selectedCountry;
             set
@@ -23,11 +29,30 @@ namespace TransfermarktScraper.Web.Services.Impl
         }
 
         /// <inheritdoc/>
+        public Competition? SelectedCompetition
+        {
+            get => _selectedCompetition;
+            set
+            {
+                _selectedCompetition = value;
+                NotifyCompetitionSelectionChange();
+            }
+        }
+
+        /// <inheritdoc/>
         public bool IsCountrySelected => _selectedCountry != null;
+
+        /// <inheritdoc/>
+        public bool IsCompetitionSelected => _selectedCompetition != null;
 
         private void NotifyCountrySelectionChange()
         {
             OnCountrySelectionChange?.Invoke();
+        }
+
+        private void NotifyCompetitionSelectionChange()
+        {
+            OnCompetitionSelectionChange?.Invoke();
         }
     }
 }

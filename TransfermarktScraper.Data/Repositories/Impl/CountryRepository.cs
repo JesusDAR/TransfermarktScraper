@@ -38,7 +38,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (MongoException ex)
             {
-                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with TransfermarktId ID {countryTransfermarktId} from the database.", ex);
+                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with Transfermarkt ID {countryTransfermarktId} from the database.", ex);
             }
         }
 

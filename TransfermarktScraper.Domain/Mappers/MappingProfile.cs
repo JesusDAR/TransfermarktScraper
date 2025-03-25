@@ -19,6 +19,10 @@ namespace TransfermarktScraper.Domain.Mappers
             // Competition
             CreateMap<Entities.Competition, DTOs.Response.Competition>();
             CreateMap<DTOs.Response.Competition, Entities.Competition>();
+
+            // Club
+            CreateMap<Entities.Club, DTOs.Response.Club>();
+            CreateMap<DTOs.Response.Club, Entities.Club>();
         }
     }
 }

@@ -56,7 +56,13 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the current market value of the player.
         /// </summary>
         [BsonElement("marketValue")]
-        public string? MarketValue { get; set; }
+        public float? MarketValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets the market valueS of the player.
+        /// </summary>
+        [BsonElement("marketValue")]
+        public IEnumerable<MarketValue>? MarketValues { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the player.

@@ -27,6 +27,10 @@ namespace TransfermarktScraper.Domain.Mappers
             // Player
             CreateMap<Entities.Player, DTOs.Response.Player>();
             CreateMap<DTOs.Response.Player, Entities.Player>();
+
+            // MarketValue
+            CreateMap<Entities.MarketValue, DTOs.Response.MarketValue>();
+            CreateMap<DTOs.Response.MarketValue, Entities.MarketValue>();
         }
     }
 }

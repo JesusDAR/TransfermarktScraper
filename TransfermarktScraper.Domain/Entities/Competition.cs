@@ -50,7 +50,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the competition cup level.
         /// </summary>
         [BsonElement("cup")]
-        public Cup? Cup { get; set; }
+        public Cup Cup { get; set; } = Cup.None;
 
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
@@ -98,6 +98,6 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the tier of the competition.
         /// </summary>
         [BsonElement("tier")]
-        public Tier? Tier { get; set; }
+        public Tier Tier { get; set; } = Tier.None;
     }
 }

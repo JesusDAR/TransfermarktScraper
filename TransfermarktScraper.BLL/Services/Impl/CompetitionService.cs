@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
-using TransfermarktScraper.BLL.Enums;
+using TransfermarktScraper.BLL.Enums.Extensions;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
@@ -19,6 +19,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
     {
         private readonly IPage _page;
         private readonly ICountryRepository _countryRepository;
+        private readonly IClubService _clubService;
         private readonly ScraperSettings _scraperSettings;
         private readonly IMapper _mapper;
         private readonly ILogger<CompetitionService> _logger;
@@ -28,18 +29,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="page">The Playwright page used for web scraping.</param>
         /// <param name="countryRepository">The country repository for accessing and managing the country data.</param>
+        /// <param name="clubService">The club service for scraping club data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
         /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public CompetitionService(
             IPage page,
             ICountryRepository countryRepository,
+            IClubService clubService,
             IOptions<ScraperSettings> scraperSettings,
             IMapper mapper,
             ILogger<CompetitionService> logger)
         {
             _page = page;
             _countryRepository = countryRepository;
+            _clubService = clubService;
             _scraperSettings = scraperSettings.Value;
             _mapper = mapper;
             _logger = logger;
@@ -54,7 +58,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
                 {
-                    var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions);
+                    var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions, cancellationToken);
 
                     competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
                 }
@@ -106,11 +110,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryTransfermarktId">The ID of the country from Transfermarkt to associate with the competitions.</param>
         /// <param name="competitions">The list of competitions to scrape data for.</param>
         /// <returns>
-        /// A collection of updated <see cref="Domain.Entities.Competition"/> objects with scraped data.
+        /// A collection of updated <see cref="Competition"/> objects with scraped data.
         /// </returns>
-        private async Task<IEnumerable<Domain.Entities.Competition>> ScrapeCompetitionsAsync(
+        private async Task<IEnumerable<Competition>> ScrapeCompetitionsAsync(
             string countryTransfermarktId,
-            IEnumerable<Domain.Entities.Competition> competitions)
+            IEnumerable<Competition> competitions,
+            CancellationToken cancellationToken)
         {
             foreach (var competition in competitions)
             {
@@ -139,6 +144,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 if (marKetValueBoxLocator != null)
                 {
                     await SetMarketValueAsync(competition, marKetValueBoxLocator);
+                }
+
+                // Competition Clubs
+                if (competition.Cup == Domain.Enums.Cup.None)
+                {
+                    var clubRowLocators = await GetClubRowsLocatorsAsync();
+                    var clubIds = await GetClubsAsync(countryTransfermarktId, clubRowLocators, cancellationToken);
+                    competition.ClubIds = clubIds;
                 }
             }
 
@@ -170,7 +183,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             await _page.WaitForSelectorAsync(".data-header__club-info");
             var clubInfoLocator = _page.Locator(".data-header__club-info");
-            _logger.LogDebug(
+            _logger.LogTrace(
                 "Club info locator HTML:\n      " +
                 "{FormattedHtml}", Logging.FormatHtml(await clubInfoLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
@@ -183,7 +196,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="competition">The competition entity to update with extracted club info values.</param>
         /// <param name="clubInfoLocator">The locator pointing to the club info section on the page.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task SetClubInfoValuesAsync(Domain.Entities.Competition competition, ILocator clubInfoLocator)
+        private async Task SetClubInfoValuesAsync(Competition competition, ILocator clubInfoLocator)
         {
             var labelLocators = clubInfoLocator.Locator(".data-header__label");
 
@@ -216,7 +229,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             await _page.WaitForSelectorAsync(".data-header__info-box");
             var infoBoxLocator = _page.Locator(".data-header__info-box");
-            _logger.LogDebug(
+            _logger.LogTrace(
                 "Info box locator HTML:\n      " +
                 "{FormattedHtml}", Logging.FormatHtml(await infoBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
@@ -229,7 +242,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="competition">The competition entity to update with extracted info box values.</param>
         /// <param name="infoBoxLocator">The locator pointing to the box info section on the page.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        private async Task SetInfoBoxValuesAsync(Domain.Entities.Competition competition, ILocator infoBoxLocator)
+        private async Task SetInfoBoxValuesAsync(Competition competition, ILocator infoBoxLocator)
         {
             var itemLocators = await infoBoxLocator.Locator("li").AllAsync();
 
@@ -268,7 +281,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
 
-                _logger.LogDebug(
+                _logger.LogTrace(
                     "Info box locator HTML:\n      " +
                     "{FormattedHtml}",
                     Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
@@ -288,7 +301,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="competition">The competition object whose market value is to be set.</param>
         /// <param name="marKetValueBoxLocator">The locator for the market value box element on the page.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task SetMarketValueAsync(Domain.Entities.Competition competition, ILocator marKetValueBoxLocator)
+        private async Task SetMarketValueAsync(Competition competition, ILocator marKetValueBoxLocator)
         {
             var boxText = (await marKetValueBoxLocator.AllInnerTextsAsync()).First();
             var lastUpdateLocator = marKetValueBoxLocator.Locator(".data-header__last-update");
@@ -297,6 +310,48 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
             marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
             competition.MarketValue = MoneyUtils.ToNumber(marketValueText);
+        }
+
+        /// <summary>
+        /// Retrieves the locators for club rows within the club grid on the page.
+        /// </summary>
+        /// <returns>
+        /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
+        /// representing the rows within the club grid.
+        /// </returns>
+        private async Task<IReadOnlyList<ILocator>> GetClubRowsLocatorsAsync()
+        {
+            var clubGridLocator = _page.Locator("#yw1");
+
+            _logger.LogTrace(
+                "Club grid locator HTML:\n      " +
+                "{FormattedHtml}",
+                Logging.FormatHtml(await clubGridLocator.EvaluateAsync<string>("element => element.outerHTML")));
+
+            var clubRowsLocators = await clubGridLocator.Locator("tbody tr").AllAsync();
+
+            return clubRowsLocators;
+        }
+
+        /// <summary>
+        /// Retrieves the Transfermarkt IDs of clubs from a given competition.
+        /// </summary>
+        /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
+        /// <param name="clubRowLocators">A collection of locators representing club rows in the competition table grid.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A collection of Transfermarkt club IDs.</returns>
+        private async Task<IEnumerable<string>> GetClubsAsync(string competitionTransfermarktId, IEnumerable<ILocator> clubRowLocators, CancellationToken cancellationToken)
+        {
+            var clubIds = new List<string>();
+
+            foreach (var clubRowLocator in clubRowLocators)
+            {
+                var club = await _clubService.GetClubAsync(competitionTransfermarktId, clubRowLocator, cancellationToken);
+
+                clubIds.Add(club.TransfermarktId);
+            }
+
+            return clubIds;
         }
     }
 }

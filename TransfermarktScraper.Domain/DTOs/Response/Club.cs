@@ -50,6 +50,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the number of players of the club.
         /// </summary>
-        public int PlayersCount { get; set; }
+        public int? PlayersCount { get; set; }
     }
 }

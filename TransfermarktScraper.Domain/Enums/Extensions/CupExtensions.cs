@@ -19,7 +19,6 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Cup.DomesticCup => "Domestic Cup",
                 Cup.DomesticSuperCup => "Domestic Super Cup",
                 Cup.International => "International",
-                Cup.None => string.Empty,
                 _ => throw new ArgumentException($"Error in {nameof(CupExtensions)}.{nameof(ToString)}: {cup} is not a valid {nameof(Cup)}."),
             };
         }
@@ -38,7 +37,6 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "domestic cup" => Cup.DomesticCup,
                 "domestic super cup" => Cup.DomesticSuperCup,
                 "international" => Cup.International,
-                "" => Cup.None,
                 _ => throw new ArgumentException($"Error in {nameof(CupExtensions)}.{nameof(FromString)}: {cupString} is not a valid {nameof(Cup)} string."),
             };
         }

@@ -16,7 +16,7 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> objects.</returns>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> DTOs.</returns>
         public Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping = false, CancellationToken cancellationToken = default);
     }
 }

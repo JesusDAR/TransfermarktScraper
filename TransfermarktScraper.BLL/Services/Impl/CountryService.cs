@@ -10,9 +10,8 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.ServiceDefaults.Utils;
-using Country = TransfermarktScraper.Domain.DTOs.Response.Country;
+using Country = TransfermarktScraper.Domain.Entities.Country;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -52,17 +51,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
             try
             {
+                var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
+
                 if (forceScraping)
                 {
                     var countriesScraped = await ScrapeCountriesAsync();
 
                     var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                    return countriesUpdatedOrInserted;
+                    countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesUpdatedOrInserted);
+
+                    return countryDtos;
                 }
 
                 var countries = await _countryRepository.GetAllAsync(cancellationToken);
@@ -73,10 +76,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                    return countriesInserted;
+                    countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesInserted);
+
+                    return countryDtos;
                 }
 
-                var countryDtos = _mapper.Map<IEnumerable<Country>>(countries);
+                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countries);
 
                 return countryDtos;
             }
@@ -99,11 +104,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task that represents the asynchronous operation, containing the persisted countries.</returns>
         private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {
-            var countryEntities = _mapper.Map<IEnumerable<Domain.Entities.Country>>(countries);
-
-            var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countryEntities, cancellationToken);
-
-            countries = _mapper.Map<IEnumerable<Country>>(countriesInsertedOrUpdated);
+            var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countries, cancellationToken);
 
             return countries;
         }
@@ -382,7 +383,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
                 {
-                    var competition = new Competition
+                    var competition = new Domain.Entities.Competition
                     {
                         TransfermarktId = competitionQuickSelectResult.Id,
                         Name = competitionQuickSelectResult.Name,

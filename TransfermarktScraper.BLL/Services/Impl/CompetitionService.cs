@@ -9,8 +9,8 @@ using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.ServiceDefaults.Utils;
+using Competition = TransfermarktScraper.Domain.Entities.Competition;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -46,20 +46,20 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Domain.DTOs.Response.Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
             try
             {
-                var competitions = (await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken)).ToList();
+                var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
                 if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
                 {
                     var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions);
 
-                    await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
+                    competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
                 }
 
-                var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitions);
+                var competitionDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Competition>>(competitions);
 
                 return competitionDtos;
             }
@@ -146,22 +146,20 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Persists a collection of competitions by updating them in the repository and returns the updated competitions as DTOs.
+        /// Persists a collection of competitions by updating them in the repository.
         /// </summary>
         /// <param name="countryTransfermarktId">The identifier of the country in Transfermarkt.</param>
         /// <param name="competitions">The collection of competition entities to update.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation, returning the updated competitions as DTOs.</returns>
+        /// <returns>A task that represents the asynchronous operation, returning the updated competitions.</returns>
         private async Task<IEnumerable<Competition>> PersistCompetitionsAsync(
             string countryTransfermarktId,
-            IEnumerable<Domain.Entities.Competition> competitions,
+            IEnumerable<Competition> competitions,
             CancellationToken cancellationToken)
         {
             var competitionsUpdated = await _countryRepository.UpdateRangeAsync(countryTransfermarktId, competitions, cancellationToken);
 
-            var competitionDtos = _mapper.Map<IEnumerable<Competition>>(competitionsUpdated);
-
-            return competitionDtos;
+            return competitionsUpdated;
         }
 
         /// <summary>
@@ -266,16 +264,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 await _page.WaitForSelectorAsync(
                     ".data-header__box--small",
-                    new PageWaitForSelectorOptions { Timeout = 1000 }
-                );
+                    new PageWaitForSelectorOptions { Timeout = 1000 });
 
                 var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
 
                 _logger.LogDebug(
                     "Info box locator HTML:\n      " +
                     "{FormattedHtml}",
-                    Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML"))
-                );
+                    Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
                 return marKetValueBoxLocator;
             }

@@ -10,6 +10,7 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.ServiceDefaults.Utils;
 using Country = TransfermarktScraper.Domain.Entities.Country;
 
@@ -381,17 +382,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
 
+                var competitions = new List<Competition>();
+
                 foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
                 {
-                    var competition = new Domain.Entities.Competition
+                    var competition = new Competition
                     {
                         TransfermarktId = competitionQuickSelectResult.Id,
                         Name = competitionQuickSelectResult.Name,
                         Link = competitionQuickSelectResult.Link,
                     };
 
-                    country.Competitions.Add(competition);
+                    competitions.Add(competition);
                 }
+
+                country.Competitions = competitions;
 
                 _logger.LogInformation(
                     "Added country:\n      " +

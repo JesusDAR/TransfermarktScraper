@@ -10,7 +10,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the competitions of the country.
         /// </summary>
-        public IList<Competition> Competitions { get; set; } = new List<Competition>();
+        public IEnumerable<Competition> Competitions { get; set; } = new List<Competition>();
 
         /// <summary>
         /// Gets or sets the flag of the country.

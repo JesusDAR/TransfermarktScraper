@@ -16,7 +16,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the list of club IDs associated with the competition.
         /// </summary>
-        public IList<string> ClubIds { get; set; } = new List<string>();
+        public IEnumerable<string> ClubIds { get; set; } = new List<string>();
 
         /// <summary>
         /// Gets or sets the coefficient of the competition.

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
@@ -223,7 +224,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var playersCountLocator = clubDataLocators[2].Locator("a");
                 var playersCount = await playersCountLocator.InnerTextAsync();
-                playersCountInt = int.Parse(playersCount);
+                var isPlayersCount = int.TryParse(playersCount, NumberStyles.Integer, CultureInfo.InvariantCulture, out playersCountInt);
+                if (isPlayersCount)
+                {
+                    return playersCountInt;
+                }
             }
             catch (Exception ex)
             {
@@ -246,7 +251,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var ageAverageLocator = clubDataLocators[3];
                 var ageAverage = await ageAverageLocator.InnerTextAsync();
-                ageAverageFloat = float.Parse(ageAverage);
+                var isAgeAverage = float.TryParse(ageAverage.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out ageAverageFloat);
+                if (isAgeAverage)
+                {
+                    return ageAverageFloat;
+                }
             }
             catch (Exception ex)
             {
@@ -269,7 +278,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var foreignersCountLocator = clubDataLocators[4];
                 var foreignersCount = await foreignersCountLocator.InnerTextAsync();
-                foreignersCountInt = int.Parse(foreignersCount);
+                var isForeignersCount = int.TryParse(foreignersCount.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out foreignersCountInt);
+                if (isForeignersCount)
+                {
+                    return foreignersCountInt;
+                }
             }
             catch (Exception ex)
             {

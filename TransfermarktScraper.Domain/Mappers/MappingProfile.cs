@@ -23,6 +23,10 @@ namespace TransfermarktScraper.Domain.Mappers
             // Club
             CreateMap<Entities.Club, DTOs.Response.Club>();
             CreateMap<DTOs.Response.Club, Entities.Club>();
+
+            // Player
+            CreateMap<Entities.Player, DTOs.Response.Player>();
+            CreateMap<DTOs.Response.Player, Entities.Player>();
         }
     }
 }

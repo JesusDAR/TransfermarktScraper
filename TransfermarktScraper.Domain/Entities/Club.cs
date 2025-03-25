@@ -27,16 +27,16 @@ namespace TransfermarktScraper.Domain.Entities
         required public string Crest { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the club.
-        /// </summary>
-        [BsonElement("name")]
-        required public string Name { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of foreign players of the club.
         /// </summary>
         [BsonElement("foreignersCount")]
         public int? ForeignersCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the club link in Transfermarkt.
+        /// </summary>
+        [BsonElement("link")]
+        required public string Link { get; set; }
 
         /// <summary>
         /// Gets or sets the market value of the club.
@@ -45,10 +45,17 @@ namespace TransfermarktScraper.Domain.Entities
         public float? MarketValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of national players of the club.
+        /// Gets or sets the market value of the club.
         /// </summary>
-        [BsonElement("nationalsCount")]
-        public int NationalsCount { get; set; }
+        [BsonElement("marketValueAverage")]
+        public float? MarketValueAverage { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the name of the club.
+        /// </summary>
+        [BsonElement("name")]
+        required public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the number of players of the club.

@@ -23,6 +23,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         required public string Crest { get; set; }
 
         /// <summary>
+        /// Gets or sets the club link in Transfermarkt.
+        /// </summary>
+        required public string Link { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the club.
         /// </summary>
         required public string Name { get; set; }
@@ -38,9 +43,9 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public float? MarketValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of national players of the club.
+        /// Gets or sets the market value average of the club.
         /// </summary>
-        public int NationalsCount { get; set; }
+        public float? MarketValueAverage { get; set; }
 
         /// <summary>
         /// Gets or sets the number of players of the club.

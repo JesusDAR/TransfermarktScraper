@@ -23,6 +23,12 @@ namespace TransfermarktScraper.Domain.Entities
         public IEnumerable<string> ClubIds { get; set; } = new List<string>();
 
         /// <summary>
+        /// Gets or sets the number of clubs of the competition.
+        /// </summary>
+        [BsonElement("clubsCount")]
+        public int? ClubsCount { get; set; }
+
+        /// <summary>
         /// Gets or sets the coefficient of the competition.
         /// </summary>
         [BsonElement("coefficient")]
@@ -39,6 +45,12 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonElement("foreignersCount")]
         public int? ForeignersCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the competition cup level.
+        /// </summary>
+        [BsonElement("cup")]
+        public Cup? Cup { get; set; }
 
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
@@ -83,15 +95,9 @@ namespace TransfermarktScraper.Domain.Entities
         public int? PlayersCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of clubs of the competition.
-        /// </summary>
-        [BsonElement("clubsCount")]
-        public int? ClubsCount { get; set; }
-
-        /// <summary>
         /// Gets or sets the tier of the competition.
         /// </summary>
         [BsonElement("tier")]
-        public Tier Tier { get; set; }
+        public Tier? Tier { get; set; }
     }
 }

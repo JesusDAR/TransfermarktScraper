@@ -34,6 +34,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public int? ForeignersCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the competition cup level.
+        /// </summary>
+        public Cup? Cup { get; set; }
+
+        /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
         /// </summary>
         required public string Link { get; set; }
@@ -76,6 +81,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the tier of the competition.
         /// </summary>
-        public Tier Tier { get; set; }
+        public Tier? Tier { get; set; }
     }
 }

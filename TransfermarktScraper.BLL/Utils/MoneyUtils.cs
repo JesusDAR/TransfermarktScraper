@@ -61,7 +61,7 @@
                 }
             }
 
-            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ToNumber)}: money format no valid.");
+            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ToNumber)}: money format {money} no valid.");
         }
 
         /// <summary>

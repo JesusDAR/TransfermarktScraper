@@ -86,7 +86,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the portrait of the player.
         /// </summary>
         [BsonElement("portrait")]
-        public string? Portrait { get; set; }
+        required public string Portrait { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the position of the player.

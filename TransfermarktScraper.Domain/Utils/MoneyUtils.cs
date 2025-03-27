@@ -1,4 +1,7 @@
-﻿namespace TransfermarktScraper.BLL.Utils
+﻿using System;
+using System.Linq;
+
+namespace TransfermarktScraper.Domain.Utils
 {
     /// <summary>
     /// Provides util methods to manage monetary values.
@@ -22,7 +25,7 @@
         /// <param name="money">The monetary string (e.g., "10k", "5m", "3bn").</param>
         /// <returns>The numeric value as an float.</returns>
         /// <exception cref="FormatException">Thrown when the input format is invalid.</exception>
-        public static float ToNumber(string money)
+        public static float ConvertToFloat(string money)
         {
             money = money.Trim().ToLower();
 
@@ -61,7 +64,7 @@
                 }
             }
 
-            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ToNumber)}: money format {money} no valid.");
+            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ConvertToFloat)}: money format {money} not valid.");
         }
 
         /// <summary>
@@ -69,7 +72,7 @@
         /// </summary>
         /// <param name="money">The monetary value as an float.</param>
         /// <returns>A formatted string representing the value in an abbreviated format.</returns>
-        public static string ToAbb(float money)
+        public static string ConvertToString(float money)
         {
             if (money >= 1_000_000_000 && money % 1_000_000_000 == 0)
             {

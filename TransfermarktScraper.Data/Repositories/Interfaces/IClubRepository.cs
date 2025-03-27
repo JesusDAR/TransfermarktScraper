@@ -21,7 +21,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<Club?> GetAsync(string clubTransfermarktId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Asynchronously retrieves all <see cref="Club"/>.
+        /// Asynchronously retrieves all <see cref="Club"/> from a competition.
         /// </summary>
         /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier of the <see cref="Competition"/></param>
         /// <param name="cancellationToken">The cancellation token.</param>

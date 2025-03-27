@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
+using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.BLL.Enums.Extensions
 {
@@ -106,7 +106,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
 
                 case CompetitionInfoBox.MarketValueAverage:
                     var money = MoneyUtils.ExtractNumericPart(spanText);
-                    competition.MarketValueAverage = MoneyUtils.ToNumber(money);
+                    competition.MarketValueAverage = MoneyUtils.ConvertToFloat(money);
                     break;
 
                 case CompetitionInfoBox.AgeAverage:

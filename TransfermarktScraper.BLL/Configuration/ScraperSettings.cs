@@ -12,6 +12,21 @@
         public int CountryLimit { get; set; } = 0;
 
         /// <summary>
+        /// Gets or sets the id of the current season in Transfermarkt.
+        /// </summary>
+        public string SeasonId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the season path used in Transfermarkt.
+        /// </summary>
+        public string SeasonPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the path of the detailed table view used in Transfermarkt.
+        /// </summary>
+        public string DetailedViewPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the base URL that the scraper will use for making HTTP requests.
         /// </summary>
         public string BaseUrl { get; set; } = string.Empty;

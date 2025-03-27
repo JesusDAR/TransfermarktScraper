@@ -7,8 +7,8 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Enums.Extensions;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.Utils;
 using TransfermarktScraper.ServiceDefaults.Utils;
 using Competition = TransfermarktScraper.Domain.Entities.Competition;
 
@@ -109,6 +109,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="countryTransfermarktId">The ID of the country from Transfermarkt to associate with the competitions.</param>
         /// <param name="competitions">The list of competitions to scrape data for.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// A collection of updated <see cref="Competition"/> objects with scraped data.
         /// </returns>
@@ -149,7 +150,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 // Competition Clubs
                 if (competition.Cup == Domain.Enums.Cup.None)
                 {
-                    var clubRowLocators = await GetClubRowsLocatorsAsync();
+                    var clubRowLocators = await GetClubRowLocatorsAsync();
                     var clubIds = await GetClubsAsync(countryTransfermarktId, clubRowLocators, cancellationToken);
                     competition.ClubIds = clubIds;
                 }
@@ -309,7 +310,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
             marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
-            competition.MarketValue = MoneyUtils.ToNumber(marketValueText);
+            competition.MarketValue = MoneyUtils.ConvertToFloat(marketValueText);
         }
 
         /// <summary>
@@ -319,7 +320,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
         /// representing the rows within the club grid.
         /// </returns>
-        private async Task<IReadOnlyList<ILocator>> GetClubRowsLocatorsAsync()
+        private async Task<IReadOnlyList<ILocator>> GetClubRowLocatorsAsync()
         {
             var clubGridLocator = _page.Locator("#yw1");
 

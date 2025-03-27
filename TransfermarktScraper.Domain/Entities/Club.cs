@@ -57,6 +57,12 @@ namespace TransfermarktScraper.Domain.Entities
         required public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the players of the club.
+        /// </summary>
+        [BsonElement("players")]
+        public IEnumerable<Player>? Players { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of players of the club.
         /// </summary>
         [BsonElement("playersCount")]

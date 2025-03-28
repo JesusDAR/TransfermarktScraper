@@ -19,7 +19,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
         {
             return competitionInfoBox switch
             {
-                CompetitionInfoBox.ClubsCount => "Number of clubs",
+                CompetitionInfoBox.ClubsCount => "Number of teams",
                 CompetitionInfoBox.PlayersCount => "Players",
                 CompetitionInfoBox.ForeignersCount => "Foreigners",
                 CompetitionInfoBox.MarketValueAverage => "ø-Market value",
@@ -46,7 +46,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
         {
             return competitionInfoBoxString switch
             {
-                string s when s.Contains("Number of clubs", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.ClubsCount,
+                string s when s.Contains("Number of teams", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.ClubsCount,
                 string s when s.Contains("Players", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.PlayersCount,
                 string s when s.Contains("Foreigners", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.ForeignersCount,
                 string s when s.Contains("ø-Market value", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.MarketValueAverage,

@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
+
+namespace TransfermarktScraper.ApiService.Controllers
+{
+    /// <summary>
+    /// Handles player-related API requests.
+    /// </summary>
+    [Route("api/player")]
+    [ApiController]
+    public class PlayerController : ControllerBase
+    {
+        private readonly IPlayerService _playerService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlayerController"/> class.
+        /// </summary>
+        /// <param name="playerService">The service for scraping player data.</param>
+        public PlayerController(IPlayerService playerService)
+        {
+            _playerService = playerService;
+        }
+
+        /// <summary>
+        /// Retrieves a list of players for a given club, either from the database or by scraping Transfermarkt.
+        /// If scraping is forced or the data is unavailable, it scrapes the players and returns them.
+        /// </summary>
+        /// <param name="clubTransfermarktId">The Transfermarkt player ID used to identify the player.</param>
+        /// <param name="forceScraping">
+        /// A boolean flag that determines whether to force scraping of the players data, even if it exists in the database.
+        /// </param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Player"/> objects,
+        /// wrapped in a successful response or an appropriate error code.
+        /// </returns>
+        /// <response code="200">Returns the list of players successfully scraped or retrieved from the database.</response>
+        /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
+        /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Player>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersAsync(
+            [FromQuery] string clubTransfermarktId,
+            [FromQuery] bool forceScraping,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _playerService.GetPlayersAsync(clubTransfermarktId, forceScraping, cancellationToken);
+                return Ok(result);
+            }
+            catch (HttpRequestException e)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+    }
+}

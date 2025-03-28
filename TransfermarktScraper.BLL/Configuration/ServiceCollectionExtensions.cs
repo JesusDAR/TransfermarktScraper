@@ -67,6 +67,7 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<ICompetitionService, CompetitionService>();
             services.AddScoped<IClubService, ClubService>();
+            services.AddScoped<IPlayerService, PlayerService>();
 
             return services;
         }

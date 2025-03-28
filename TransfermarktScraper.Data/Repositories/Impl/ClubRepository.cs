@@ -117,5 +117,58 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 throw new Exception($"Error in {nameof(InsertOrUpdateAsync)}: Failed inserting or updating club with Transfermarkt ID {club.TransfermarktId} in the database.", ex);
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Player>> InsertOrUpdateRangeAsync(Club club, IEnumerable<Player> players, CancellationToken cancellationToken)
+        {
+            var newPlayers = new List<Player>();
+
+            var existingPlayersDict = club.Players?.ToDictionary(p => p.TransfermarktId) ?? new Dictionary<string, Player>();
+
+            foreach (var player in players)
+            {
+                if (existingPlayersDict.TryGetValue(player.TransfermarktId, out var existingPlayer))
+                {
+                    // Update existing player
+                    existingPlayer.Age = player.Age;
+                    existingPlayer.ContractEnd = player.ContractEnd;
+                    existingPlayer.ContractStart = player.ContractStart;
+                    existingPlayer.DateOfBirth = player.DateOfBirth;
+                    existingPlayer.Foot = player.Foot;
+                    existingPlayer.Height = player.Height;
+                    existingPlayer.Link = player.Link;
+                    existingPlayer.MarketValue = player.MarketValue;
+                    existingPlayer.MarketValues = player.MarketValues;
+                    existingPlayer.Name = player.Name;
+                    existingPlayer.Nationalities = player.Nationalities;
+                    existingPlayer.Number = player.Number;
+                    existingPlayer.Portrait = player.Portrait;
+                    existingPlayer.UpdateDate = DateTime.UtcNow;
+
+                    newPlayers.Add(existingPlayer);
+                }
+                else
+                {
+                    // Insert new player
+                    player.UpdateDate = DateTime.UtcNow;
+                    newPlayers.Add(player);
+                }
+            }
+
+            var filter = Builders<Club>.Filter.Eq(c => c.TransfermarktId, club.TransfermarktId);
+
+            var update = Builders<Club>.Update
+                .Set(c => c.Players, newPlayers);
+
+            _logger.LogInformation("Inserting/Updating {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
+            await _clubs.UpdateOneAsync(
+                filter,
+                update,
+                new UpdateOptions { IsUpsert = false },
+                cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully Inserted/Updated {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
+
+            return players;
+        }
     }
 }

@@ -41,5 +41,16 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// updated or inserted <see cref="Club"/>.
         /// </returns>
         Task<Club> InsertOrUpdateAsync(Club club, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Inserts new players or updates existing ones within a club's player collection.
+        /// </summary>
+        /// <param name="club">The <see cref="Club"/> containing the collection of <see cref="Player"/>.</param>
+        /// <param name="players">The collection of <see cref="Player"/> to be inserted or updated.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation.The task result is the <see cref="Player"/> collection inserted or updated.
+        /// </returns>
+        Task<IEnumerable<Player>> InsertOrUpdateRangeAsync(Club club, IEnumerable<Player> players, CancellationToken cancellationToken);
     }
 }

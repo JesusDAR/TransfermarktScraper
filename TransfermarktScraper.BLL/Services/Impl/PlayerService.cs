@@ -51,14 +51,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var club = await _clubRepository.GetAsync(clubTransfermarktId, cancellationToken);
 
+            var players = Enumerable.Empty<Player>();
+
             if (club?.Players == null || forceScraping)
             {
-                var players = await ScrapePlayersAsync(cancellationToken);
+                players = await ScrapePlayersAsync(cancellationToken);
 
                 await PersistPlayersAsync(players);
             }
 
-            throw new NotImplementedException();
+            var playerDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Player>>(players);
+
+            return playerDtos;
         }
 
         /// <summary>

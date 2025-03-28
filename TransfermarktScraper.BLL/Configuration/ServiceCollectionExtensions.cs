@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Impl;
 using TransfermarktScraper.BLL.Services.Interfaces;
@@ -44,7 +45,16 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped(provider =>
             {
                 var browser = provider.GetRequiredService<IBrowser>();
-                return browser.NewContextAsync().GetAwaiter().GetResult();
+                var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+
+                var context = browser.NewContextAsync(new BrowserNewContextOptions
+                {
+                    BaseURL = scraperSettings.BaseUrl,
+                }).GetAwaiter().GetResult();
+
+                context.SetDefaultTimeout(scraperSettings.DefaultTimeout);
+
+                return context;
             });
 
             // One page per request

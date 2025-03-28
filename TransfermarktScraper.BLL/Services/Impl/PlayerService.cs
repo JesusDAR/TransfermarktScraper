@@ -72,9 +72,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable of Player entities.</returns>
         private async Task<IEnumerable<Player>> ScrapePlayersAsync(CancellationToken cancellationToken)
         {
-            var url = string.Concat(_scraperSettings.BaseUrl, _scraperSettings.DetailedViewPath);
-
-            await _page.GotoAsync(url);
+            await _page.GotoAsync(_scraperSettings.DetailedViewPath);
 
             var playerRowsLocators = await GetPlayerRowLocatorsAsync();
 

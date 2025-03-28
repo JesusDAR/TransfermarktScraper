@@ -12,6 +12,11 @@
         public int CountryLimit { get; set; } = 0;
 
         /// <summary>
+        /// Gets or sets the default timeout in ms for all awaitable actiones in the scraper.
+        /// </summary>
+        public int DefaultTimeout { get; set; } = 5000;
+
+        /// <summary>
         /// Gets or sets the id of the current season in Transfermarkt.
         /// </summary>
         public string SeasonId { get; set; } = string.Empty;

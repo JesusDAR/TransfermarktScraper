@@ -117,8 +117,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
         private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
         {
-            var url = new Uri(_scraperSettings.BaseUrl);
-            var response = await _page.GotoAsync(url.AbsoluteUri);
+            var response = await _page.GotoAsync("/");
 
             if (response != null && response.Status != (int)HttpStatusCode.OK)
             {
@@ -220,7 +219,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     attempt++;
                     await buttonLocator.ClickAsync();
-                    await _page.WaitForSelectorAsync(".selector-dropdown", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible, Timeout = 200 });
+                    await _page.WaitForSelectorAsync(
+                        ".selector-dropdown",
+                        new PageWaitForSelectorOptions {
+                            State = WaitForSelectorState.Visible,
+                            Timeout = 200,
+                        });
                     isDropdownVisible = true;
                 }
                 catch (TimeoutException)

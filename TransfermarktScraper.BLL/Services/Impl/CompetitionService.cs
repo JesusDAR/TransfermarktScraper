@@ -120,13 +120,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             foreach (var competition in competitions)
             {
-                var url = new Uri(_scraperSettings.BaseUrl + competition.Link);
-
-                var response = await _page.GotoAsync(url.AbsoluteUri);
+                var response = await _page.GotoAsync(competition.Link);
 
                 if (response != null && response.Status != (int)HttpStatusCode.OK)
                 {
-                    throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {url} status code: {response.Status}");
+                    throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {competition.Link} status code: {response.Status}");
                 }
 
                 competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId.ToLower(), ".png");

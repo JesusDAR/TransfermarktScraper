@@ -7,6 +7,7 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Utils;
@@ -51,13 +52,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var club = await _clubRepository.GetAsync(clubTransfermarktId, cancellationToken);
 
+            if (club == null)
+            {
+                throw new ArgumentNullException($"Error in {nameof(GetPlayersAsync)}: {nameof(club)} not found in database.");
+            }
+
             var players = Enumerable.Empty<Player>();
 
-            if (club?.Players == null || forceScraping)
+            if (club.Players == null || forceScraping)
             {
-                players = await ScrapePlayersAsync(cancellationToken);
+                players = await ScrapePlayersAsync(club, cancellationToken);
 
-                await PersistPlayersAsync(players);
+                await PersistPlayersAsync(club, players, cancellationToken);
             }
 
             var playerDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Player>>(players);
@@ -68,11 +74,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Scrapes player data from the configured URL and returns a collection of Player entities.
         /// </summary>
+        /// <param name="club">The player's club.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable of Player entities.</returns>
-        private async Task<IEnumerable<Player>> ScrapePlayersAsync(CancellationToken cancellationToken)
+        private async Task<IEnumerable<Player>> ScrapePlayersAsync(Club club, CancellationToken cancellationToken)
         {
-            await _page.GotoAsync(_scraperSettings.DetailedViewPath);
+            var uri = string.Concat(club.Link, _scraperSettings.DetailedViewPath);
+
+            await _page.GotoAsync(uri);
 
             var playerRowsLocators = await GetPlayerRowLocatorsAsync();
 
@@ -80,7 +89,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             foreach (var playerRowLocator in playerRowsLocators)
             {
-                var playerDataLocators = await playerRowLocator.Locator("td").AllAsync();
+                var playerDataLocators = await playerRowLocator.Locator("> td").AllAsync();
 
                 var number = await GetNumberAsync(playerDataLocators);
 
@@ -134,9 +143,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return players;
         }
 
-        private async Task PersistPlayersAsync(IEnumerable<Player> players)
+        private async Task PersistPlayersAsync(Club club, IEnumerable<Player> players, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await _clubRepository.InsertOrUpdateRangeAsync(club, players, cancellationToken);
         }
 
         /// <summary>
@@ -157,7 +166,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 "{FormattedHtml}",
                 Logging.FormatHtml(await playerGridLocator.EvaluateAsync<string>("element => element.outerHTML")));
 
-            var playerRowsLocators = await playerGridLocator.Locator("tbody tr").AllAsync();
+            var playerRowsLocators = await playerGridLocator.Locator("table.items > tbody > tr").AllAsync();
 
             return playerRowsLocators;
         }
@@ -174,7 +183,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             try
             {
                 var dataLocator = playerDataLocators[0];
-                var text = await dataLocator.InnerTextAsync();
+                number = await dataLocator.InnerTextAsync();
                 return number;
             }
             catch (Exception ex)
@@ -196,8 +205,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var portraitLocator = playerDataLocators[1].Locator("table img");
-                portrait = await portraitLocator.GetAttributeAsync("src") ?? string.Empty;
+                var portraitLocator = playerDataLocators[1].Locator("table.inline-table img");
+                portrait = await portraitLocator.GetAttributeAsync("data-src") ?? string.Empty;
                 return portrait;
             }
             catch (Exception ex)
@@ -219,7 +228,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var nameLocator = playerDataLocators[1].Locator("#hauptlink");
+                var nameLocator = playerDataLocators[1].Locator(".hauptlink");
                 name = await nameLocator.InnerTextAsync();
                 return name;
             }
@@ -242,7 +251,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var linkLocator = playerDataLocators[1].Locator("#hauptlink a");
+                var linkLocator = playerDataLocators[1].Locator(".hauptlink a");
                 link = await linkLocator.GetAttributeAsync("href") ?? throw new Exception($"Failed to obtain the {nameof(link)} from the href attribute.");
                 return link;
             }
@@ -326,7 +335,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var text = await playerDataLocators[2].InnerTextAsync();
+                var dataLocator = playerDataLocators[2];
+                var text = await dataLocator.InnerTextAsync();
                 Match match = Regex.Match(text, @"\((\d+)\)");
                 if (match.Success)
                 {
@@ -520,7 +530,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return marketValue;
                 }
 
-                marketValue = MoneyUtils.ConvertToFloat(marketValueString);
+                var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValueString);
+                marketValue = MoneyUtils.ConvertToFloat(marketValueNumeric);
                 return marketValue;
             }
             catch (Exception ex)

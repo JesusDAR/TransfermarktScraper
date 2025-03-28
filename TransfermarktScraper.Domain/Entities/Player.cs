@@ -61,7 +61,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// <summary>
         /// Gets or sets the market valueS of the player.
         /// </summary>
-        [BsonElement("marketValue")]
+        [BsonElement("marketValues")]
         public IEnumerable<MarketValue>? MarketValues { get; set; }
 
         /// <summary>

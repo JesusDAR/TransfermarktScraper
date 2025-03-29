@@ -119,15 +119,29 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var json = await response.JsonAsync();
 
+            if (json == null)
+            {
+                throw new Exception($"Error in {nameof(CompetitionService)}.{nameof(FormatQuickSelectCompetitionResponseAsync)}: json is null");
+            }
+
             var competitionQuickSelectResults = new List<CompetitionQuickSelectResult>();
 
             foreach (var competitionElement in json.Value.EnumerateArray())
             {
+                var name = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Name).ToLower()).GetString();
+                var link = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Link).ToLower()).GetString();
+                var id = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Id).ToLower()).GetString();
+
+                if (name == null || link == null || id == null)
+                {
+                    throw new Exception($"Error in {nameof(CompetitionService)}.{nameof(FormatQuickSelectCompetitionResponseAsync)}: There are empty fields: name {name} or link {link} or id {id}.");
+                }
+
                 var competitionQuickSelectResult = new CompetitionQuickSelectResult
                 {
-                    Name = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Name).ToLower()).GetString(),
-                    Link = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Link).ToLower()).GetString(),
-                    Id = competitionElement.GetProperty(nameof(CompetitionQuickSelectResult.Id).ToLower()).GetString(),
+                    Name = name,
+                    Link = link,
+                    Id = id,
                 };
 
                 competitionQuickSelectResults.Add(competitionQuickSelectResult);

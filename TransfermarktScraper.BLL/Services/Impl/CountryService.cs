@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -239,42 +238,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country and competition data from the URL intercepted.
-        /// The competitions request is triggered when clicking on a country item from the countries dropdown.
-        /// </summary>
-        /// <param name="onCountryQuickSelectResultCaptured">
-        /// A callback function that will be invoked when the competition data is captured.
-        /// The callback receives a <see cref="CountryQuickSelectResult"/> containing the competition data extracted from the response.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation.
-        /// </returns>
-        private async Task SetQuickSelectCompetitionsInterceptorAsync(Func<CountryQuickSelectResult, Task> onCountryQuickSelectResultCaptured)
-        {
-            await _page.RouteAsync("**/quickselect/competitions/**", async route =>
-            {
-                var url = route.Request.Url;
-                _logger.LogDebug("Intercepted competition URL: {url}", url);
-
-                var countryTransfermarktId = ExtractTransfermarktId(url);
-
-                var response = await route.FetchAsync();
-
-                var competitionQuickSelectResults = await _competitionService.FormatQuickSelectCompetitionResponseAsync(response);
-
-                await route.AbortAsync();
-
-                var countryQuickSelectResult = new CountryQuickSelectResult
-                {
-                    Id = countryTransfermarktId,
-                    CompetitionQuickSelectResults = competitionQuickSelectResults,
-                };
-
-                await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
-            });
-        }
-
-        /// <summary>
         /// Attempts to retrieve the country name by interacting with the specified item locator.
         /// If the locator is not visible, it retries up to a maximum number of attempts,
         /// reloading the page and attempting to retrieve the dropdown locator if necessary.
@@ -320,7 +283,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var countryQuickSelectResults = new List<CountryQuickSelectResult>();
 
-            var interceptorTask = SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
+            var interceptorTask = _competitionService.SetQuickSelectCompetitionsInterceptorAsync(async (countryQuickSelectResult) =>
             {
                 countryQuickSelectResults.Add(countryQuickSelectResult);
             });
@@ -406,20 +369,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     "Added country:\n      " +
                     "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
             }
-        }
-
-        /// <summary>
-        /// Extracts the Transfermarkt ID from a given URL.
-        /// </summary>
-        /// /// <returns>
-        /// A string representing the extracted Transfermarkt ID. If no match is found, an empty string is returned.
-        /// </returns>
-        private string ExtractTransfermarktId(string url)
-        {
-            string pattern = @"/(\d+)$";
-            var match = Regex.Match(url, pattern);
-            string transfermarktId = match.Groups[1].Value;
-            return transfermarktId;
         }
     }
 }

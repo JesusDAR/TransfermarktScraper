@@ -1,4 +1,6 @@
-﻿namespace TransfermarktScraper.BLL.Models
+﻿using TransfermarktScraper.BLL.Models.Competition;
+
+namespace TransfermarktScraper.BLL.Models
 {
     /// <summary>
     /// Represents a quick selection result for a country, containing its quick selection competitions on Transfermarkt.

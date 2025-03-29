@@ -1,4 +1,4 @@
-﻿namespace TransfermarktScraper.BLL.Models
+﻿namespace TransfermarktScraper.BLL.Models.Competition
 {
     /// <summary>
     /// Represents a quick selection result for a competition on Transfermarkt.

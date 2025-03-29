@@ -1,5 +1,4 @@
-﻿using Microsoft.Playwright;
-using TransfermarktScraper.BLL.Models;
+﻿using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.BLL.Services.Interfaces
@@ -23,10 +22,16 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         public Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping = false, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Asynchronously formats the quick select competition response into a list of <see cref="CompetitionQuickSelectResult"/> objects.
+        /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country and competition data from the URL intercepted.
+        /// The competitions request is triggered when clicking on a country item from the countries dropdown.
         /// </summary>
-        /// <param name="response">The API response containing quick select competition data in JSON format.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="CompetitionQuickSelectResult"/> objects.</returns>
-        public Task<IList<CompetitionQuickSelectResult>> FormatQuickSelectCompetitionResponseAsync(IAPIResponse response);
+        /// <param name="onCountryQuickSelectResultCaptured">
+        /// A callback function that will be invoked when the competition data is captured.
+        /// The callback receives a <see cref="CountryQuickSelectResult"/> containing the competition data extracted from the response.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        public Task SetQuickSelectCompetitionsInterceptorAsync(Func<CountryQuickSelectResult, Task> onCountryQuickSelectResultCaptured);
     }
 }

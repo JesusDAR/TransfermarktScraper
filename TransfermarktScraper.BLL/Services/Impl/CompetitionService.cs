@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,8 +7,10 @@ using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Enums.Extensions;
 using TransfermarktScraper.BLL.Models;
+using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Utils;
 using TransfermarktScraper.ServiceDefaults.Utils;
 using Competition = TransfermarktScraper.Domain.Entities.Competition;
@@ -69,12 +72,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError(e, $"Error in {nameof(GetCompetitionsAsync)}: trying to access external page to scrape");
+                _logger.LogError(e, $"Error in {nameof(CompetitionService)}.{nameof(GetCompetitionsAsync)} for {nameof(Country)} {countryTransfermarktId}: trying to access external page to scrape");
                 throw;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Unexpected error in {nameof(GetCompetitionsAsync)}");
+                _logger.LogError(e, $"Unexpected error in {nameof(CompetitionService)}.{nameof(GetCompetitionsAsync)} for Country {countryTransfermarktId}");
                 throw;
             }
 
@@ -82,6 +85,36 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
+        public async Task SetQuickSelectCompetitionsInterceptorAsync(Func<CountryQuickSelectResult, Task> onCountryQuickSelectResultCaptured)
+        {
+            await _page.RouteAsync("**/quickselect/competitions/**", async route =>
+            {
+                var url = route.Request.Url;
+                _logger.LogDebug("Intercepted competition URL: {url}", url);
+
+                var countryTransfermarktId = ExtractTransfermarktId(url);
+
+                var response = await route.FetchAsync();
+
+                var competitionQuickSelectResults = await FormatQuickSelectCompetitionResponseAsync(response);
+
+                await route.AbortAsync();
+
+                var countryQuickSelectResult = new CountryQuickSelectResult
+                {
+                    Id = countryTransfermarktId,
+                    CompetitionQuickSelectResults = competitionQuickSelectResults,
+                };
+
+                await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously formats the quick select competition response into a list of <see cref="CompetitionQuickSelectResult"/> objects.
+        /// </summary>
+        /// <param name="response">The API response containing quick select competition data in JSON format.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="CompetitionQuickSelectResult"/> objects.</returns>
         public async Task<IList<CompetitionQuickSelectResult>> FormatQuickSelectCompetitionResponseAsync(IAPIResponse response)
         {
             var json = await response.JsonAsync();
@@ -351,6 +384,20 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
 
             return clubIds;
+        }
+
+        /// <summary>
+        /// Extracts the Transfermarkt ID from a given URL.
+        /// </summary>
+        /// /// <returns>
+        /// A string representing the extracted Transfermarkt ID. If no match is found, an empty string is returned.
+        /// </returns>
+        private string ExtractTransfermarktId(string url)
+        {
+            string pattern = @"/(\d+)$";
+            var match = Regex.Match(url, pattern);
+            string transfermarktId = match.Groups[1].Value;
+            return transfermarktId;
         }
     }
 }

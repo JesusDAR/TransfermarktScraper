@@ -3,7 +3,7 @@
     /// <summary>
     /// Provides util methods to manage scraped table data.
     /// </summary>
-    public class TableUtils
+    public static class TableUtils
     {
         /// <summary>
         /// Determines whether a given string is empty or contains a placeholder value in a table data cell.

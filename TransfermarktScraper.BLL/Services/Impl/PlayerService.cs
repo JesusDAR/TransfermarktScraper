@@ -21,6 +21,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
     {
         private readonly IPage _page;
         private readonly IClubRepository _clubRepository;
+        private readonly IMarketValueService _marketValueService;
         private readonly ScraperSettings _scraperSettings;
         private readonly IMapper _mapper;
         private readonly ILogger<PlayerService> _logger;
@@ -30,18 +31,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="page">The Playwright page used for web scraping.</param>
         /// <param name="clubRepository">The club repository for accessing and managing the club data.</param>
+        /// <param name="marketValueService">The market value service for obtaining market value data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
         /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public PlayerService(
             IPage page,
             IClubRepository clubRepository,
+            IMarketValueService marketValueService,
             IOptions<ScraperSettings> scraperSettings,
             IMapper mapper,
             ILogger<PlayerService> logger)
         {
             _page = page;
             _clubRepository = clubRepository;
+            _marketValueService = marketValueService;
             _scraperSettings = scraperSettings.Value;
             _mapper = mapper;
             _logger = logger;
@@ -119,6 +123,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var marketValue = await GetMarketValueAsync(playerDataLocators);
 
+                var marketValues = await _marketValueService.GetMarketValuesAsync(transfermarktId, cancellationToken);
+
                 var player = new Player
                 {
                     Number = number,
@@ -135,6 +141,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     ContractStart = contractStart,
                     ContractEnd = contractEnd,
                     MarketValue = marketValue,
+                    MarketValues = marketValues,
                 };
 
                 players.Add(player);
@@ -304,9 +311,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="playerDataLocators">A list of locators containing player information.</param>
         /// <returns>The birth date of the player.</returns>
-        private async Task<DateTime> GetDateOfBirthAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<DateTime?> GetDateOfBirthAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
-            DateTime dateOfBirth = default;
+            DateTime? dateOfBirth = null;
 
             try
             {
@@ -370,12 +377,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 foreach (var imgLocator in imgLocators)
                 {
                     var src = await imgLocator.GetAttributeAsync("src") ?? throw new Exception($"Failed to obtain the {nameof(nationalities)} from the src attribute.");
-                    Match match = Regex.Match(src, @"(\d+)\.png");
-                    if (match.Success)
-                    {
-                        var nationality = match.Groups[1].Value;
-                        nationalities.Add(nationality);
-                    }
+                    var nationality = ImageUtils.GetTransfermarktIdFromImageUrl(src);
+                    nationalities.Add(nationality);
                 }
             }
             catch (Exception ex)

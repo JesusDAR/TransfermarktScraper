@@ -73,11 +73,21 @@ namespace TransfermarktScraper.BLL.Configuration
                 return page;
             });
 
+            // Register MarketValue HttpClient
+            services.AddHttpClient("MarketValueClient")
+                .ConfigureHttpClient((provider, client) =>
+                {
+                    var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+                    client.BaseAddress = new Uri(scraperSettings.BaseUrl + scraperSettings.MarketValuePath);
+                    client.Timeout = TimeSpan.FromSeconds(2);
+                });
+
             // Register services
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<ICompetitionService, CompetitionService>();
             services.AddScoped<IClubService, ClubService>();
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IMarketValueService, MarketValueService>();
 
             return services;
         }

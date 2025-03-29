@@ -17,8 +17,20 @@ namespace TransfermarktScraper.Domain.Entities
         /// <summary>
         /// Gets or sets the name of the club in which the player played during the date of the market value.
         /// </summary>
-        [BsonElement("club")]
-        public string? Club { get; set; }
+        [BsonElement("clubName")]
+        public string? ClubName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the crest of the club in which the player played during the date of the market value.
+        /// </summary>
+        [BsonElement("clubCrest")]
+        public string? ClubCrest { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TransfermarktId of the club in which the player played during the date of the market value.
+        /// </summary>
+        [BsonElement("clubTransfermarktId")]
+        public string? ClubTransfermarktId { get; set; }
 
         /// <summary>
         /// Gets or sets the date of the market value of the player.

@@ -5,7 +5,7 @@ namespace TransfermarktScraper.Domain.Utils
     /// <summary>
     /// Provides util methods to manage height values.
     /// </summary>
-    public class HeightUtils
+    public static class HeightUtils
     {
         /// <summary>
         /// Converts a height string (e.g., "1,91m") to centimeters as integer (e.g., 191).

@@ -29,42 +29,49 @@ namespace TransfermarktScraper.Domain.Utils
         {
             money = money.Trim().ToLower();
 
-            if (money.EndsWith("k", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                string numericPart = money.Substring(0, money.Length - 1);
-
-                if (float.TryParse(numericPart, out float result))
+                if (money.EndsWith("k", StringComparison.OrdinalIgnoreCase))
                 {
-                    return result * 1000;
+                    string numericPart = money.Substring(0, money.Length - 1);
+
+                    if (float.TryParse(numericPart, out float result))
+                    {
+                        return result * 1000;
+                    }
+                }
+                else if (money.EndsWith("m", StringComparison.OrdinalIgnoreCase))
+                {
+                    string numericPart = money.Substring(0, money.Length - 1);
+
+                    if (float.TryParse(numericPart, out float result))
+                    {
+                        return result * 1_000_000;
+                    }
+                }
+                else if (money.EndsWith("bn", StringComparison.OrdinalIgnoreCase))
+                {
+                    string numericPart = money.Substring(0, money.Length - 2);
+
+                    if (float.TryParse(numericPart, out float result))
+                    {
+                        return result * 1_000_000_000;
+                    }
+                }
+                else
+                {
+                    if (float.TryParse(money, out float result))
+                    {
+                        return result;
+                    }
                 }
             }
-            else if (money.EndsWith("m", StringComparison.OrdinalIgnoreCase))
+            catch (Exception)
             {
-                string numericPart = money.Substring(0, money.Length - 1);
-
-                if (float.TryParse(numericPart, out float result))
-                {
-                    return result * 1_000_000;
-                }
-            }
-            else if (money.EndsWith("bn", StringComparison.OrdinalIgnoreCase))
-            {
-                string numericPart = money.Substring(0, money.Length - 2);
-
-                if (float.TryParse(numericPart, out float result))
-                {
-                    return result * 1_000_000_000;
-                }
-            }
-            else
-            {
-                if (float.TryParse(money, out float result))
-                {
-                    return result;
-                }
+                throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ConvertToFloat)}: money format {money} not found.");
             }
 
-            throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ConvertToFloat)}: money format {money} not valid.");
+            return 0;
         }
 
         /// <summary>

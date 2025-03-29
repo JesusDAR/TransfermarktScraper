@@ -15,7 +15,17 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the name of the club in which the player played during the date of the market value.
         /// </summary>
-        public string? Club { get; set; }
+        public string? ClubName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the crest of the club in which the player played during the date of the market value.
+        /// </summary>
+        public string? ClubCrest { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TransfermarktId of the club in which the player played during the date of the market value.
+        /// </summary>
+        public string? ClubTransfermarktId { get; set; }
 
         /// <summary>
         /// Gets or sets the date of the market value of the player.

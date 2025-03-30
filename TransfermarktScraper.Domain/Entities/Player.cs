@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
+using TransfermarktScraper.Domain.Entities.Embedded;
 using TransfermarktScraper.Domain.Enums;
 
 namespace TransfermarktScraper.Domain.Entities
@@ -93,5 +94,11 @@ namespace TransfermarktScraper.Domain.Entities
         /// </summary>
         [BsonElement("position")]
         public Position Position { get; set; } = Position.Unknown;
+
+        /// <summary>
+        /// Gets or sets the player stat.
+        /// </summary>
+        [BsonElement("playerStat")]
+        public IEnumerable<PlayerStat>? PlayerStat { get; set; }
     }
 }

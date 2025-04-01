@@ -13,7 +13,7 @@ namespace TransfermarktScraper.ApiService.Controllers
     /// <summary>
     /// Handles competition-related API requests.
     /// </summary>
-    [Route("api/competition")]
+    [Route("api/competitions")]
     [ApiController]
     public class CompetitionController : ControllerBase
     {

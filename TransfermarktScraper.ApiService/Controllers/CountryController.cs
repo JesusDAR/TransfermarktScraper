@@ -13,7 +13,7 @@ namespace TransfermarktScraper.ApiService.Controllers
     /// <summary>
     /// Handles country-related API requests.
     /// </summary>
-    [Route("api/country")]
+    [Route("api/countries")]
     [ApiController]
     public class CountryController : ControllerBase
     {

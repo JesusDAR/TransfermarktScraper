@@ -13,7 +13,7 @@ namespace TransfermarktScraper.ApiService.Controllers
     /// <summary>
     /// Handles player-related API requests.
     /// </summary>
-    [Route("api/player")]
+    [Route("api/players")]
     [ApiController]
     public class PlayerController : ControllerBase
     {
@@ -32,7 +32,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Retrieves a list of players for a given club, either from the database or by scraping Transfermarkt.
         /// If scraping is forced or the data is unavailable, it scrapes the players and returns them.
         /// </summary>
-        /// <param name="clubTransfermarktId">The Transfermarkt player ID used to identify the player.</param>
+        /// <param name="clubTransfermarktId">The Transfermarkt club ID used to identify the club.</param>
         /// <param name="forceScraping">
         /// A boolean flag that determines whether to force scraping of the players data, even if it exists in the database.
         /// </param>

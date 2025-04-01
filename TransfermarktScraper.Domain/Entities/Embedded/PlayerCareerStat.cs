@@ -83,9 +83,9 @@ namespace TransfermarktScraper.Domain.Entities.Embedded
         public int MinutesPlayed { get; set; }
 
         /// <summary>
-        /// Gets or sets the player stats per competition.
+        /// Gets or sets the player career stats per competition.
         /// </summary>
         [BsonElement("playerCompetitionStats")]
-        public IEnumerable<PlayerSeasonCompetitionStat>? PlayerCompetitionStats { get; set; }
+        public IEnumerable<PlayerCareerCompetitionStat>? PlayerCareerCompetitionStats { get; set; }
     }
 }

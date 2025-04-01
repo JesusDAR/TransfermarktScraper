@@ -84,109 +84,115 @@ namespace TransfermarktScraper.Domain.Entities
         required public string CompetitionName { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of goals.
+        /// Gets or sets the number of appearances in the competition for the season.
+        /// </summary>
+        [BsonElement("appearances")]
+        public int Appearances { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the number of goals in the competition for the season.
         /// </summary>
         [BsonElement("goals")]
         public int Goals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of assists.
+        /// Gets or sets the number of assists in the competition for the season.
         /// </summary>
         [BsonElement("assists")]
         public int Assists { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of own goals in the competition.
+        /// Gets or sets the number of own goals in the competition for the season.
         /// </summary>
         [BsonElement("ownGoals")]
         public int OwnGoals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of yellow cards received in the competition.
+        /// Gets or sets the number of yellow cards received in the competition for the season.
         /// </summary>
         [BsonElement("yellowCards")]
         public int YellowCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of second yellow cards received in the competition.
+        /// Gets or sets the number of second yellow cards received in the competition for the season.
         /// </summary>
         [BsonElement("secondYellowCards")]
         public int SecondYellowCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of red cards receive in the competition.
+        /// Gets or sets the number of red cards receive in the competition for the season.
         /// </summary>
         [BsonElement("redCards")]
         public int RedCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of penalty goals scored in the competition.
+        /// Gets or sets the number of penalty goals scored in the competition for the season.
         /// </summary>
         [BsonElement("penaltyGoals")]
         public int PenaltyGoals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of minutes per goal scored in the competition.
+        /// Gets or sets the number of minutes per goal scored in the competition for the season.
         /// </summary>
         [BsonElement("minutesPerGoal")]
         public int? MinutesPerGoal { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of minutes played in the competition.
+        /// Gets or sets the number of minutes played in the competition for the season.
         /// </summary>
         [BsonElement("minutesPlayed")]
         public int? MinutesPlayed { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of times the player was in the squad in the competition.
+        /// Gets or sets the number of times the player was in the squad in the competition for the season.
         /// </summary>
         [BsonElement("squad")]
         public int Squad { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was in the starting eleven in the competition.
+        /// Gets or sets the number of times the player was in the starting eleven in the competition for the season.
         /// </summary>
         [BsonElement("startingEleven")]
         public int StartingEleven { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted in the competition.
+        /// Gets or sets the number of times the player was substituted in the competition for the season.
         /// </summary>
         [BsonElement("substitutedIn")]
         public int SubstitutedIn { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted off in the competition.
+        /// Gets or sets the number of times the player was substituted off in the competition for the season.
         /// </summary>
         [BsonElement("substitutedOff")]
         public int SubstitutedOff { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was on the bench the whole match in the competition.
+        /// Gets or sets the number of times the player was on the bench the whole match in the competition for the season.
         /// </summary>
         [BsonElement("onTheBench")]
         public int OnTheBench { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of matches the player missed because of a suspension in the competition.
+        /// Gets or sets the number of matches the player missed because of a suspension in the competition for the season.
         /// </summary>
         [BsonElement("suspended")]
         public int Suspended { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of matches the player missed because of an injure in the competition.
+        /// Gets or sets the number of matches the player missed because of an injure in the competition for the season.
         /// </summary>
         [BsonElement("injured")]
         public int Injured { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of matches the player missed because of an absence in the competition.
+        /// Gets or sets the number of matches the player missed because of an absence in the competition for the season.
         /// </summary>
         [BsonElement("absence")]
         public int Absence { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the player match stats.
+        /// Gets or sets the player match stats in the competition for the season.
         /// </summary>
         [BsonElement("playerMatchStats")]
         public IEnumerable<PlayerMatchStat>? PlayerMatchStats { get; set; }

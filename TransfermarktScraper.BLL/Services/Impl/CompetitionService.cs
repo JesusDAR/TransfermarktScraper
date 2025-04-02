@@ -10,9 +10,8 @@ using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
-using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
-using TransfermarktScraper.ServiceDefaults.Utils;
 using Competition = TransfermarktScraper.Domain.Entities.Competition;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -55,33 +54,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Domain.DTOs.Response.Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
-            try
+            var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
+
+            if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
             {
-                var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
+                var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions, cancellationToken);
 
-                if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
-                {
-                    var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions, cancellationToken);
-
-                    competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
-                }
-
-                var competitionDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Competition>>(competitions);
-
-                return competitionDtos;
-            }
-            catch (HttpRequestException e)
-            {
-                _logger.LogError(e, $"Error in {nameof(CompetitionService)}.{nameof(GetCompetitionsAsync)} for {nameof(Country)} {countryTransfermarktId}: trying to access external page to scrape");
-                throw;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Unexpected error in {nameof(CompetitionService)}.{nameof(GetCompetitionsAsync)} for Country {countryTransfermarktId}");
-                throw;
+                competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
             }
 
-            throw new NotImplementedException();
+            var competitionDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Competition>>(competitions);
+
+            return competitionDtos;
         }
 
         /// <inheritdoc/>
@@ -169,20 +153,27 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var response = await _page.GotoAsync(competition.Link);
 
-                if (response != null && response.Status != (int)HttpStatusCode.OK)
+                if (response == null || response.Status != (int)HttpStatusCode.OK)
                 {
-                    throw new HttpRequestException($"Error in {nameof(ScrapeCompetitionsAsync)}: Failed navigating to page: {competition.Link} status code: {response.Status}");
+                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                    throw ScrapingException.LogError(nameof(ScrapeCompetitionsAsync), nameof(CompetitionService), message, _page.Url, _logger);
                 }
 
                 competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId.ToLower(), ".png");
 
                 // Competition Club Info
                 var clubInfoLocator = await GetClubInfoLocatorAsync();
-                await SetClubInfoValuesAsync(competition, clubInfoLocator);
+                if (clubInfoLocator != null)
+                {
+                    await SetClubInfoValuesAsync(competition, clubInfoLocator);
+                }
 
                 // Competition Info Box
                 var infoBoxLocator = await GetInfoBoxLocatorAsync();
-                await SetInfoBoxValuesAsync(competition, infoBoxLocator);
+                if (infoBoxLocator != null)
+                {
+                    await SetInfoBoxValuesAsync(competition, infoBoxLocator);
+                }
 
                 // Competition Market Value Box
                 var marKetValueBoxLocator = await GetMarketValueBoxLocatorAsync();
@@ -195,8 +186,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 // Competition Clubs
                 if (competition.Cup == Domain.Enums.Cup.None)
                 {
-                    var clubRowLocators = await GetClubRowLocatorsAsync();
-                    var clubIds = await GetClubsAsync(countryTransfermarktId, clubRowLocators, cancellationToken);
+                    var clubIds = await GetClubsAsync(countryTransfermarktId, cancellationToken);
                     competition.ClubIds = clubIds;
                 }
             }
@@ -225,15 +215,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Retrieves the locator for the club information section on the page.
         /// </summary>
         /// <returns>A task representing the asynchronous operation, returning an <see cref="ILocator"/> for the club info section.</returns>
-        private async Task<ILocator> GetClubInfoLocatorAsync()
+        private async Task<ILocator?> GetClubInfoLocatorAsync()
         {
-            await _page.WaitForSelectorAsync(".data-header__club-info");
-            var clubInfoLocator = _page.Locator(".data-header__club-info");
-            _logger.LogTrace(
-                "Club info locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await clubInfoLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            var selector = ".data-header__club-info";
+            try
+            {
+                await _page.WaitForSelectorAsync(
+                    selector,
+                    new PageWaitForSelectorOptions { Timeout = 1000 });
 
-            return clubInfoLocator;
+                var clubInfoLocator = _page.Locator(selector);
+
+                return clubInfoLocator;
+            }
+            catch (TimeoutException)
+            {
+                _logger.LogWarning("Timeout exceeded while waiting for club info in page URL: {Url}", _page.Url);
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetClubInfoLocatorAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -244,26 +249,29 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task SetClubInfoValuesAsync(Competition competition, ILocator clubInfoLocator)
         {
-            var labelLocators = clubInfoLocator.Locator(".data-header__label");
-
-            var count = await labelLocators.CountAsync();
-
-            for (int i = 0; i < count; i++)
+            var selector = ".data-header__label";
+            try
             {
-                var labelLocator = labelLocators.Nth(i);
+                var labelLocators = clubInfoLocator.Locator(selector);
 
-                var labelText = await labelLocator.InnerTextAsync();
+                var count = await labelLocators.CountAsync();
 
-                var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
-
-                try
+                for (int i = 0; i < count; i++)
                 {
+                    var labelLocator = labelLocators.Nth(i);
+
+                    var labelText = await labelLocator.InnerTextAsync();
+
+                    var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
+
                     await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
+
                 }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogWarning(ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(SetClubInfoValuesAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
             }
         }
 
@@ -271,15 +279,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Retrieves the locator for the info box section on the page.
         /// </summary>
         /// <returns>A task representing the asynchronous operation, returning an <see cref="ILocator"/> for the info box section.</returns>
-        private async Task<ILocator> GetInfoBoxLocatorAsync()
+        private async Task<ILocator?> GetInfoBoxLocatorAsync()
         {
-            await _page.WaitForSelectorAsync(".data-header__info-box");
-            var infoBoxLocator = _page.Locator(".data-header__info-box");
-            _logger.LogTrace(
-                "Info box locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await infoBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            var selector = ".data-header__info-box";
+            try
+            {
+                await _page.WaitForSelectorAsync(
+                    selector,
+                    new PageWaitForSelectorOptions { Timeout = 1000 });
 
-            return infoBoxLocator;
+                var infoBoxLocator = _page.Locator(selector);
+
+                return infoBoxLocator;
+            }
+            catch (TimeoutException)
+            {
+                _logger.LogWarning("Timeout exceeded while waiting for info box in page URL: {Url}", _page.Url);
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetInfoBoxLocatorAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -290,24 +313,29 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task SetInfoBoxValuesAsync(Competition competition, ILocator infoBoxLocator)
         {
-            var itemLocators = await infoBoxLocator.Locator("li").AllAsync();
+            var selector = "li";
 
-            foreach (var itemLocator in itemLocators)
+            try
             {
-                var itemText = await itemLocator.InnerTextAsync();
-                var spanText = (await itemLocator.Locator("span").AllInnerTextsAsync()).First();
-                var labelText = itemText.Replace(spanText, string.Empty).Trim();
+                var itemLocators = await infoBoxLocator.Locator(selector).AllAsync();
 
-                var competitionInfoBox = CompetitionInfoBoxExtensions.ToEnum(labelText);
-
-                try
+                foreach (var itemLocator in itemLocators)
                 {
+                    var itemText = await itemLocator.InnerTextAsync();
+                    selector = "span";
+                    var spanLocator = itemLocator.Locator(selector);
+                    var spanTexts = await spanLocator.AllInnerTextsAsync();
+                    var spanText = spanTexts.First();
+                    var labelText = itemText.Replace(spanText, string.Empty).Trim();
+
+                    var competitionInfoBox = CompetitionInfoBoxExtensions.ToEnum(labelText);
                     CompetitionInfoBoxExtensions.AssignToCompetitionProperty(competitionInfoBox, spanText, competition);
                 }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogWarning(ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(SetInfoBoxValuesAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
             }
         }
 
@@ -319,26 +347,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private async Task<ILocator?> GetMarketValueBoxLocatorAsync()
         {
+            var selector = ".data-header__box--small";
             try
             {
                 await _page.WaitForSelectorAsync(
-                    ".data-header__box--small",
+                    selector,
                     new PageWaitForSelectorOptions { Timeout = 1000 });
 
-                var marKetValueBoxLocator = _page.Locator(".data-header__box--small");
-
-                _logger.LogTrace(
-                    "Info box locator HTML:\n      " +
-                    "{FormattedHtml}",
-                    Logging.FormatHtml(await marKetValueBoxLocator.EvaluateAsync<string>("element => element.outerHTML")));
+                var marKetValueBoxLocator = _page.Locator(selector);
 
                 return marKetValueBoxLocator;
             }
             catch (TimeoutException)
             {
                 _logger.LogWarning("Timeout exceeded while waiting for market value box in page URL: {Url}", _page.Url);
-                return null;
             }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(GetMarketValueBoxLocatorAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -349,13 +379,24 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task SetMarketValueAsync(Competition competition, ILocator marKetValueBoxLocator)
         {
-            var boxText = (await marKetValueBoxLocator.AllInnerTextsAsync()).First();
-            var lastUpdateLocator = marKetValueBoxLocator.Locator(".data-header__last-update");
-            var lastUpdateText = await lastUpdateLocator.InnerTextAsync();
+            var selector = ".data-header__last-update";
+            try
+            {
+                var lastUpdateLocator = marKetValueBoxLocator.Locator(selector);
+                var lastUpdateText = await lastUpdateLocator.InnerTextAsync();
 
-            var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
-            marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
-            competition.MarketValue = MoneyUtils.ConvertToFloat(marketValueText);
+                var boxTexts = await marKetValueBoxLocator.AllInnerTextsAsync();
+                var boxText = boxTexts.First();
+
+                var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
+                marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
+                competition.MarketValue = MoneyUtils.ConvertToFloat(marketValueText);
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(SetMarketValueAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+            }
         }
 
         /// <summary>
@@ -367,34 +408,48 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private async Task<IReadOnlyList<ILocator>> GetClubRowLocatorsAsync()
         {
-            var clubGridLocator = _page.Locator("#yw1");
+            var selector = "#yw1 tbody tr";
+            try
+            {
+                var clubGridLocator = _page.Locator(selector);
 
-            _logger.LogTrace(
-                "Club grid locator HTML:\n      " +
-                "{FormattedHtml}",
-                Logging.FormatHtml(await clubGridLocator.EvaluateAsync<string>("element => element.outerHTML")));
+                var clubRowLocators = await clubGridLocator.AllAsync();
 
-            var clubRowsLocators = await clubGridLocator.Locator("tbody tr").AllAsync();
-
-            return clubRowsLocators;
+                return clubRowLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetClubRowLocatorsAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+            }
         }
 
         /// <summary>
         /// Retrieves the Transfermarkt IDs of clubs from a given competition.
         /// </summary>
         /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
-        /// <param name="clubRowLocators">A collection of locators representing club rows in the competition table grid.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A collection of Transfermarkt club IDs.</returns>
-        private async Task<IEnumerable<string>> GetClubsAsync(string competitionTransfermarktId, IEnumerable<ILocator> clubRowLocators, CancellationToken cancellationToken)
+        private async Task<IEnumerable<string>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
         {
+            var clubRowLocators = await GetClubRowLocatorsAsync();
             var clubIds = new List<string>();
 
             foreach (var clubRowLocator in clubRowLocators)
             {
-                var club = await _clubService.GetClubAsync(competitionTransfermarktId, clubRowLocator, cancellationToken);
+                Domain.DTOs.Response.Club? club = null;
 
-                clubIds.Add(club.TransfermarktId);
+                try
+                {
+                    club = await _clubService.GetClubAsync(competitionTransfermarktId, clubRowLocator, cancellationToken);
+
+                    clubIds.Add(club.TransfermarktId);
+                }
+                catch (ScrapingException ex)
+                {
+                    var message = $"Getting club: {club?.TransfermarktId ?? "null"} from competition {competitionTransfermarktId} failed.";
+                    throw ScrapingException.LogError(nameof(GetClubsAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
+                }
             }
 
             return clubIds;

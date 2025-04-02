@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
+using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.BLL.Enums.Extensions
@@ -25,7 +26,8 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 CompetitionInfoBox.MarketValueAverage => "ø-Market value",
                 CompetitionInfoBox.AgeAverage => "ø-Age",
                 CompetitionInfoBox.Cup => "Type of cup",
-                _ => string.Empty
+                CompetitionInfoBox.Participants => "Participants",
+                _ => HandleUnsupportedEnum(competitionInfoBox)
             };
         }
 
@@ -52,7 +54,8 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 string s when s.Contains("ø-Market value", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.MarketValueAverage,
                 string s when s.Contains("ø-Age", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.AgeAverage,
                 string s when s.Contains("Type of cup", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.Cup,
-                _ => CompetitionInfoBox.Unknown
+                string s when s.Contains("participants", StringComparison.OrdinalIgnoreCase) => CompetitionInfoBox.Participants,
+                _ => HandleUnsupportedString(competitionInfoBoxString)
             };
         }
 
@@ -66,66 +69,114 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
         {
             spanText = spanText.Replace('\u00A0', ' ');
             IReadOnlyCollection<string> spanTextParts;
+            var message = string.Empty;
 
-            switch (competitionInfoBox)
+            try
             {
-                case CompetitionInfoBox.ClubsCount:
-                    spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
-                    foreach (var spanTextPart in spanTextParts)
-                    {
-                        var isClubsCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var clubsCount);
-                        if (isClubsCount)
+                switch (competitionInfoBox)
+                {
+                    case CompetitionInfoBox.ClubsCount:
+                        spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
+                        foreach (var spanTextPart in spanTextParts)
                         {
-                            competition.ClubsCount = clubsCount;
+                            var isClubsCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var clubsCount);
+                            if (isClubsCount)
+                            {
+                                competition.ClubsCount = clubsCount;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case CompetitionInfoBox.PlayersCount:
-                    var isPlayersCount = int.TryParse(spanText.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var playersCount);
-                    if (isPlayersCount)
-                    {
-                        competition.PlayersCount = playersCount;
-                    }
-
-                    break;
-
-                case CompetitionInfoBox.ForeignersCount:
-                    spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
-                    foreach (var spanTextPart in spanTextParts)
-                    {
-                        var isForeignersCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var foreignersCount);
-                        if (isForeignersCount)
+                    case CompetitionInfoBox.PlayersCount:
+                        var isPlayersCount = int.TryParse(spanText.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var playersCount);
+                        if (isPlayersCount)
                         {
-                            competition.ForeignersCount = foreignersCount;
+                            competition.PlayersCount = playersCount;
                         }
-                    }
 
-                    break;
+                        break;
 
-                case CompetitionInfoBox.MarketValueAverage:
-                    var money = MoneyUtils.ExtractNumericPart(spanText);
-                    competition.MarketValueAverage = MoneyUtils.ConvertToFloat(money);
-                    break;
+                    case CompetitionInfoBox.ForeignersCount:
+                        spanTextParts = spanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).AsReadOnly();
+                        foreach (var spanTextPart in spanTextParts)
+                        {
+                            var isForeignersCount = int.TryParse(spanTextPart.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var foreignersCount);
+                            if (isForeignersCount)
+                            {
+                                competition.ForeignersCount = foreignersCount;
+                            }
+                        }
 
-                case CompetitionInfoBox.AgeAverage:
-                    var isAgeAverage = float.TryParse(spanText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var ageAverage);
-                    if (isAgeAverage)
-                    {
-                        competition.AgeAverage = ageAverage;
-                    }
+                        break;
 
-                    break;
+                    case CompetitionInfoBox.MarketValueAverage:
+                        var money = MoneyUtils.ExtractNumericPart(spanText);
+                        competition.MarketValueAverage = MoneyUtils.ConvertToFloat(money);
+                        break;
 
-                case CompetitionInfoBox.Cup:
-                    competition.Cup = CupExtensions.FromString(spanText);
-                    break;
+                    case CompetitionInfoBox.AgeAverage:
+                        var isAgeAverage = float.TryParse(spanText.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var ageAverage);
+                        if (isAgeAverage)
+                        {
+                            competition.AgeAverage = (float)Math.Round(ageAverage, 2);
+                        }
 
-                case CompetitionInfoBox.Unknown:
-                default:
-                    throw new ArgumentException($"Error in {nameof(CompetitionClubInfoExtensions)}.{nameof(AssignToCompetitionProperty)} for {competition.Name}: {spanText} is not a valid {nameof(CompetitionInfoBox)}");
+                        break;
+
+                    case CompetitionInfoBox.Participants:
+                        var isParticipants = int.TryParse(spanText.Trim(), out var participants);
+                        if (isParticipants)
+                        {
+                            competition.Participants = participants;
+                        }
+
+                        break;
+
+                    case CompetitionInfoBox.Cup:
+                        competition.Cup = CupExtensions.ToEnum(spanText);
+                        break;
+
+                    case CompetitionInfoBox.Unknown:
+                        message = $"For competition {competition.Name}: '{spanText}' is {CompetitionInfoBox.Unknown} {nameof(CompetitionInfoBox)}";
+                        throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionInfoBoxExtensions), message);
+
+                    default:
+                        message = $"For competition {competition.Name}: '{competitionInfoBox}' is not valid {nameof(CompetitionInfoBox)}";
+                        throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionInfoBoxExtensions), message);
+                }
             }
+            catch (Exception ex)
+            {
+                message = $"Assigning span text: {spanText} failed.";
+                throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionInfoBoxExtensions), message, default, default, ex);
+            }
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="CompetitionInfoBox"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="competitionInfoBox">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(CompetitionInfoBox competitionInfoBox)
+        {
+            var message = $"Unsupported enum value: '{competitionInfoBox}'";
+            EnumException.LogWarning(nameof(ToString), nameof(CompetitionInfoBoxExtensions), message);
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="CompetitionInfoBox"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="competitionInfoBoxString">The unsupported string.</param>
+        /// <returns>The <see cref="CompetitionInfoBox.Unknown"/> enum value.</returns>
+        private static CompetitionInfoBox HandleUnsupportedString(string competitionInfoBoxString)
+        {
+            var message = $"Unsupported string value: '{competitionInfoBoxString}'";
+            EnumException.LogWarning(nameof(ToEnum), nameof(CompetitionInfoBoxExtensions), message);
+            return CompetitionInfoBox.Unknown;
         }
     }
 }

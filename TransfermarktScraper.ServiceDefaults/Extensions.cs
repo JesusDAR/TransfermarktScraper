@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -139,7 +140,13 @@ namespace Microsoft.Extensions.Hosting
             builder.Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
-                logging.AddConsole();
+                logging.AddConsole(options =>
+                {
+                    options.FormatterName = "custom"; // to use custom format
+                });
+
+                logging.AddConsoleFormatter<CustomConsoleFormatter, SimpleConsoleFormatterOptions>();
+
                 logging.AddDebug();
             });
 

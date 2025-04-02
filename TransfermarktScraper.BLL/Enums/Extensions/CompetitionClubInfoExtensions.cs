@@ -2,6 +2,7 @@
 using Microsoft.Playwright;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.BLL.Enums.Extensions
 {
@@ -23,7 +24,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 CompetitionClubInfo.CurrentChampion => "Reigning champion",
                 CompetitionClubInfo.MostTimesChampion => "Record-holding champions",
                 CompetitionClubInfo.Coefficient => "UEFA coefficient",
-                _ => string.Empty
+                _ => HandleUnsupportedEnum(competitionClubInfo),
             };
         }
 
@@ -48,7 +49,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 string s when s.Contains("Reigning champion", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.CurrentChampion,
                 string s when s.Contains("Record-holding champions", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.MostTimesChampion,
                 string s when s.Contains("UEFA coefficient", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.Coefficient,
-                _ => CompetitionClubInfo.Unknown
+                _ => HandleUnsupportedString(competitionClubInfoString)
             };
         }
 
@@ -61,48 +62,95 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
         /// <returns>A task that represents the asynchronous operation.</returns>
         public static async Task AssignToCompetitionProperty(this CompetitionClubInfo competitionClubInfo, ILocator labelLocator, Competition competition)
         {
-            string spanText;
             ILocator spanLocator;
+            string spanText = string.Empty;
+            string selector = string.Empty;
+            var message = string.Empty;
 
-            switch (competitionClubInfo)
+            try
             {
-                case CompetitionClubInfo.Tier:
-                    spanLocator = labelLocator.Locator("span");
-                    spanText = await spanLocator.InnerTextAsync();
-                    competition.Tier = TierExtensions.FromString(spanText);
-                    break;
+                switch (competitionClubInfo)
+                {
+                    case CompetitionClubInfo.Tier:
+                        selector = "span";
+                        spanLocator = labelLocator.Locator(selector);
+                        spanText = await spanLocator.InnerTextAsync();
+                        competition.Tier = TierExtensions.ToEnum(spanText);
+                        break;
 
-                case CompetitionClubInfo.CurrentChampion:
-                    spanLocator = labelLocator.Locator("span");
-                    spanText = await spanLocator.InnerTextAsync();
-                    competition.CurrentChampion = spanText;
-                    break;
+                    case CompetitionClubInfo.CurrentChampion:
+                        selector = "span";
+                        spanLocator = labelLocator.Locator(selector);
+                        spanText = await spanLocator.InnerTextAsync();
+                        competition.CurrentChampion = spanText;
+                        break;
 
-                case CompetitionClubInfo.MostTimesChampion:
-                    var linkLocator = labelLocator.Locator("span[itemprop='dataItem'] > a");
-                    spanText = await linkLocator.InnerTextAsync();
-                    competition.MostTimesChampion = spanText;
-                    break;
+                    case CompetitionClubInfo.MostTimesChampion:
+                        selector = "span[itemprop='dataItem'] > a";
+                        var linkLocator = labelLocator.Locator(selector);
+                        spanText = await linkLocator.InnerTextAsync();
+                        competition.MostTimesChampion = spanText;
+                        break;
 
-                case CompetitionClubInfo.Coefficient:
-                    spanLocator = labelLocator.Locator("span");
-                    var texts = await spanLocator.AllInnerTextsAsync();
+                    case CompetitionClubInfo.Coefficient:
+                        selector = "span";
+                        spanLocator = labelLocator.Locator(selector);
+                        var texts = await spanLocator.AllInnerTextsAsync();
 
-                    foreach (var text in texts)
-                    {
-                        var isCoefficient = float.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var coefficient);
-                        if (isCoefficient)
+                        foreach (var text in texts)
                         {
-                            competition.Coefficient = coefficient;
+                            var isCoefficient = float.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var coefficient);
+                            if (isCoefficient)
+                            {
+                                competition.Coefficient = coefficient;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case CompetitionClubInfo.Unknown:
-                default:
-                    throw new ArgumentException($"Error in {nameof(CompetitionClubInfoExtensions)}.{nameof(AssignToCompetitionProperty)} for competition {competition.Name}: {competitionClubInfo} is not a valid {nameof(CompetitionClubInfo)} ");
+                    case CompetitionClubInfo.Unknown:
+                        message = $"For competition {competition.Name}: '{spanText}' is {CompetitionClubInfo.Unknown} {nameof(CompetitionClubInfo)}";
+                        throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionClubInfoExtensions), message);
+
+                    default:
+                        message = $"For competition {competition.Name}: '{competitionClubInfo}' is not a valid {nameof(CompetitionClubInfo)}";
+                        throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionClubInfoExtensions), message);
+                }
             }
+            catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(selector))
+                {
+                    message = $"Using selector: '{selector}' failed.";
+                    throw EnumException.LogWarning(nameof(AssignToCompetitionProperty), nameof(CompetitionClubInfoExtensions), message, default, default, ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="CompetitionClubInfo"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="competitionClubInfo">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(CompetitionClubInfo competitionClubInfo)
+        {
+            var message = $"Unsupported enum value: '{competitionClubInfo}'";
+            EnumException.LogWarning(nameof(ToString), nameof(CompetitionClubInfoExtensions), message);
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="CompetitionClubInfo"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="competitionClubInfoString">The unsupported string.</param>
+        /// <returns>The <see cref="CompetitionClubInfo.Unknown"/> enum value.</returns>
+        private static CompetitionClubInfo HandleUnsupportedString(string competitionClubInfoString)
+        {
+            var message = $"Unsupported string value: '{competitionClubInfoString}'";
+            EnumException.LogWarning(nameof(ToEnum), nameof(CompetitionClubInfoExtensions), message);
+            return CompetitionClubInfo.Unknown;
         }
     }
 }

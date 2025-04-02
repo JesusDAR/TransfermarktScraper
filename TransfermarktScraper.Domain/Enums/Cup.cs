@@ -11,18 +11,23 @@
         None = 0,
 
         /// <summary>
+        /// Unknown cup.
+        /// </summary>
+        Unknown = 1,
+
+        /// <summary>
         /// Domestic cup.
         /// </summary>
-        DomesticCup = 1,
+        DomesticCup = 2,
 
         /// <summary>
         /// Domestic super cup.
         /// </summary>
-        DomesticSuperCup = 2,
+        DomesticSuperCup = 3,
 
         /// <summary>
         /// International cup.
         /// </summary>
-        International = 3,
+        International = 4,
     }
 }

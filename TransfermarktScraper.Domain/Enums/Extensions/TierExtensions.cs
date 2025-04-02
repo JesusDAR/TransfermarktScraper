@@ -1,4 +1,5 @@
 ﻿using System;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -20,7 +21,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Tier.SecondTier => "Second Tier",
                 Tier.ThirdTier => "Third Tier",
                 Tier.YouthLeague => "Youth League",
-                _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}.{nameof(ToString)}: {tier} is not a valid {nameof(Tier)}."),
+                Tier.Unknown => "Unknown",
+                Tier.None => string.Empty,
+                _ => HandleUnsupportedEnum(tier),
             };
         }
 
@@ -29,7 +32,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// </summary>
         /// <param name="tierString">The string representation of the <see cref="Tier"/>.</param>
         /// <returns>The corresponding <see cref="Tier"/> enum value.</returns>
-        public static Tier FromString(string tierString)
+        public static Tier ToEnum(string tierString)
         {
             tierString = tierString.ToLower();
 
@@ -39,8 +42,36 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "second tier" => Tier.SecondTier,
                 "third tier" => Tier.ThirdTier,
                 "youth league" => Tier.YouthLeague,
-                _ => throw new ArgumentException($"Error in {nameof(TierExtensions)}.{nameof(FromString)}: {tierString} is not a valid {nameof(Tier)} string."),
+                "unknown" => Tier.Unknown,
+                "" => Tier.None,
+                _ => HandleUnsupportedString(tierString),
             };
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="Tier"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="tier">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(Tier tier)
+        {
+            var message = $"Unsupported enum value: {tier}";
+            EnumException.LogWarning(nameof(ToString), nameof(TierExtensions), message);
+            return ToString(Tier.Unknown);
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="Tier"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="tierString">The unsupported string.</param>
+        /// <returns>The <see cref="Tier.Unknown"/> enum value.</returns>
+        private static Tier HandleUnsupportedString(string tierString)
+        {
+            var message = $"Unsupported string value: {tierString}";
+            EnumException.LogWarning(nameof(ToEnum), nameof(TierExtensions), message);
+            return Tier.Unknown;
         }
     }
 }

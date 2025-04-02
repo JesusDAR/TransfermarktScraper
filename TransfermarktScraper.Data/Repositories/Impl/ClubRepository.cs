@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Data.Repositories.Impl
 {
@@ -36,9 +37,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 var club = await _clubs.Find(club => club.TransfermarktId == clubTransfermarktId).FirstOrDefaultAsync(cancellationToken);
                 return club;
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the club with Transfermarkt ID {clubTransfermarktId} from the database.", ex);
+                var message = $"Failed to retrieve the club with Transfermarkt ID: {clubTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAsync), nameof(ClubRepository), _logger);
             }
         }
 
@@ -51,9 +53,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     club.CompetitionIds.Contains(competitionTransfermarktId)).ToListAsync(cancellationToken);
                 return clubs;
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all clubs from competition with TransfermarktId {competitionTransfermarktId} from the database.", ex);
+                var message = $"Failed to retrieve all clubs from competition with Transfermarkt ID: {competitionTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(ClubRepository), _logger);
             }
         }
 
@@ -90,13 +93,13 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     .Set(c => c.PlayersCount, club.PlayersCount)
                     .Set(c => c.UpdateDate, club.UpdateDate);
 
-                _logger.LogInformation("Updating club with Transfermarkt ID {club.TransfermarktId} in the database...", club.TransfermarktId);
+                _logger.LogDebug("Updating club with Transfermarkt ID {Club.TransfermarktId} in the database...", club.TransfermarktId);
                 await _clubs.UpdateOneAsync(
                     filter,
                     update,
                     new UpdateOptions { IsUpsert = false },
                     cancellationToken);
-                _logger.LogInformation("Successfully updated club with Transfermarkt ID {club.TransfermarktId} in the database...", club.TransfermarktId);
+                _logger.LogDebug("Successfully updated club with Transfermarkt ID {Club.TransfermarktId} in the database...", club.TransfermarktId);
 
                 return new Club
                 {
@@ -112,9 +115,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     UpdateDate = club.UpdateDate,
                 };
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(InsertOrUpdateAsync)}: Failed inserting or updating club with Transfermarkt ID {club.TransfermarktId} in the database.", ex);
+                var message = $"Failed inserting or updating club with Transfermarkt ID: {club.TransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(InsertOrUpdateAsync), nameof(ClubRepository), _logger);
             }
         }
 
@@ -123,52 +127,60 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         {
             var newPlayers = new List<Player>();
 
-            var existingPlayersDict = club.Players?.ToDictionary(p => p.TransfermarktId) ?? new Dictionary<string, Player>();
-
-            foreach (var player in players)
+            try
             {
-                if (existingPlayersDict.TryGetValue(player.TransfermarktId, out var existingPlayer))
-                {
-                    // Update existing player
-                    existingPlayer.Age = player.Age;
-                    existingPlayer.ContractEnd = player.ContractEnd;
-                    existingPlayer.ContractStart = player.ContractStart;
-                    existingPlayer.DateOfBirth = player.DateOfBirth;
-                    existingPlayer.Foot = player.Foot;
-                    existingPlayer.Height = player.Height;
-                    existingPlayer.Link = player.Link;
-                    existingPlayer.MarketValue = player.MarketValue;
-                    existingPlayer.MarketValues = player.MarketValues;
-                    existingPlayer.Name = player.Name;
-                    existingPlayer.Nationalities = player.Nationalities;
-                    existingPlayer.Number = player.Number;
-                    existingPlayer.Portrait = player.Portrait;
-                    existingPlayer.UpdateDate = DateTime.UtcNow;
+                var existingPlayersDict = club.Players?.ToDictionary(p => p.TransfermarktId) ?? new Dictionary<string, Player>();
 
-                    newPlayers.Add(existingPlayer);
-                }
-                else
+                foreach (var player in players)
                 {
-                    // Insert new player
-                    player.UpdateDate = DateTime.UtcNow;
-                    newPlayers.Add(player);
+                    if (existingPlayersDict.TryGetValue(player.TransfermarktId, out var existingPlayer))
+                    {
+                        // Update existing player
+                        existingPlayer.Age = player.Age;
+                        existingPlayer.ContractEnd = player.ContractEnd;
+                        existingPlayer.ContractStart = player.ContractStart;
+                        existingPlayer.DateOfBirth = player.DateOfBirth;
+                        existingPlayer.Foot = player.Foot;
+                        existingPlayer.Height = player.Height;
+                        existingPlayer.Link = player.Link;
+                        existingPlayer.MarketValue = player.MarketValue;
+                        existingPlayer.MarketValues = player.MarketValues;
+                        existingPlayer.Name = player.Name;
+                        existingPlayer.Nationalities = player.Nationalities;
+                        existingPlayer.Number = player.Number;
+                        existingPlayer.Portrait = player.Portrait;
+                        existingPlayer.UpdateDate = DateTime.UtcNow;
+
+                        newPlayers.Add(existingPlayer);
+                    }
+                    else
+                    {
+                        // Insert new player
+                        player.UpdateDate = DateTime.UtcNow;
+                        newPlayers.Add(player);
+                    }
                 }
+
+                var filter = Builders<Club>.Filter.Eq(c => c.TransfermarktId, club.TransfermarktId);
+
+                var update = Builders<Club>.Update
+                    .Set(c => c.Players, newPlayers);
+
+                _logger.LogDebug("Inserting/Updating {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
+                await _clubs.UpdateOneAsync(
+                    filter,
+                    update,
+                    new UpdateOptions { IsUpsert = false },
+                    cancellationToken: cancellationToken);
+                _logger.LogDebug("Successfully Inserted/Updated {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
+
+                return players;
             }
-
-            var filter = Builders<Club>.Filter.Eq(c => c.TransfermarktId, club.TransfermarktId);
-
-            var update = Builders<Club>.Update
-                .Set(c => c.Players, newPlayers);
-
-            _logger.LogInformation("Inserting/Updating {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
-            await _clubs.UpdateOneAsync(
-                filter,
-                update,
-                new UpdateOptions { IsUpsert = false },
-                cancellationToken: cancellationToken);
-            _logger.LogInformation("Successfully Inserted/Updated {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
-
-            return players;
+            catch (Exception)
+            {
+                var message = $"Failed inserting or updating players range in club with Transfermarkt ID: {club.TransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(InsertOrUpdateRangeAsync), nameof(ClubRepository), _logger);
+            }
         }
     }
 }

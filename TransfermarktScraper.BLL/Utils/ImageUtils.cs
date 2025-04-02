@@ -10,6 +10,7 @@ namespace TransfermarktScraper.BLL.Utils
         /// <summary>
         /// Extracts the Transfermarkt ID from an image URL.
         /// </summary>
+        /// <param name="url">The url of the image from where to extract the Transfermarkt ID.</param>
         /// <returns>
         /// The extracted Transfermarkt ID as a string if found in the URL pattern.
         /// Returns an empty string if no ID is found or if the URL doesn't match the expected pattern.

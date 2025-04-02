@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Utils
 {
@@ -64,11 +65,15 @@ namespace TransfermarktScraper.Domain.Utils
                     {
                         return result;
                     }
+
+                    var message = $"Money abbreviation {money} not found.";
+                    throw UtilException.LogWarning(nameof(ConvertToFloat), nameof(MoneyUtils), message);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new FormatException($"Error in {nameof(MoneyUtils)}.{nameof(ConvertToFloat)}: money format {money} not found.");
+                var message = $"Converting money: {money} to float failed.";
+                throw UtilException.LogWarning(nameof(ConvertToFloat), nameof(MoneyUtils), message, default, default, ex);
             }
 
             return 0;
@@ -81,21 +86,29 @@ namespace TransfermarktScraper.Domain.Utils
         /// <returns>A formatted string representing the value in an abbreviated format.</returns>
         public static string ConvertToString(float money)
         {
-            if (money >= 1_000_000_000 && money % 1_000_000_000 == 0)
+            try
             {
-                return (money / 1_000_000_000) + "bn";
+                if (money >= 1_000_000_000 && money % 1_000_000_000 == 0)
+                {
+                    return (money / 1_000_000_000) + "bn";
+                }
+                else if (money >= 1_000_000 && money % 1_000_000 == 0)
+                {
+                    return (money / 1_000_000) + "m";
+                }
+                else if (money >= 1000 && money % 1000 == 0)
+                {
+                    return (money / 1000) + "k";
+                }
+                else
+                {
+                    return money.ToString();
+                }
             }
-            else if (money >= 1_000_000 && money % 1_000_000 == 0)
+            catch (Exception)
             {
-                return (money / 1_000_000) + "m";
-            }
-            else if (money >= 1000 && money % 1000 == 0)
-            {
-                return (money / 1000) + "k";
-            }
-            else
-            {
-                return money.ToString();
+                var message = $"Converting money: {money} to string failed.";
+                throw UtilException.LogWarning(nameof(ConvertToString), nameof(MoneyUtils), message);
             }
         }
     }

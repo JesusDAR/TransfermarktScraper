@@ -1,4 +1,5 @@
 ﻿using System;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Utils
 {
@@ -23,7 +24,8 @@ namespace TransfermarktScraper.Domain.Utils
                 return (int)(meters * 100);
             }
 
-            throw new FormatException($"Error in {nameof(HeightUtils)}.{nameof(ConvertToInt)}: money format {height} not valid.");
+            var message = $"Height format {height} not valid.";
+            throw UtilException.LogWarning(nameof(ConvertToInt), nameof(HeightUtils), message);
         }
 
         /// <summary>

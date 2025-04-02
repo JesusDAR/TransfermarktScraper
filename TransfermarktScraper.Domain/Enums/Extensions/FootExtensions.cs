@@ -1,4 +1,4 @@
-﻿using System;
+﻿using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -19,7 +19,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Foot.Right => "right",
                 Foot.Left => "left",
                 Foot.Unknown => "unknown",
-                _ => throw new ArgumentException($"Error in {nameof(FootExtensions)}.{nameof(ToString)}: {foot} is not a valid {nameof(Foot)}."),
+                _ => HandleUnsupportedEnum(foot),
             };
         }
 
@@ -28,7 +28,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// </summary>
         /// <param name="footString">The string representation of the <see cref="Foot"/>.</param>
         /// <returns>The corresponding <see cref="Foot"/> enum value.</returns>
-        public static Foot FromString(string footString)
+        public static Foot ToEnum(string footString)
         {
             footString = footString.ToLower();
 
@@ -37,8 +37,34 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "right" => Foot.Right,
                 "left" => Foot.Left,
                 "unknown" => Foot.Unknown,
-                _ => throw new ArgumentException($"Error in {nameof(FootExtensions)}.{nameof(FromString)}: {footString} is not a valid {nameof(Foot)} string."),
+                _ => HandleUnsupportedString(footString),
             };
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="Foot"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="foot">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(Foot foot)
+        {
+            var message = $"Unsupported enum value: {foot}";
+            EnumException.LogWarning(nameof(ToString), nameof(FootExtensions), message);
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="Foot"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="footString">The unsupported string.</param>
+        /// <returns>The <see cref="Foot.Unknown"/> enum value.</returns>
+        private static Foot HandleUnsupportedString(string footString)
+        {
+            var message = $"Unsupported string value: {footString}";
+            EnumException.LogWarning(nameof(ToEnum), nameof(FootExtensions), message);
+            return Foot.Unknown;
         }
     }
 }

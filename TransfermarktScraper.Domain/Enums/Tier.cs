@@ -11,23 +11,28 @@
         None = 0,
 
         /// <summary>
+        /// Unknown league level.
+        /// </summary>
+        Unknown = 1,
+
+        /// <summary>
         /// First division league level.
         /// </summary>
-        FirstTier = 1,
+        FirstTier = 2,
 
         /// <summary>
         /// Second division league level.
         /// </summary>
-        SecondTier = 2,
+        SecondTier = 3,
 
         /// <summary>
         /// Third division league level.
         /// </summary>
-        ThirdTier = 3,
+        ThirdTier = 4,
 
         /// <summary>
         /// Youth league level.
         /// </summary>
-        YouthLeague = 4,
+        YouthLeague = 5,
     }
 }

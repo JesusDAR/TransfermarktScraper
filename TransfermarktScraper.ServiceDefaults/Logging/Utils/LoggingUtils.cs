@@ -1,12 +1,12 @@
 ﻿using System.Text;
 using HtmlAgilityPack;
 
-namespace TransfermarktScraper.ServiceDefaults.Utils
+namespace TransfermarktScraper.ServiceDefaults.Logging.Utils
 {
     /// <summary>
     /// Utility class for logging-related functionalities.
     /// </summary>
-    public static class Logging
+    public static class LoggingUtils
     {
         /// <summary>
         /// Formats the provided HTML string by loading it into an <see cref="HtmlDocument"/> and returning the indented outer HTML.
@@ -35,8 +35,7 @@ namespace TransfermarktScraper.ServiceDefaults.Utils
         /// <param name="indentLevel">The current level of indentation.</param>
         private static void IndentNode(HtmlNode node, StringBuilder builder, int indentLevel)
         {
-            // Aplicar indentación al inicio del nodo
-            builder.Append(new string(' ', indentLevel * 2)); // Usar 2 espacios para indentación
+            builder.Append(new string(' ', indentLevel * 2));
 
             if (node.NodeType == HtmlNodeType.Element)
             {

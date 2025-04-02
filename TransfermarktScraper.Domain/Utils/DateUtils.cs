@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Utils
 {
@@ -15,17 +16,20 @@ namespace TransfermarktScraper.Domain.Utils
         /// <returns>A DateTime object representing the parsed date.</returns>
         public static DateTime? ConvertToDateTime(string date)
         {
-            if (string.IsNullOrWhiteSpace(date))
+            try
             {
-                return null;
+                var dateTime = DateTime.ParseExact(
+                    date,
+                    "MMM d, yyyy",
+                    CultureInfo.InvariantCulture);
+
+                return dateTime;
             }
-
-            var dateTime = DateTime.ParseExact(
-                date,
-                "MMM d, yyyy",
-                CultureInfo.InvariantCulture);
-
-            return dateTime;
+            catch (Exception ex)
+            {
+                var message = $"Parsing string date: {date} to DateTime failed.";
+                throw UtilException.LogWarning(nameof(ConvertToDateTime), nameof(DateUtils), message, default, default, ex);
+            }
         }
     }
 }

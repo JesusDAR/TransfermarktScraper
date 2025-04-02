@@ -10,8 +10,8 @@ using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Enums.Extensions;
+using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
-using TransfermarktScraper.ServiceDefaults.Utils;
 using Player = TransfermarktScraper.Domain.Entities.Player;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -58,7 +58,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             if (club == null)
             {
-                throw new ArgumentNullException($"Error in {nameof(GetPlayersAsync)}: {nameof(club)} not found in database.");
+                var message = $"{nameof(club)}: {clubTransfermarktId} not found in database.";
+                throw DatabaseException.LogError(nameof(GetPlayersAsync), nameof(PlayerService), message, _logger);
             }
 
             var players = Enumerable.Empty<Player>();
@@ -93,7 +94,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             foreach (var playerRowLocator in playerRowsLocators)
             {
-                var playerDataLocators = await playerRowLocator.Locator("> td").AllAsync();
+                var playerDataLocators = await GetPlayerDataLocatorsAsync(playerRowLocator);
 
                 var number = await GetNumberAsync(playerDataLocators);
 
@@ -124,6 +125,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var marketValue = await GetMarketValueAsync(playerDataLocators);
 
                 var marketValues = await _marketValueService.GetMarketValuesAsync(transfermarktId, cancellationToken);
+
+                // Get Player stats TODO
 
                 var player = new Player
                 {
@@ -164,18 +167,47 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private async Task<IReadOnlyList<ILocator>> GetPlayerRowLocatorsAsync()
         {
-            await _page.Locator("#yw1").WaitForAsync();
+            var selector = "#yw1";
+            try
+            {
+                await _page.WaitForSelectorAsync(selector);
+                var playerGridLocator = _page.Locator(selector);
 
-            var playerGridLocator = _page.Locator("#yw1");
+                selector = "table.items > tbody > tr";
+                var playerRowLocator = playerGridLocator.Locator(selector);
+                var playerRowLocators = await playerRowLocator.AllAsync();
 
-            _logger.LogTrace(
-                "Club grid locator HTML:\n      " +
-                "{FormattedHtml}",
-                Logging.FormatHtml(await playerGridLocator.EvaluateAsync<string>("element => element.outerHTML")));
+                return playerRowLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetPlayerRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
+            }
+        }
 
-            var playerRowsLocators = await playerGridLocator.Locator("table.items > tbody > tr").AllAsync();
+        /// <summary>
+        /// Retrieves the locators for player data within player data grid.
+        /// </summary>
+        /// <returns>
+        /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
+        /// representing the player datas.
+        /// </returns>
+        private async Task<IReadOnlyList<ILocator>> GetPlayerDataLocatorsAsync(ILocator playerRowLocator)
+        {
+            var selector = "> td";
+            try
+            {
+                var playerDataLocator = playerRowLocator.Locator(selector);
+                var playerDataLocators = await playerDataLocator.AllAsync();
 
-            return playerRowsLocators;
+                return playerDataLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetPlayerDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
+            }
         }
 
         /// <summary>
@@ -185,20 +217,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The player number.</returns>
         private async Task<string?> GetNumberAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
-            string? number = default;
+            string? playerNumber = default;
 
             try
             {
                 var dataLocator = playerDataLocators[0];
-                number = await dataLocator.InnerTextAsync();
-                return number;
+                playerNumber = await dataLocator.InnerTextAsync();
+                return playerNumber;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(number)} in {nameof(GetNumberAsync)}");
+                var message = $"Getting {nameof(playerNumber)} failed.";
+                ScrapingException.LogWarning(nameof(GetNumberAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
-            return number;
+            return playerNumber;
         }
 
         /// <summary>
@@ -208,20 +241,22 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The url of the player portrait.</returns>
         private async Task<string> GetPortraitAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
-            string portrait = string.Empty;
-
+            var portraitUrl = string.Empty;
+            var selector = "table.inline-table img";
             try
             {
-                var portraitLocator = playerDataLocators[1].Locator("table.inline-table img");
-                portrait = await portraitLocator.GetAttributeAsync("data-src") ?? string.Empty;
-                return portrait;
+                var dataLocator = playerDataLocators[1];
+                var portraitImageLocator = dataLocator.Locator(selector);
+
+                selector = "data-src";
+                portraitUrl = await dataLocator.GetAttributeAsync(selector);
+                return portraitUrl ?? throw new Exception();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(portrait)} in {nameof(GetPortraitAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetPortraitAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
-
-            return portrait;
         }
 
         /// <summary>
@@ -232,19 +267,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<string> GetNameAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
             string name = string.Empty;
-
+            var selector = ".hauptlink";
             try
             {
-                var nameLocator = playerDataLocators[1].Locator(".hauptlink");
+                var dataLocator = playerDataLocators[1];
+                var nameLocator = dataLocator.Locator(selector);
                 name = await nameLocator.InnerTextAsync();
                 return name;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(name)} in {nameof(GetNameAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetNameAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
-
-            return name;
         }
 
         /// <summary>
@@ -255,19 +290,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<string> GetLinkAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
             string link = string.Empty;
-
+            var selector = ".hauptlink a";
             try
             {
-                var linkLocator = playerDataLocators[1].Locator(".hauptlink a");
-                link = await linkLocator.GetAttributeAsync("href") ?? throw new Exception($"Failed to obtain the {nameof(link)} from the href attribute.");
+                var dataSelector = playerDataLocators[1];
+                var linkLocator = dataSelector.Locator(selector);
+
+                selector = "href";
+                link = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception();
                 return link;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(link)} in {nameof(GetLinkAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetLinkAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
-
-            return link;
         }
 
         /// <summary>
@@ -290,17 +327,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<Domain.Enums.Position> GetPositionAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
             Domain.Enums.Position position = default;
-
+            var selector = "table tr:nth-child(2)";
             try
             {
-                var positionLocator = playerDataLocators[1].Locator("table tr:nth-child(2)");
+                var dataLocator = playerDataLocators[1];
+                var positionLocator = dataLocator.Locator(selector);
                 var positionString = await positionLocator.InnerTextAsync();
-                position = PositionExtensions.FromString(positionString);
+                position = PositionExtensions.ToEnum(positionString);
                 return position;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(position)} in {nameof(GetPositionAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(GetPositionAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return position;
@@ -325,7 +364,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(dateOfBirth)} in {nameof(GetDateOfBirthAsync)}");
+                var message = $"Getting {nameof(dateOfBirth)} failed.";
+                ScrapingException.LogWarning(nameof(GetDateOfBirthAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return dateOfBirth;
@@ -356,7 +396,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(age)} in {nameof(GetAgeAsync)}");
+                var message = $"Getting {nameof(age)} failed.";
+                ScrapingException.LogWarning(nameof(GetAgeAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return age;
@@ -370,20 +411,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<IEnumerable<string>> GetNationalitiesAsync(IReadOnlyList<ILocator> playerDataLocators)
         {
             var nationalities = new List<string>();
-
+            var selector = "img";
             try
             {
-                var imgLocators = await playerDataLocators[3].Locator("img").AllAsync();
-                foreach (var imgLocator in imgLocators)
+                var dataLocator = playerDataLocators[3];
+                var imgLocator = dataLocator.Locator(selector);
+                var imgLocators = await imgLocator.AllAsync();
+                selector = "src";
+
+                foreach (var locator in imgLocators)
                 {
-                    var src = await imgLocator.GetAttributeAsync("src") ?? throw new Exception($"Failed to obtain the {nameof(nationalities)} from the src attribute.");
+                    var src = await locator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain attribute src from selector '{selector}'.");
                     var nationality = ImageUtils.GetTransfermarktIdFromImageUrl(src);
                     nationalities.Add(nationality);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(nationalities)} in {nameof(GetNationalitiesAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(GetNationalitiesAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return nationalities;
@@ -418,7 +464,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(height)} in {nameof(GetHeightAsync)}");
+                var message = $"Getting {nameof(height)} failed.";
+                ScrapingException.LogWarning(nameof(GetHeightAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return height;
@@ -443,12 +490,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return foot;
                 }
 
-                foot = FootExtensions.FromString(footString);
+                foot = FootExtensions.ToEnum(footString);
                 return foot;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(foot)} in {nameof(GetFootAsync)}");
+                var message = $"Getting {nameof(foot)} failed.";
+                ScrapingException.LogWarning(nameof(GetFootAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return foot;
@@ -478,7 +526,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(contractStart)} in {nameof(GetContractStartAsync)}");
+                var message = $"Getting {nameof(contractStart)} failed.";
+                ScrapingException.LogWarning(nameof(GetContractStartAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return contractStart;
@@ -508,7 +557,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(contractEnd)} in {nameof(GetContractEndAsync)}");
+                var message = $"Getting {nameof(contractEnd)} failed.";
+                ScrapingException.LogWarning(nameof(GetContractEndAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return contractEnd;
@@ -539,7 +589,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the player {nameof(marketValue)} in {nameof(GetMarketValueAsync)}");
+                var message = $"Getting {nameof(marketValue)} failed.";
+                ScrapingException.LogWarning(nameof(GetMarketValueAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
             return marketValue;

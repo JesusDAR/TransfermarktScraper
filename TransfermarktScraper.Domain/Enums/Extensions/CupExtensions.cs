@@ -1,4 +1,4 @@
-﻿using System;
+﻿using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -19,7 +19,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Cup.DomesticCup => "Domestic Cup",
                 Cup.DomesticSuperCup => "Domestic Super Cup",
                 Cup.International => "International",
-                _ => throw new ArgumentException($"Error in {nameof(CupExtensions)}.{nameof(ToString)}: {cup} is not a valid {nameof(Cup)}."),
+                Cup.Unknown => "Unknown",
+                Cup.None => string.Empty,
+                _ => HandleUnsupportedEnum(cup),
             };
         }
 
@@ -28,7 +30,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// </summary>
         /// <param name="cupString">The string representation of the <see cref="Cup"/>.</param>
         /// <returns>The corresponding <see cref="Cup"/> enum value.</returns>
-        public static Cup FromString(string cupString)
+        public static Cup ToEnum(string cupString)
         {
             cupString = cupString.ToLower();
 
@@ -37,8 +39,36 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "domestic cup" => Cup.DomesticCup,
                 "domestic super cup" => Cup.DomesticSuperCup,
                 "international" => Cup.International,
-                _ => throw new ArgumentException($"Error in {nameof(CupExtensions)}.{nameof(FromString)}: {cupString} is not a valid {nameof(Cup)} string."),
+                "unknown" => Cup.Unknown,
+                "" => Cup.None,
+                _ => HandleUnsupportedString(cupString),
             };
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="Cup"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="cup">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(Cup cup)
+        {
+            var message = $"Unsupported enum value: {cup}";
+            EnumException.LogWarning(nameof(ToString), nameof(CupExtensions), message);
+            return ToString(Cup.Unknown);
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="Cup"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="cupString">The unsupported string.</param>
+        /// <returns>The <see cref="Cup.Unknown"/> enum value.</returns>
+        private static Cup HandleUnsupportedString(string cupString)
+        {
+            var message = $"Unsupported string value: {cupString}";
+            EnumException.LogWarning(nameof(ToEnum), nameof(CupExtensions), message);
+            return Cup.Unknown;
         }
     }
 }

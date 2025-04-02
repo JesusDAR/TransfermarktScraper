@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Data.Repositories.Impl
 {
@@ -34,11 +35,13 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             try
             {
                 var country = await _countries.Find(country => country.TransfermarktId == countryTransfermarktId).FirstOrDefaultAsync(cancellationToken);
+
                 return country;
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(GetAsync)}: Failed to retrieve the country with Transfermarkt ID {countryTransfermarktId} from the database.", ex);
+                var message = $"Failed to retrieve the country with Transfermarkt ID: {countryTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAsync), nameof(CountryRepository), _logger);
             }
         }
 
@@ -50,9 +53,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 var countries = await _countries.Find(_ => true).ToListAsync(cancellationToken);
                 return countries;
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all countries from the database.", ex);
+                var message = $"Failed to retrieve all countries from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
             }
         }
 
@@ -65,16 +69,23 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 if (country == null)
                 {
-                    throw new InvalidOperationException($"Error in {nameof(GetAllAsync)}: Country with Transfermarkt ID {countryTransfermarktId} not found in the database.");
+                    var message = $"Country with Transfermarkt ID: {countryTransfermarktId} not found in the database.";
+                    throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
                 }
 
                 var competitions = country.Competitions;
 
                 return competitions;
             }
-            catch (MongoException ex)
+            catch (DatabaseException ex)
             {
-                throw new Exception($"Error in {nameof(GetAllAsync)}: Failed to retrieve all competitions of the country with Transfermarkt ID {countryTransfermarktId} from the database.", ex);
+                var message = string.Concat($"Failed to retrieve all competitions of the country with Transfermarkt ID: {countryTransfermarktId} from the database. ", ex.Message);
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
+            }
+            catch (MongoException)
+            {
+                var message = $"Failed to retrieve all competitions of the country with Transfermarkt ID: {countryTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
             }
         }
 
@@ -87,9 +98,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 await _countries.InsertManyAsync(countries, cancellationToken: cancellationToken);
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(AddRangeAsync)}: Failed to add countries to the database.", ex);
+                var message = $"Failed to add range of countries to the database.";
+                throw DatabaseException.LogError(message, nameof(AddRangeAsync), nameof(CountryRepository), _logger);
             }
         }
 
@@ -110,9 +122,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 if (!hasExistingCountries)
                 {
-                    _logger.LogInformation("Inserting {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
+                    _logger.LogDebug("Inserting {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
+                    countries = countries.OrderBy(country => int.Parse(country.TransfermarktId));
                     await _countries.InsertManyAsync(countries);
-                    _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
+                    _logger.LogDebug("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                 }
                 else
                 {
@@ -132,9 +145,9 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                     if (countriesToInsert.Any())
                     {
-                        _logger.LogInformation("Inserting {Count} countries in the database...", countriesToInsert.Count.ToString());
+                        _logger.LogDebug("Inserting {Count} countries in the database...", countriesToInsert.Count.ToString());
                         await _countries.InsertManyAsync(countriesToInsert, cancellationToken: cancellationToken);
-                        _logger.LogInformation("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
+                        _logger.LogDebug("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
                     }
 
                     var bulkOperations = countriesToUpdate
@@ -146,48 +159,63 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                                 .Set(c => c.Competitions, country.Competitions)))
                         .ToList();
 
-                    _logger.LogInformation("Updating {Count} countries in the database...", bulkOperations.Count);
+                    _logger.LogDebug("Updating {Count} countries in the database...", bulkOperations.Count);
                     var result = await _countries.BulkWriteAsync(bulkOperations, cancellationToken: cancellationToken);
-                    _logger.LogInformation("Successfully updated {Count} countries in the database...", bulkOperations.Count);
+                    _logger.LogDebug("Successfully updated {Count} countries in the database...", bulkOperations.Count);
                 }
 
                 return countries;
             }
-            catch (MongoException ex)
+            catch (MongoException)
             {
-                throw new Exception($"Error in {nameof(InsertOrUpdateRangeAsync)}: Failed inserting or updating {countries.Count()} countries in the database.", ex);
+                var message = $"Failed inserting or updating {countries.Count()} countries in the database.";
+                throw DatabaseException.LogError(message, nameof(InsertOrUpdateRangeAsync), nameof(CountryRepository), _logger);
             }
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<Competition>> UpdateRangeAsync(string countryTransfermarktId, IEnumerable<Competition> competitions, CancellationToken cancellationToken)
         {
-            var country = await GetAsync(countryTransfermarktId, cancellationToken);
-
-            if (country == null)
+            try
             {
-                throw new InvalidOperationException($"Error in {nameof(UpdateRangeAsync)}: Country with Transfermarkt ID {countryTransfermarktId} not found in the database.");
+                var country = await GetAsync(countryTransfermarktId, cancellationToken);
+
+                if (country == null)
+                {
+                    var message = $"Country with Transfermarkt ID: {countryTransfermarktId} not found in the database.";
+                    throw DatabaseException.LogError(message, nameof(UpdateRangeAsync), nameof(CountryRepository), _logger);
+                }
+
+                SetUpdateTime(new List<Country> { country });
+
+                var filter = Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId);
+
+                var competitionsList = competitions.ToList();
+
+                var update = Builders<Country>.Update.Set(c => c.Competitions, competitionsList);
+
+                _logger.LogDebug(
+                    "Updating {Count} competitions from {Country.Name} in the database...",
+                    competitionsList.Count.ToString(),
+                    country.Name);
+                await _countries.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+                _logger.LogDebug(
+                    "Successfully updated {Count} competitions from {Country.Name} in the database...",
+                    competitionsList.Count.ToString(),
+                    country.Name);
+
+                return competitionsList;
             }
-
-            SetUpdateTime(new List<Country> { country });
-
-            var filter = Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId);
-
-            var competitionsList = competitions.ToList();
-
-            var update = Builders<Country>.Update.Set(c => c.Competitions, competitionsList);
-
-            _logger.LogInformation(
-                "Updating {Count} competitions from {Country.Name} in the database...",
-                competitionsList.Count.ToString(),
-                country.Name);
-            await _countries.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-            _logger.LogInformation(
-                "Successfully updated {Count} competitions from {Country.Name} in the database...",
-                competitionsList.Count.ToString(),
-                country.Name);
-
-            return competitionsList;
+            catch (DatabaseException ex)
+            {
+                var message = string.Concat($"Failed to update competitions of the country with Transfermarkt ID: {countryTransfermarktId} in the database. ", ex.Message);
+                throw DatabaseException.LogError(message, nameof(UpdateRangeAsync), nameof(CountryRepository), _logger);
+            }
+            catch (MongoException)
+            {
+                var message = $"Failed to update competitions of the country with Transfermarkt ID: {countryTransfermarktId} in the database.";
+                throw DatabaseException.LogError(message, nameof(UpdateRangeAsync), nameof(CountryRepository), _logger);
+            }
         }
 
         /// <summary>

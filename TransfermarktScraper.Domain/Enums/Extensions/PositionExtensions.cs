@@ -1,4 +1,4 @@
-﻿using System;
+﻿using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -27,7 +27,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Position.RightWinger => "Right Winger",
                 Position.CentreForward => "Centre-Forward",
                 Position.Unknown => "Unknown",
-                _ => throw new ArgumentException($"Error in {nameof(PositionExtensions)}.{nameof(ToString)}: {position} is not a valid {nameof(Position)}."),
+                _ => HandleUnsupportedEnum(position),
             };
         }
 
@@ -36,7 +36,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// </summary>
         /// <param name="positionString">The string representation of the <see cref="Position"/>.</param>
         /// <returns>The corresponding <see cref="Position"/> enum value.</returns>
-        public static Position FromString(string positionString)
+        public static Position ToEnum(string positionString)
         {
             positionString = positionString.ToLower();
 
@@ -53,8 +53,34 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "right winger" => Position.RightWinger,
                 "centre-forward" => Position.CentreForward,
                 "unknown" => Position.Unknown,
-                _ => throw new ArgumentException($"Error in {nameof(PositionExtensions)}.{nameof(FromString)}: {positionString} is not a valid {nameof(Position)} string."),
+                _ => HandleUnsupportedString(positionString),
             };
+        }
+
+        /// <summary>
+        /// Handles unsupported values of the <see cref="Position"/> enum.
+        /// Logs a warning indicating an unexpected enum value and returns an empty string.
+        /// </summary>
+        /// <param name="position">The unsupported enum value.</param>
+        /// <returns>An empty string.</returns>
+        private static string HandleUnsupportedEnum(Position position)
+        {
+            var message = $"Unsupported enum value: {position}";
+            EnumException.LogWarning(nameof(ToString), nameof(PositionExtensions), message);
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Handles unsupported string of the <see cref="Position"/> enum.
+        /// Logs a warning indicating an unexpected string and returns an empty string.
+        /// </summary>
+        /// <param name="positionString">The unsupported string.</param>
+        /// <returns>The <see cref="Position.Unknown"/> enum value.</returns>
+        private static Position HandleUnsupportedString(string positionString)
+        {
+            var message = $"Unsupported string value: {positionString}";
+            EnumException.LogWarning(nameof(ToEnum), nameof(PositionExtensions), message);
+            return Position.Unknown;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
 using Club = TransfermarktScraper.Domain.Entities.Club;
 
@@ -58,7 +60,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             ILocator clubRowLocator,
             CancellationToken cancellationToken)
         {
-            var clubDataLocators = await clubRowLocator.Locator("td").AllAsync();
+            var clubDataLocators = await GetClubDataLocatorsAsync(clubRowLocator);
 
             var crest = await GetCrestAsync(clubDataLocators);
 
@@ -111,6 +113,22 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return clubAdded;
         }
 
+        private async Task<IReadOnlyList<ILocator>> GetClubDataLocatorsAsync(ILocator clubRowLocator)
+        {
+            var selector = "td";
+            try
+            {
+                var clubDataLocator = clubRowLocator.Locator(selector);
+                var clubDataLocators = await clubDataLocator.AllAsync();
+                return clubDataLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetClubDataLocatorsAsync), nameof(ClubService), message, clubRowLocator.Page.Url, _logger, ex);
+            }
+        }
+
         /// <summary>
         /// Extracts the club crest URL from the provided locators.
         /// </summary>
@@ -119,18 +137,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<string> GetCrestAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
             string? crest;
-
+            var selector = "img";
             try
             {
-                var crestLocator = clubDataLocators[0].Locator("img");
-                var crestTiny = await crestLocator.GetAttributeAsync("src");
+                var dataLocator = clubDataLocators[0];
+                var crestImgLocator = dataLocator.Locator(selector);
+
+                selector = "src";
+                var crestTiny = await crestImgLocator.GetAttributeAsync(selector);
                 crest = crestTiny?.Replace("tiny", "head");
-                return crest ?? throw new Exception($"Failed to obtain the club {nameof(crest)} from the src attribute.");
+                return crest ?? throw new Exception($"Failed to obtain the club {nameof(crest)} from the '{selector}' attribute.");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(crest)} in {nameof(GetCrestAsync)}");
-                throw;
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetCrestAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
         }
 
@@ -142,17 +163,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<string> GetNameAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
             string? name;
-
+            var selector = "a[title]";
             try
             {
-                var nameLocator = clubDataLocators[1].Locator("a[title]");
-                name = await nameLocator.InnerTextAsync();
-                return name ?? throw new Exception($"Failed to obtain the club {nameof(name)} from the href attribute.");
+                var dataLocator = clubDataLocators[1];
+                var nameTitleLocator = dataLocator.Locator(selector);
+                name = await nameTitleLocator.InnerTextAsync();
+                return name ?? throw new Exception($"Failed to obtain the club {nameof(name)} from the '{selector}' attribute.");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(name)} in {nameof(GetNameAsync)}");
-                throw;
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetNameAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
         }
 
@@ -164,18 +186,20 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<string> GetLinkAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
             string? link;
-
+            var selector = "a[title]";
             try
             {
-                var nameLocator = clubDataLocators[1].Locator("a[title]");
-                link = await nameLocator.GetAttributeAsync("href");
+                var dataLocator = clubDataLocators[1];
+                var nameTitleLocator = dataLocator.Locator(selector);
+                selector = "href";
+                link = await nameTitleLocator.GetAttributeAsync(selector);
                 link = link?.Replace("startseite", "kader"); // To set the detailed club page
-                return link ?? throw new Exception($"Failed to obtain the {nameof(link)} from the href attribute.");
+                return link ?? throw new Exception($"Failed to obtain the {nameof(link)} from the '{selector}' attribute.");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(link)} in {nameof(GetLinkAsync)}");
-                throw;
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetLinkAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
         }
 
@@ -198,8 +222,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(transfermarktId)} in {nameof(GetTransfermarktId)}");
-                throw;
+                var message = $"Getting TransfermarktId from link: {link} failed.";
+                throw ScrapingException.LogError(nameof(GetTransfermarktId), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
         }
 
@@ -210,24 +234,32 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The number of players in the club.</returns>
         private async Task<int> GetPlayersCountAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
-            int playersCountInt = default;
-
+            int playersCount = default;
+            var selector = "a";
+            int index = 2;
             try
             {
-                var playersCountLocator = clubDataLocators[2].Locator("a");
-                var playersCount = await playersCountLocator.InnerTextAsync();
-                var isPlayersCount = int.TryParse(playersCount, NumberStyles.Integer, CultureInfo.InvariantCulture, out playersCountInt);
+                if (clubDataLocators.Count <= index)
+                {
+                    return playersCount;
+                }
+
+                var dataLocator = clubDataLocators[2];
+                var playersCountLinkLocator = dataLocator.Locator(selector);
+                var playersCountString = await playersCountLinkLocator.InnerTextAsync();
+                var isPlayersCount = int.TryParse(playersCountString, NumberStyles.Integer, CultureInfo.InvariantCulture, out playersCount);
                 if (isPlayersCount)
                 {
-                    return playersCountInt;
+                    return playersCount;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(playersCountInt)} in {nameof(GetPlayersCountAsync)}");
+                var message = $"Using selector: '{selector}' failed.";
+                ScrapingException.LogWarning(nameof(GetPlayersCountAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
 
-            return playersCountInt;
+            return playersCount;
         }
 
         /// <summary>
@@ -237,24 +269,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The average age of the players in the club.</returns>
         private async Task<float> GetAgeAverageAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
-            float ageAverageFloat = default;
-
+            float ageAverage = default;
+            int index = 3;
             try
             {
-                var ageAverageLocator = clubDataLocators[3];
-                var ageAverage = await ageAverageLocator.InnerTextAsync();
-                var isAgeAverage = float.TryParse(ageAverage.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out ageAverageFloat);
+                if (clubDataLocators.Count <= index)
+                {
+                    return ageAverage;
+                }
+
+                var dataLocator = clubDataLocators[3];
+                var ageAverageString = await dataLocator.InnerTextAsync();
+                var isAgeAverage = float.TryParse(ageAverageString.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out ageAverage);
                 if (isAgeAverage)
                 {
-                    return ageAverageFloat;
+                    return ageAverage;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(ageAverageFloat)} in {nameof(GetAgeAverageAsync)}");
+                var message = $"Getting club {nameof(ageAverage)} failed.";
+                ScrapingException.LogWarning(nameof(GetAgeAverageAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
 
-            return ageAverageFloat;
+            return ageAverage;
         }
 
         /// <summary>
@@ -264,52 +302,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The number of foreign players in the club.</returns>
         private async Task<int> GetForeignersCountAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
-            int foreignersCountInt = default;
-
+            int foreignersCount = default;
+            int index = 4;
             try
             {
-                var foreignersCountLocator = clubDataLocators[4];
-                var foreignersCount = await foreignersCountLocator.InnerTextAsync();
-                var isForeignersCount = int.TryParse(foreignersCount.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out foreignersCountInt);
+                if (clubDataLocators.Count <= index)
+                {
+                    return foreignersCount;
+                }
+
+                var dataLocator = clubDataLocators[4];
+                var foreignersCountString = await dataLocator.InnerTextAsync();
+                var isForeignersCount = int.TryParse(foreignersCountString.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out foreignersCount);
                 if (isForeignersCount)
                 {
-                    return foreignersCountInt;
+                    return foreignersCount;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(foreignersCountInt)} in {nameof(GetForeignersCountAsync)}");
+                var message = $"Getting {nameof(foreignersCount)} failed.";
+                ScrapingException.LogWarning(nameof(GetForeignersCountAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
 
-            return foreignersCountInt;
-        }
-
-        /// <summary>
-        /// Extracts the club's total market value from the provided locators.
-        /// </summary>
-        /// <param name="clubDataLocators">A list of locators containing club information.</param>
-        /// <returns>The club's total market value.</returns>
-        private async Task<float> GetMarketValueAsync(IReadOnlyList<ILocator> clubDataLocators)
-        {
-            float marketValueNumber = default;
-
-            try
-            {
-                var marketValueLocator = clubDataLocators[6];
-                var marketValue = await marketValueLocator.InnerTextAsync();
-
-                if (!TableUtils.IsTableDataCellEmpty(marketValue))
-                {
-                    var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValue);
-                    marketValueNumber = MoneyUtils.ConvertToFloat(marketValueNumeric);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(marketValueNumber)} in {nameof(GetMarketValueAsync)}");
-            }
-
-            return marketValueNumber;
+            return foreignersCount;
         }
 
         /// <summary>
@@ -319,25 +335,66 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>The club's average market value.</returns>
         private async Task<float> GetMarketValueAverageAsync(IReadOnlyList<ILocator> clubDataLocators)
         {
-            float marketValueAverageNumber = default;
-
+            float marketValueAverage = default;
+            int index = 5;
             try
             {
-                var marketValueAverageLocator = clubDataLocators[5];
-                var marketValueAverage = await marketValueAverageLocator.InnerTextAsync();
-
-                if (!TableUtils.IsTableDataCellEmpty(marketValueAverage))
+                if (clubDataLocators.Count <= index)
                 {
-                    var marketValueAverageNumeric = MoneyUtils.ExtractNumericPart(marketValueAverage);
-                    marketValueAverageNumber = MoneyUtils.ConvertToFloat(marketValueAverageNumeric);
+                    return marketValueAverage;
+                }
+
+                var dataLocator = clubDataLocators[5];
+                var marketValueAverageString = await dataLocator.InnerTextAsync();
+
+                if (!TableUtils.IsTableDataCellEmpty(marketValueAverageString))
+                {
+                    var marketValueAverageNumeric = MoneyUtils.ExtractNumericPart(marketValueAverageString);
+                    marketValueAverage = MoneyUtils.ConvertToFloat(marketValueAverageNumeric);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Failed to obtain the club {nameof(marketValueAverageNumber)} in {nameof(GetMarketValueAverageAsync)}");
+                var message = $"Getting {nameof(marketValueAverage)} failed.";
+                ScrapingException.LogWarning(nameof(GetMarketValueAverageAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
             }
 
-            return marketValueAverageNumber;
+            return marketValueAverage;
+        }
+
+        /// <summary>
+        /// Extracts the club's total market value from the provided locators.
+        /// </summary>
+        /// <param name="clubDataLocators">A list of locators containing club information.</param>
+        /// <returns>The club's total market value.</returns>
+        private async Task<float> GetMarketValueAsync(IReadOnlyList<ILocator> clubDataLocators)
+        {
+            float marketValue = default;
+            int index = 6;
+
+            try
+            {
+                if (clubDataLocators.Count <= index)
+                {
+                    return marketValue;
+                }
+
+                var dataLocator = clubDataLocators[6];
+                var marketValueString = await dataLocator.InnerTextAsync();
+
+                if (!TableUtils.IsTableDataCellEmpty(marketValueString))
+                {
+                    var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValueString);
+                    marketValue = MoneyUtils.ConvertToFloat(marketValueNumeric);
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Getting {nameof(marketValue)} failed.";
+                ScrapingException.LogWarning(nameof(GetMarketValueAsync), nameof(ClubService), message, clubDataLocators.First().Page.Url, _logger, ex);
+            }
+
+            return marketValue;
         }
     }
 }

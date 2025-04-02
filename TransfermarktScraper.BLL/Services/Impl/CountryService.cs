@@ -10,7 +10,7 @@ using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities;
-using TransfermarktScraper.ServiceDefaults.Utils;
+using TransfermarktScraper.Domain.Exceptions;
 using Country = TransfermarktScraper.Domain.Entities.Country;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -53,48 +53,35 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
-            try
+            var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
+
+            if (forceScraping)
             {
-                var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
+                var countriesScraped = await ScrapeCountriesAsync();
 
-                if (forceScraping)
-                {
-                    var countriesScraped = await ScrapeCountriesAsync();
+                var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                    var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
-
-                    countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesUpdatedOrInserted);
-
-                    return countryDtos;
-                }
-
-                var countries = await _countryRepository.GetAllAsync(cancellationToken);
-
-                if (!countries.Any())
-                {
-                    var countriesScraped = await ScrapeCountriesAsync();
-
-                    var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
-
-                    countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesInserted);
-
-                    return countryDtos;
-                }
-
-                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countries);
+                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesUpdatedOrInserted);
 
                 return countryDtos;
             }
-            catch (HttpRequestException e)
+
+            var countries = await _countryRepository.GetAllAsync(cancellationToken);
+
+            if (!countries.Any())
             {
-                _logger.LogError(e, $"Error in {nameof(GetCountriesAsync)} trying to access external page to scrape");
-                throw;
+                var countriesScraped = await ScrapeCountriesAsync();
+
+                var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
+
+                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesInserted);
+
+                return countryDtos;
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Unexpected error in {nameof(GetCountriesAsync)}");
-                throw;
-            }
+
+            countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countries);
+
+            return countryDtos;
         }
 
         /// <summary>
@@ -118,33 +105,34 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var response = await _page.GotoAsync("/");
 
-            if (response != null && response.Status != (int)HttpStatusCode.OK)
+            if (response == null || response.Status != (int)HttpStatusCode.OK)
             {
-                throw new HttpRequestException($"Error navigating to page: {_scraperSettings.BaseUrl} status code: {response.Status}");
+                var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                throw ScrapingException.LogError(_page.Url, nameof(ScrapeCountriesAsync), nameof(CountryService), message, _logger);
             }
 
             var countryQuickSelectInterceptorResult = InitializeCountryQuickSelectInterceptor();
 
-            var selectorLocator = await GetSelectorLocatorAsync();
-            var itemLocators = await GetItemLocatorsAsync(selectorLocator);
-            var countries = new Collection<Country>();
+            var countrySelectorLocator = await GetCountrySelectorLocatorAsync();
+            var itemLocators = await GetItemLocatorsAsync(countrySelectorLocator);
 
+            var countries = new Collection<Country>();
             int countryLimit = _scraperSettings.CountryLimit;
-            int numberOfCountriesScraped = 0;
+            int countriesScrapedCounter = 0;
 
             foreach (var itemLocator in itemLocators)
             {
-                if (countryLimit == 0 || numberOfCountriesScraped < countryLimit)
+                if (countryLimit == 0 || countriesScrapedCounter < countryLimit)
                 {
-                    var countryName = await GetCountryNameAsync(itemLocator, selectorLocator);
+                    var countryName = await GetCountryNameAsync(itemLocator, countrySelectorLocator);
 
                     await countryQuickSelectInterceptorResult.InterceptorTask;
 
                     CreateAndAddCountry(countries, countryName);
 
-                    await GetDropdownLocatorAsync(selectorLocator);
+                    await GetDropdownLocatorAsync(countrySelectorLocator);
 
-                    numberOfCountriesScraped++;
+                    countriesScrapedCounter++;
                 }
             }
 
@@ -159,20 +147,24 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A task that represents the asynchronous operation. The task result contains the <see cref="ILocator"/> representing the container of the country selector.
         /// </returns>
-        private async Task<ILocator> GetSelectorLocatorAsync()
+        private async Task<ILocator> GetCountrySelectorLocatorAsync()
         {
-            await _page.WaitForSelectorAsync("img[alt='Countries']");
-            var imgLocator = _page.Locator("img[alt='Countries']");
-            _logger.LogTrace(
-                "Image locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await imgLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            var selector = "img[alt='Countries']";
+            try
+            {
+                await _page.WaitForSelectorAsync(selector);
+                var imgLocator = _page.Locator(selector);
 
-            var selectorLocator = imgLocator.Locator("..");
-            _logger.LogTrace(
-                "Selector locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await selectorLocator.EvaluateAsync<string>("element => element.outerHTML")));
+                selector = "..";
+                var countrySelectorLocator = imgLocator.Locator(selector);
 
-            return selectorLocator;
+                return countrySelectorLocator;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetCountrySelectorLocatorAsync), nameof(CountryService), message, _page.Url, _logger);
+            }
         }
 
         /// <summary>
@@ -184,13 +176,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private async Task<ILocator> GetButtonLocatorAsync(ILocator selectorLocator)
         {
-            await _page.WaitForSelectorAsync("div[role='button']");
-            var buttonLocator = selectorLocator.Locator("div[role='button']");
-            _logger.LogTrace(
-                "Button locator HTML:\n      " +
-                "{FormattedHtml}", Logging.FormatHtml(await buttonLocator.EvaluateAsync<string>("element => element.outerHTML")));
+            string selector = "div[role='button']";
+            try
+            {
+                await _page.WaitForSelectorAsync(selector);
+                var buttonLocator = selectorLocator.Locator(selector);
 
-            return buttonLocator;
+                return buttonLocator;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetButtonLocatorAsync), nameof(CountryService), message, _page.Url, _logger);
+            }
         }
 
         /// <summary>
@@ -211,6 +209,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var buttonLocator = await GetButtonLocatorAsync(selectorLocator);
             int attempt = 0;
             bool isDropdownVisible = false;
+            var selector = ".selector-dropdown";
 
             while (!isDropdownVisible && attempt < maxAttempts)
             {
@@ -219,8 +218,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     attempt++;
                     await buttonLocator.ClickAsync();
                     await _page.WaitForSelectorAsync(
-                        ".selector-dropdown",
-                        new PageWaitForSelectorOptions {
+                        selector,
+                        new PageWaitForSelectorOptions
+                        {
                             State = WaitForSelectorState.Visible,
                             Timeout = 200,
                         });
@@ -228,11 +228,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
                 catch (TimeoutException)
                 {
-                    _logger.LogDebug("The country dropdown did not appear at attempt: {Attempt}.", attempt);
+                    _logger.LogDebug("The country dropdown in page: {Page} did not appear at attempt: {Attempt}.", _page.Url, attempt);
                 }
             }
 
-            var dropdownLocator = selectorLocator.Locator(".selector-dropdown");
+            var dropdownLocator = selectorLocator.Locator(selector);
 
             return dropdownLocator;
         }
@@ -263,10 +263,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
                 catch (TimeoutException)
                 {
-                    _logger.LogInformation("The item locator is not visible at attempt: {Attempt}.", attempt);
+                    _logger.LogDebug("The item locator is not visible at attempt: {Attempt}.", attempt);
                     await _page.ReloadAsync();
                     await GetDropdownLocatorAsync(selectorLocator);
                 }
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                var message = $"Exceeded {maxAttempts} number of attempts. Getting country name from country dropdown failed.";
+                throw ScrapingException.LogError(nameof(GetCountryNameAsync), nameof(CountryService), message, _page.Url, _logger);
             }
 
             return name;
@@ -305,9 +311,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </returns>
         private async Task<IReadOnlyList<ILocator>> GetItemLocatorsAsync(ILocator selectorLocator)
         {
-            var dropdownLocator = await GetDropdownLocatorAsync(selectorLocator);
-            var itemLocators = await dropdownLocator.Locator("li").AllAsync();
-            return itemLocators;
+            var selector = "li";
+            try
+            {
+                var dropdownLocator = await GetDropdownLocatorAsync(selectorLocator);
+                var itemLocators = await dropdownLocator.Locator(selector).AllAsync();
+                return itemLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetItemLocatorsAsync), nameof(CountryService), message, _page.Url, _logger, ex);
+            }
         }
 
         /// <summary>
@@ -365,9 +380,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 country.Competitions = competitions;
 
-                _logger.LogInformation(
-                    "Added country:\n      " +
-                    "{country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
+                _logger.LogDebug(
+                    "Intercepted country:\n      " +
+                    "{Country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
             }
         }
     }

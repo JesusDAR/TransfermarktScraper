@@ -39,5 +39,10 @@
         /// The competition is a cup.
         /// </summary>
         Cup,
+
+        /// <summary>
+        /// The number of club participants in the cup.
+        /// </summary>
+        Participants,
     }
 }

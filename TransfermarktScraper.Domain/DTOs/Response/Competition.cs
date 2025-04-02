@@ -69,6 +69,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         required public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of club participants in the cup.
+        /// </summary>
+        public int Participants { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of players of the competition.
         /// </summary>
         public int? PlayersCount { get; set; }

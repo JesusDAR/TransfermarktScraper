@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Utils
 {
@@ -18,7 +19,8 @@ namespace TransfermarktScraper.Domain.Utils
         {
             if (string.IsNullOrEmpty(rawId))
             {
-                throw new ArgumentException($"Error in {nameof(EntityUtils)}.{nameof(GetHash)}: id cannot be null.");
+                var message = $"{nameof(rawId)} cannot be null or empty.";
+                throw UtilException.LogError(nameof(GetHash), nameof(EntityUtils), message);
             }
 
             var hash = SHA256.HashData(Encoding.UTF8.GetBytes(rawId));

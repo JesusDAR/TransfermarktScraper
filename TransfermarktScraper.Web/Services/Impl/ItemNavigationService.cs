@@ -13,6 +13,12 @@ namespace TransfermarktScraper.Web.Services.Impl
         public event Action OnNavigateToCompetitions = () => { };
 
         /// <inheritdoc/>
+        public event Action OnNavigateToClubs = () => { };
+
+        /// <inheritdoc/>
+        public event Action OnNavigateToPlayers = () => { };
+
+        /// <inheritdoc/>
         public void NotifyNavigateToCountries()
         {
             OnNavigateToCountries?.Invoke();
@@ -22,6 +28,18 @@ namespace TransfermarktScraper.Web.Services.Impl
         public void NotifyNavigateToCompetitions()
         {
             OnNavigateToCompetitions?.Invoke();
+        }
+
+        /// <inheritdoc/>
+        public void NotifyNavigateToClubs()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public void NotifyNavigateToPlayers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

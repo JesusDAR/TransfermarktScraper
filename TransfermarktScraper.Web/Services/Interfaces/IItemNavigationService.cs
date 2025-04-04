@@ -18,6 +18,16 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         event Action OnNavigateToCompetitions;
 
         /// <summary>
+        /// Event triggered when navigation to the Clubs page is requested.
+        /// </summary>
+        event Action OnNavigateToClubs;
+
+        /// <summary>
+        /// Event triggered when navigation to the Players page is requested.
+        /// </summary>
+        event Action OnNavigateToPlayers;
+
+        /// <summary>
         /// Notifies subscribers that navigation to the Countries page has been requested.
         /// </summary>
         void NotifyNavigateToCountries();
@@ -26,5 +36,15 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         /// Notifies subscribers that navigation to the Competitions page has been requested.
         /// </summary>
         void NotifyNavigateToCompetitions();
+
+        /// <summary>
+        /// Notifies subscribers that navigation to the Clubs has been requested.
+        /// </summary>
+        void NotifyNavigateToClubs();
+
+        /// <summary>
+        /// Notifies subscribers that navigation to the Players has been requested.
+        /// </summary>
+        void NotifyNavigateToPlayers();
     }
 }

@@ -7,29 +7,36 @@
 
 <MudNavMenu>
     <MudNavLink 
-    Href="" 
-    Match="NavLinkMatch.All" 
-    Icon="@Icons.Material.Filled.Home">
-        Home
+        Href="" 
+        Match="NavLinkMatch.All" 
+        Icon="@Icons.Material.Filled.Home">
+            Home
+    </MudNavLink>
+        <MudNavLink 
+        OnClick="NavigateToCountries" 
+        Match="NavLinkMatch.Prefix" 
+        Icon="@Icons.Material.Filled.SouthAmerica">
+            Countries
     </MudNavLink>
     <MudNavLink 
-    OnClick="NavigateToCountries" 
-    Match="NavLinkMatch.Prefix" 
-    Icon="@Icons.Material.Filled.SouthAmerica">
-        Countries
+        OnClick="NavigateToCompetitions"
+        Match="NavLinkMatch.Prefix" 
+        Icon="@Icons.Material.Filled.EmojiEvents"
+        Disabled="@(!IsCountrySelected())">
+            Competitions
     </MudNavLink>
     <MudNavLink 
-    OnClick="NavigateToCompetitions"
-    Match="NavLinkMatch.Prefix" 
-    Icon="@Icons.Material.Filled.EmojiEvents"
-    Disabled="@(!IsCountrySelected())">
-        Competitions
+        OnClick="NavigateToClubs"
+        Match="NavLinkMatch.Prefix" 
+        Icon="@Icons.Material.Filled.Home"
+        Disabled="@(!IsCompetitionSelected())">
+            Clubs
     </MudNavLink>
     <MudNavLink 
-    Href="player" 
-    Match="NavLinkMatch.Prefix" 
-    Icon="@Icons.Material.Filled.SportsSoccer">
-        Players
+        Href="player" 
+        Match="NavLinkMatch.Prefix" 
+        Icon="@Icons.Material.Filled.SportsSoccer">
+            Players
     </MudNavLink>
 </MudNavMenu>
 
@@ -44,6 +51,26 @@
         if (ItemSelectionService.IsCountrySelected)
         {
             var url = $"competition?countryTransfermarktId={ItemSelectionService?.SelectedCountry?.TransfermarktId}";
+
+            Navigation.NavigateTo(url);
+        }
+    }
+
+    private void NavigateToClubs()
+    {
+        if (ItemSelectionService.IsClubSelected)
+        {
+            var url = $"players?clubTransfermarktId={ItemSelectionService?.SelectedCountry?.TransfermarktId}";
+
+            Navigation.NavigateTo(url);
+        }
+    }
+
+    private void NavigateToPlayers()
+    {
+        if (ItemSelectionService.IsPlayerSelected)
+        {
+            var url = $"players?clubTransfermarktId={ItemSelectionService?.SelectedCountry?.TransfermarktId}";
 
             Navigation.NavigateTo(url);
         }
@@ -66,4 +93,6 @@
     }
 
     public bool IsCountrySelected() => ItemSelectionService.IsCountrySelected;
+
+    public bool IsCompetitionSelected() => ItemSelectionService.IsCompetitionSelected;
 }

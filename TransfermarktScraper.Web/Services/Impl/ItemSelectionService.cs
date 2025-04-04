@@ -18,6 +18,12 @@ namespace TransfermarktScraper.Web.Services.Impl
         public event Action OnCompetitionSelectionChange = () => { };
 
         /// <inheritdoc/>
+        public event Action OnClubSelectionChange = () => { };
+
+        /// <inheritdoc/>
+        public event Action OnPlayerSelectionChange = () => { };
+
+        /// <inheritdoc/>
         public Country? SelectedCountry
         {
             get => _selectedCountry;
@@ -44,6 +50,18 @@ namespace TransfermarktScraper.Web.Services.Impl
 
         /// <inheritdoc/>
         public bool IsCompetitionSelected => _selectedCompetition != null;
+
+        /// <inheritdoc/>
+        public Club? SelectedClub { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        /// <inheritdoc/>
+        public Player? SelectedPlayer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        /// <inheritdoc/>
+        public bool IsClubSelected => throw new NotImplementedException();
+
+        /// <inheritdoc/>
+        public bool IsPlayerSelected => throw new NotImplementedException();
 
         private void NotifyCountrySelectionChange()
         {

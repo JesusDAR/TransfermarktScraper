@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {
@@ -7,6 +8,14 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
     /// </summary>
     public interface ISettingsClient
     {
+        /// <summary>
+        /// Asynchronously retrieves the current settings from the settings API.
+        /// </summary>
+        /// <returns>
+        /// A task representing the asynchronous operation, with a <see cref="Settings"/> object as the result.
+        /// </returns>
+        Task<Settings> GetSettingsAsync();
+
         /// <summary>
         /// Sets the headless mode for the scraper.
         /// </summary>

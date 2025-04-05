@@ -55,6 +55,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
 
+            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
+
             if (forceScraping)
             {
                 var countriesScraped = await ScrapeCountriesAsync();

@@ -64,6 +64,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var players = Enumerable.Empty<Player>();
 
+            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
+
             if (club.Players == null || forceScraping)
             {
                 players = await ScrapePlayersAsync(club, cancellationToken);

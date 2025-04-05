@@ -1,7 +1,7 @@
-﻿using System.Data;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -17,6 +17,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         public SettingsService(IOptions<ScraperSettings> scraperSettings)
         {
             _scraperSettings = scraperSettings.Value;
+        }
+
+        /// <inheritdoc/>
+        public Settings GetSettings()
+        {
+            var settings = new Settings
+            {
+                isHeadlessMode = _scraperSettings.HeadlessMode,
+                isForceScraping = _scraperSettings.ForceScraping,
+                CountriesCountToScrape = _scraperSettings.CountryLimit,
+            };
+
+            return settings;
         }
 
         /// <inheritdoc/>
@@ -41,6 +54,5 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             _scraperSettings.ForceScraping = isForceScraping;
         }
-
     }
 }

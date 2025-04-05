@@ -1,10 +1,18 @@
-﻿namespace TransfermarktScraper.BLL.Services.Interfaces
+﻿using TransfermarktScraper.Domain.DTOs.Response;
+
+namespace TransfermarktScraper.BLL.Services.Interfaces
 {
     /// <summary>
     /// Defines a service that provides methods to configure and manage application settings.
     /// </summary>
     public interface ISettingsService
     {
+        /// <summary>
+        /// Retrieves the current scraping settings.
+        /// </summary>
+        /// <returns>The current scraping settings.</returns>
+        public Settings GetSettings();
+
         /// <summary>
         /// Enables or disables headless mode for the scraper.
         /// </summary>

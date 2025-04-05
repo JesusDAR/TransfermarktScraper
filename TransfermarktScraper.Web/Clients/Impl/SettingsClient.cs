@@ -1,6 +1,8 @@
 ﻿using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Web.Clients.Interfaces;
 using TransfermarktScraper.Web.Configuration;
 
@@ -23,6 +25,13 @@ namespace TransfermarktScraper.Web.Clients.Impl
         {
             _httpClient = httpClient;
             _clientSettings = clientSettings.Value;
+        }
+
+        /// <inheritdoc/>
+        public async Task<Settings> GetSettingsAsync()
+        {
+            var result = await _httpClient.GetFromJsonAsync<Settings>(_clientSettings.SettingsControllerPath);
+            return result ?? new Settings();
         }
 
         /// <inheritdoc/>

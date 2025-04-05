@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -21,6 +22,30 @@ namespace TransfermarktScraper.ApiService.Controllers
         public SettingsController(ISettingsService settingsService)
         {
             _settingsService = settingsService;
+        }
+
+        /// <summary>
+        /// Retrieves the current settings.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="ActionResult{Settings}"/> containing the current settings if successful, or a 500 error if an exception occurs.
+        /// </returns>
+        /// <response code="200">The current settings were successfully retrieved.</response>
+        /// <response code="500">An internal server error occurred while retrieving the settings.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(Settings), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<Settings> GetSettings()
+        {
+            try
+            {
+                var result = _settingsService.GetSettings();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         /// <summary>

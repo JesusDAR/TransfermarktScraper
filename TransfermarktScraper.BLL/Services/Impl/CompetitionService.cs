@@ -56,6 +56,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
+            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
+
             if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
             {
                 var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions, cancellationToken);

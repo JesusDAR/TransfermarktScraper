@@ -165,7 +165,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetCountrySelectorLocatorAsync), nameof(CountryService), message, _page.Url, _logger);
+                throw ScrapingException.LogError(nameof(GetCountrySelectorLocatorAsync), nameof(CountryService), message, _page.Url, _logger, ex);
             }
         }
 
@@ -189,7 +189,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetButtonLocatorAsync), nameof(CountryService), message, _page.Url, _logger);
+                throw ScrapingException.LogError(nameof(GetButtonLocatorAsync), nameof(CountryService), message, _page.Url, _logger, ex);
             }
         }
 

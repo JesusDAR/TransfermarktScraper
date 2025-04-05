@@ -24,8 +24,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var settings = new Settings
             {
-                isHeadlessMode = _scraperSettings.HeadlessMode,
-                isForceScraping = _scraperSettings.ForceScraping,
+                IsHeadlessMode = _scraperSettings.HeadlessMode,
+                IsForceScraping = _scraperSettings.ForceScraping,
                 CountriesCountToScrape = _scraperSettings.CountryLimit,
             };
 

@@ -60,6 +60,5 @@ namespace TransfermarktScraper.ApiService.Controllers
                 return Problem(ex.Message);
             }
         }
-
     }
 }

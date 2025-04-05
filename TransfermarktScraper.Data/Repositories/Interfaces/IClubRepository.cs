@@ -23,7 +23,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// <summary>
         /// Asynchronously retrieves all <see cref="Club"/> from a competition.
         /// </summary>
-        /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier of the <see cref="Competition"/></param>
+        /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier of the <see cref="Competition"/>.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains a collection of <see cref="Club"/>, or empty list if no clubs exist.

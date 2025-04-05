@@ -267,7 +267,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     var competitionClubInfo = CompetitionClubInfoExtensions.ToEnum(labelText);
 
                     await CompetitionClubInfoExtensions.AssignToCompetitionProperty(competitionClubInfo, labelLocator, competition);
-
                 }
             }
             catch (Exception ex)

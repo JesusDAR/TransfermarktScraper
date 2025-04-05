@@ -35,9 +35,10 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddSingleton(provider =>
             {
                 var playwright = provider.GetRequiredService<IPlaywright>();
+                var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
                 return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
                 {
-                    Headless = true, // set to false to see the browser
+                    Headless = scraperSettings.HeadlessMode, // set to false to see the browser
                 }).GetAwaiter().GetResult();
             });
 
@@ -83,6 +84,7 @@ namespace TransfermarktScraper.BLL.Configuration
                 });
 
             // Register services
+            services.AddSingleton<ISettingsService, SettingsService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<ICompetitionService, CompetitionService>();
             services.AddScoped<IClubService, ClubService>();

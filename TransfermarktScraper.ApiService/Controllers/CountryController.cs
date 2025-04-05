@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -42,11 +41,9 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </returns>
         /// <response code="200">Returns the list of countries successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
-        /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync(
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
@@ -56,13 +53,9 @@ namespace TransfermarktScraper.ApiService.Controllers
                 var result = await _countryService.GetCountriesAsync(forceScraping, cancellationToken);
                 return Ok(result);
             }
-            catch (HttpRequestException e)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
+                return Problem(ex.Message);
             }
         }
     }

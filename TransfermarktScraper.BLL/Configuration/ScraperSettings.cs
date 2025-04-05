@@ -12,6 +12,16 @@
         public int CountryLimit { get; set; } = 0;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the scraping is done in headless mode or not.
+        /// </summary>
+        public bool HeadlessMode { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the fetching of data comes always from scraping and not database.
+        /// </summary>
+        public bool ForceScraping { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the default timeout in ms for all awaitable actiones in the scraper.
         /// </summary>
         public int DefaultTimeout { get; set; } = 8000;

@@ -1,14 +1,23 @@
 ﻿@page "/"
 
 @using TransfermarktScraper.Web.Clients.Interfaces
+@using TransfermarktScraper.Web.Services.Interfaces
 
-@inject NavigationManager Navigation
 @inject ISettingsClient SettingsClient
+@inject INavigationHistoryService NavigationHistoryService
 
 <PageTitle>Home</PageTitle>
 
-<MudGrid Justify="Justify.Center" Spacing="2">
-    <MudItem xs="12" md="3">
+<MudGrid>
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudText>
+            Here comes some general explanation about what the app does
+        </MudText>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+    <MudItem md="2">
         <MudSelect Label="Visual scraping mode"
                    T="bool"
                    Value="_selectedHeadlessMode"
@@ -17,7 +26,7 @@
             <MudSelectItem Value="false">Enabled</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem xs="12" md="3">
+    <MudItem md="2">
         <MudSelect Label="Always force scraping mode"
                    T="bool"
                    Value="_selectedForceScrapingMode"
@@ -26,7 +35,7 @@
             <MudSelectItem Value="false">Disabled</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem xs="12" md="3">
+    <MudItem md="2">
         <MudNumericField Label="Number of countries to scrape"
                          T="int"
                          Value="_selectedCountriesCountToScrape"
@@ -36,8 +45,8 @@
         </MudNumericField>
     </MudItem>
 </MudGrid>
-<MudGrid Justify="Justify.Center" Class="mt-2">
-    <MudItem xs="12" Class="d-flex justify-center">
+<MudGrid Justify="Justify.Center" Class="mt-6">
+    <MudItem md="6" Class="d-flex justify-center">
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
                    Variant="Variant.Filled"
@@ -82,6 +91,6 @@
 
     private void NavigateToCountry()
     {
-        Navigation.NavigateTo("/country");
+        NavigationHistoryService.NavigateTo("/country");
     }
 }

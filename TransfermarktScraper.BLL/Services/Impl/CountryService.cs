@@ -70,7 +70,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var countries = await _countryRepository.GetAllAsync(cancellationToken);
 
-            if (!countries.Any())
+            if (!countries.Any() || countries.Count() < _scraperSettings.CountryLimit)
             {
                 var countriesScraped = await ScrapeCountriesAsync();
 

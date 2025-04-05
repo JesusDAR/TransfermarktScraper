@@ -48,6 +48,9 @@ namespace TransfermarktScraper.Web.Configuration
             // Register item selection service
             services.AddSingleton<IItemSelectionService, ItemSelectionService>();
 
+            // Register navigation history service
+            services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
+
             return services;
         }
     }

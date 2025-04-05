@@ -40,10 +40,7 @@ namespace TransfermarktScraper.Web.Configuration
             });
 
             // Register item selection service
-            services.AddScoped<IItemSelectionService, ItemSelectionService>();
-
-            // Register item navigation service
-            services.AddScoped<IItemNavigationService, ItemNavigationService>();
+            services.AddSingleton<IItemSelectionService, ItemSelectionService>();
 
             return services;
         }

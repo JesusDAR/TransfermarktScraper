@@ -1,4 +1,4 @@
-﻿@page "/competition"
+@page "/competition"
 
 @using Microsoft.AspNetCore.WebUtilities
 @using TransfermarktScraper.Web.Clients.Interfaces
@@ -8,7 +8,6 @@
 
 @inject ICompetitionClient CompetitionClient
 @inject IItemSelectionService ItemSelectionService
-@inject IItemNavigationService ItemNavigationService
 @inject NavigationManager Navigation
 
 <PageTitle>Competitions</PageTitle>
@@ -20,13 +19,13 @@
 else
 {
 	<MudTextField Label="Search competitions..."
-				  @bind-Value="SearchedCompetition"
-				  Adornment="Adornment.Start"
-				  AdornmentIcon="@Icons.Material.Filled.Search"
-				  Immediate="true"
-				  @oninput="FilterCompetitions" />
+	@bind-Value="SearchedCompetition"
+	Adornment="Adornment.Start"
+	AdornmentIcon="@Icons.Material.Filled.Search"
+	Immediate="true"
+	@oninput="FilterCompetitions" />
 
-	<MudGrid Spacing="4" Justify="Justify.FlexStart">
+	@* 	<MudGrid Spacing="4" Justify="Justify.FlexStart">
 		@foreach (var competition in filteredCompetitions)
 		{
 			<MudItem Class="mt-5">
@@ -38,7 +37,20 @@ else
 				</MudLink>
 			</MudItem>
 		}
-	</MudGrid>
+	</MudGrid> *@
+	<div style="height: calc(100vh - 150px);"> 
+		<MudList T="Domain.DTOs.Response.Competition" Style="overflow-y: auto;">
+			@foreach (var competition in filteredCompetitions)
+			{
+				<MudListItem>
+					<div style="padding: 8px;">
+						<MudImage Src="@competition.Logo" Alt="@competition.Name" />
+						<MudText Typo="Typo.body2" Align="Align.Center">@competition.Name</MudText>
+					</div>
+				</MudListItem>
+			}
+		</MudList>
+	</div>
 }
 
 @code {
@@ -62,11 +74,9 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		NavigationCheck();
-
 		competitions = await CompetitionClient.GetCompetitionsAsync(ItemSelectionService.SelectedCountry.TransfermarktId);
 
-		filteredCompetitions = competitions.ToList();
+		filteredCompetitions = competitions.ToList();		
 	}
 
 	private void FilterCompetitions()
@@ -76,31 +86,8 @@ else
 			.ToList() ?? new List<Domain.DTOs.Response.Competition>();
 	}
 
-	private void NavigationCheck() 
-	{
-		if (!ItemSelectionService.IsCountrySelected)
-		{
-			ItemNavigationService.NotifyNavigateToCountries();
-		}
-
-		var uri = new Uri(Navigation.Uri);
-
-		var queryParameters = QueryHelpers.ParseQuery(uri.Query);
-
-		int.TryParse(queryParameters["countryTransfermarktId"], out var transfermarktId);
-
-		var country = ItemSelectionService.SelectedCountry;
-
-		if (!transfermarktId.ToString().Equals(country?.TransfermarktId))
-		{
-			ItemNavigationService.NotifyNavigateToCompetitions();
-		}
-	}
-
 	private void SelectCompetition(Domain.DTOs.Response.Competition competition)
 	{
 		ItemSelectionService.SelectedCompetition = competition;
-
-		// ItemNavigationService.NotifyNavigateToCompetitions();
 	}
 }

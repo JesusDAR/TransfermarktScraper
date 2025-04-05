@@ -1,76 +1,28 @@
-﻿using System;
-using TransfermarktScraper.Domain.DTOs.Response;
-using TransfermarktScraper.Web.Services.Interfaces;
+﻿using TransfermarktScraper.Web.Services.Interfaces;
 
 namespace TransfermarktScraper.Web.Services.Impl
 {
     /// <inheritdoc/>
     public class ItemSelectionService : IItemSelectionService
     {
-        private Country? _selectedCountry;
+        /// <summary>
+        /// Gets or sets the currently selected country.
+        /// </summary>
+        public Domain.DTOs.Response.Country? SelectedCountry { get; set; }
 
-        private Competition? _selectedCompetition;
+        /// <summary>
+        /// Gets or sets the currently selected competition.
+        /// </summary>
+        public Domain.DTOs.Response.Competition? SelectedCompetition { get; set; }
 
-        /// <inheritdoc/>
-        public event Action OnCountrySelectionChange = () => { }; // Event to notify changes
+        /// <summary>
+        /// Gets or sets the currently selected club.
+        /// </summary>
+        public Domain.DTOs.Response.Club? SelectedClub { get; set; }
 
-        /// <inheritdoc/>
-        public event Action OnCompetitionSelectionChange = () => { };
-
-        /// <inheritdoc/>
-        public event Action OnClubSelectionChange = () => { };
-
-        /// <inheritdoc/>
-        public event Action OnPlayerSelectionChange = () => { };
-
-        /// <inheritdoc/>
-        public Country? SelectedCountry
-        {
-            get => _selectedCountry;
-            set
-            {
-                _selectedCountry = value;
-                NotifyCountrySelectionChange();
-            }
-        }
-
-        /// <inheritdoc/>
-        public Competition? SelectedCompetition
-        {
-            get => _selectedCompetition;
-            set
-            {
-                _selectedCompetition = value;
-                NotifyCompetitionSelectionChange();
-            }
-        }
-
-        /// <inheritdoc/>
-        public bool IsCountrySelected => _selectedCountry != null;
-
-        /// <inheritdoc/>
-        public bool IsCompetitionSelected => _selectedCompetition != null;
-
-        /// <inheritdoc/>
-        public Club? SelectedClub { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        /// <inheritdoc/>
-        public Player? SelectedPlayer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        /// <inheritdoc/>
-        public bool IsClubSelected => throw new NotImplementedException();
-
-        /// <inheritdoc/>
-        public bool IsPlayerSelected => throw new NotImplementedException();
-
-        private void NotifyCountrySelectionChange()
-        {
-            OnCountrySelectionChange?.Invoke();
-        }
-
-        private void NotifyCompetitionSelectionChange()
-        {
-            OnCompetitionSelectionChange?.Invoke();
-        }
+        /// <summary>
+        /// Gets or sets the currently selected player.
+        /// </summary>
+        public Domain.DTOs.Response.Player? SelectedPlayer { get; set; }
     }
 }

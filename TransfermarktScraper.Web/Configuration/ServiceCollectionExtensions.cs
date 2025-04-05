@@ -39,6 +39,12 @@ namespace TransfermarktScraper.Web.Configuration
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CompetitionControllerPath);
             });
 
+            services.AddHttpClient<ISettingsClient, SettingsClient>((serviceProvider, client) =>
+            {
+                var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
+                client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
+            });
+
             // Register item selection service
             services.AddSingleton<IItemSelectionService, ItemSelectionService>();
 

@@ -10,18 +10,22 @@
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h6" Class="ml-3">TFMScraper</MudText>
+        <MudText Typo="Typo.h6">TFMScraper</MudText>
         <MudSpacer />
-        <MudTooltip Text="Go Back">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
-                           Color="Color.Inherit"
-                           OnClick="NavigateBack" />
-        </MudTooltip>
-        <MudTooltip Text="Go Forward">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"
-                           Color="Color.Inherit"
-                           OnClick="NavigateForward" />
-        </MudTooltip>
+        <MudContainer Class="d-flex justify-center mr-3">
+            <MudTooltip Text="Go Back">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                               Class="mr-3"
+                               Color="Color.Inherit"
+                               OnClick="NavigateBack" />
+            </MudTooltip>
+            <MudTooltip Text="Go Forward">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"
+                               Class="mr-3"
+                               Color="Color.Inherit"
+                               OnClick="NavigateForward" />
+            </MudTooltip>
+        </MudContainer>
         <MudSpacer />
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         <MudIconButton Icon="@Icons.Material.Filled.Help" Color="Color.Inherit" Edge="Edge.End" />

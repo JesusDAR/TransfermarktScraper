@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -31,18 +32,21 @@ namespace TransfermarktScraper.Web.Configuration
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CountryControllerPath);
+                client.Timeout = Timeout.InfiniteTimeSpan;
             });
 
             services.AddHttpClient<ICompetitionClient, CompetitionClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CompetitionControllerPath);
+                client.Timeout = Timeout.InfiniteTimeSpan;
             });
 
             services.AddHttpClient<ISettingsClient, SettingsClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
+                client.Timeout = Timeout.InfiniteTimeSpan;
             });
 
             // Register navigation history service

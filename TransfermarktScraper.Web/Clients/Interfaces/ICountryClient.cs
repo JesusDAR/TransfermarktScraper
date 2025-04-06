@@ -16,5 +16,16 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Country"/>.
         /// </returns>
         Task<IEnumerable<Country>> GetCountriesAsync();
+
+        /// <summary>
+        /// Retrieves a list of countries with full competition data from the API.
+        /// </summary>
+        /// <param name="countries">
+        /// A collection of <see cref="Domain.DTOs.Request.Country"/> objects.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Country"/> with full <see cref="Competition"/> data.
+        /// </returns>
+        Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries);
     }
 }

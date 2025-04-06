@@ -1,7 +1,7 @@
-﻿namespace TransfermarktScraper.Domain.DTOs.Response
+﻿namespace TransfermarktScraper.Domain.DTOs.Request
 {
     /// <summary>
-    /// Represents the base response DTO.
+    /// Represents the base request DTO.
     /// </summary>
     public class Base
     {

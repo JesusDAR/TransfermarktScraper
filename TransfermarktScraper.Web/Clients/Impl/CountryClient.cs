@@ -31,9 +31,24 @@ namespace TransfermarktScraper.Web.Clients.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Country>> GetCountriesAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<List<Country>>(_clientSettings.CountryControllerPath);
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Country>>(_clientSettings.CountryControllerPath);
 
             return result ?? new List<Country>();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries)
+        {
+            var result = await _httpClient.PostAsJsonAsync(_clientSettings.CountryControllerPath, countries);
+
+            if (result != null && result.IsSuccessStatusCode)
+            {
+                var content = await result.Content.ReadFromJsonAsync<IEnumerable<Country>>();
+
+                return content ?? new List<Country>();
+            }
+
+            return new List<Country>();
         }
     }
 }

@@ -86,6 +86,29 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return countryDtos;
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
+        {
+            var countriesDtos = new List<Domain.DTOs.Response.Country>();
+
+            foreach (var country in countries)
+            {
+                var competitions = await _competitionService.GetCompetitionsAsync(country.TransfermarktId, forceScraping, cancellationToken);
+
+                var countryDto = new Domain.DTOs.Response.Country
+                {
+                    Name = country.Name,
+                    TransfermarktId = country.TransfermarktId,
+                    Competitions = competitions,
+                    Flag = country.Flag,
+                };
+
+                countriesDtos.Add(countryDto);
+            }
+
+            return countriesDtos;
+        }
+
         /// <summary>
         /// Persists a collection of countries by inserting or updating them in the database.
         /// </summary>

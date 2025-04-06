@@ -8,13 +8,13 @@ namespace TransfermarktScraper.Web.Services.Impl
     public class ItemSelectionService : IItemSelectionService
     {
         /// <inheritdoc/>
-        public IList<Country> SelectedCountries { get; set; } = [];
+        public HashSet<Country> SelectedCountries { get; set; } = [];
 
         /// <inheritdoc/>
-        public IList<Competition> SelectedCompetitions { get; set; } = [];
+        public HashSet<Competition> SelectedCompetitions { get; set; } = [];
 
         /// <inheritdoc/>
-        public IList<Club> SelectedClubs { get; set; } = [];
+        public HashSet<Club> SelectedClubs { get; set; } = [];
 
         /// <inheritdoc/>
         public Player? SelectedPlayer { get; set; }

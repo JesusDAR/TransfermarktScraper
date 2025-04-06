@@ -11,17 +11,17 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         /// <summary>
         /// Gets or sets the currently selected countries.
         /// </summary>
-        public IList<Country> SelectedCountries { get; set; }
+        public HashSet<Country> SelectedCountries { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected competitions.
         /// </summary>
-        public IList<Competition> SelectedCompetitions { get; set; }
+        public HashSet<Competition> SelectedCompetitions { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected clubs.
         /// </summary>
-        public IList<Club> SelectedClubs { get; set; }
+        public HashSet<Club> SelectedClubs { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected player.

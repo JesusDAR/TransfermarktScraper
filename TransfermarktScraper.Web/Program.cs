@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
+using TransfermarktScraper.Domain.Mappers;
 using TransfermarktScraper.Web.Components;
 using TransfermarktScraper.Web.Configuration;
 
@@ -31,6 +32,9 @@ namespace TransfermarktScraper.Web
                 .AddInteractiveServerComponents();
 
             builder.Services.AddOutputCache();
+
+            // Register Automapper in the web DI container
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             builder.Services.AddWebServices(builder.Configuration);
 

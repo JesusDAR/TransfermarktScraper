@@ -10,8 +10,7 @@
 
 @inject ICountryClient CountryClient
 @inject IOptions<ClientSettings> ClientSettings
-@inject IItemSelectionService ItemSelectionService
-@inject NavigationManager Navigation
+@inject INavigationHistoryService NavigationHistoryService
 
 <PageTitle>Countries</PageTitle>
 
@@ -21,23 +20,41 @@
 }
 else
 {
-    <MudTextField Label="Search countries..."
-                  @bind-Value="SearchedCountry"
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Immediate="true"
-                  @oninput="FilterCountries" />
+    <MudGrid>
+        <MudItem xs="2">
+            <MudTextField Label="Search countries..."
+                          @bind-value="SearchedCountry"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true" />
+        </MudItem>
+        <MudSpacer />
+        <MudItem xs="2">
+            <MudButton Color="Color.Primary"
+                       Size="Size.Large"
+                       Variant="Variant.Filled"
+                       OnClick="NavigateToCompetitions">
+                Scrape competitions
+            </MudButton>
+        </MudItem>
+    </MudGrid>
 
-    <MudGrid Spacing="4" Justify="Justify.FlexStart">
+    <MudGrid Spacing="4" Justify="Justify.FlexStart" Class="mt-6">
         @foreach (var country in filteredCountries)
         {
-            <MudItem Class="mt-5">
-                <MudLink OnClick="() => SelectCountry(country)">
-                    <MudPaper Elevation="5">
-                        <MudImage Src="@country.Flag" Alt="@country.Name" />
-                        <MudText Typo="Typo.body2" Align="Align.Center">@country.Name</MudText>
-                    </MudPaper>
-                </MudLink>
+            <MudItem xs="2">
+                <MudCard Class="@(selectedCountries.Contains(country) ? "mud-paper-outlined mud-elevation-5" : "mud-paper")">
+                    <MudButton OnClick="() => ToggleSelection(country)" Class="pa-0">
+                        <MudCardContent Class="d-flex align-items-center">
+                            <MudImage Src="@country.Flag" Alt="@country.Name" Style="width: 20%;" />
+                            <MudText Align="Align.Center" Class="flex-grow-1 mt-3" Style="width: 60%;">@($"{country.Name}")</MudText>
+                            @if (selectedCountries.Contains(country))
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary"/>
+                            }
+                        </MudCardContent>
+                    </MudButton>
+                </MudCard>
             </MudItem>
         }
     </MudGrid>
@@ -46,6 +63,7 @@ else
 @code {
     private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
     private List<Domain.DTOs.Response.Country> filteredCountries = new();
+    private List<Domain.DTOs.Response.Country> selectedCountries = new();
     private string _searchedCountry = string.Empty;
 
     private string SearchedCountry
@@ -75,10 +93,20 @@ else
             .ToList() ?? new List<Domain.DTOs.Response.Country>();
     }
 
-    private void SelectCountry(Domain.DTOs.Response.Country country)
+    private void ToggleSelection(Domain.DTOs.Response.Country country)
     {
-        ItemSelectionService.SelectedCountry = country;
+        if (selectedCountries.Contains(country))
+        {
+            selectedCountries.Remove(country); // Unselect
+        }
+        else
+        {
+            selectedCountries.Add(country); // Select
+        }
+    }
 
-        Navigation.NavigateTo($"competition?countryTransfermarktId={country.TransfermarktId}");
+    private void NavigateToCompetitions()
+    {
+        NavigationHistoryService.NavigateTo("/competitions");
     }
 }

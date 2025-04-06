@@ -45,9 +45,6 @@ namespace TransfermarktScraper.Web.Configuration
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
             });
 
-            // Register item selection service
-            services.AddSingleton<IItemSelectionService, ItemSelectionService>();
-
             // Register navigation history service
             services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
 

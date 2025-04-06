@@ -7,7 +7,6 @@
 @attribute [StreamRendering(true)]
 
 @inject ICompetitionClient CompetitionClient
-@inject IItemSelectionService ItemSelectionService
 @inject NavigationManager Navigation
 
 <PageTitle>Competitions</PageTitle>
@@ -74,9 +73,9 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		competitions = await CompetitionClient.GetCompetitionsAsync(ItemSelectionService.SelectedCountry.TransfermarktId);
+		// competitions = await CompetitionClient.GetCompetitionsAsync(ItemSelectionService.SelectedCountry.TransfermarktId);
 
-		filteredCompetitions = competitions.ToList();		
+		// filteredCompetitions = competitions.ToList();		
 	}
 
 	private void FilterCompetitions()
@@ -88,6 +87,6 @@ else
 
 	private void SelectCompetition(Domain.DTOs.Response.Competition competition)
 	{
-		ItemSelectionService.SelectedCompetition = competition;
+		// ItemSelectionService.SelectedCompetition = competition;
 	}
 }

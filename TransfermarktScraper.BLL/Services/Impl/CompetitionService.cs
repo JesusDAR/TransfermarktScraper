@@ -224,7 +224,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 await _page.WaitForSelectorAsync(
                     selector,
-                    new PageWaitForSelectorOptions { Timeout = 1000 });
+                    new PageWaitForSelectorOptions { Timeout = 200 });
 
                 var clubInfoLocator = _page.Locator(selector);
 
@@ -287,7 +287,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 await _page.WaitForSelectorAsync(
                     selector,
-                    new PageWaitForSelectorOptions { Timeout = 1000 });
+                    new PageWaitForSelectorOptions { Timeout = 200 });
 
                 var infoBoxLocator = _page.Locator(selector);
 
@@ -353,7 +353,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 await _page.WaitForSelectorAsync(
                     selector,
-                    new PageWaitForSelectorOptions { Timeout = 1000 });
+                    new PageWaitForSelectorOptions { Timeout = 200 });
 
                 var marKetValueBoxLocator = _page.Locator(selector);
 

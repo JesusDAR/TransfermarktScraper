@@ -3,90 +3,147 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
+@using AutoMapper
 
 @attribute [StreamRendering(true)]
 
-@inject ICompetitionClient CompetitionClient
-@inject NavigationManager Navigation
+@inject ICountryClient CountryClient
+@inject INavigationHistoryService NavigationHistoryService
+@inject IItemSelectionService ItemSelectionService
+@inject IMapper Mapper
 
 <PageTitle>Competitions</PageTitle>
 
-@if (competitions == null)
+@if (countries == null)
 {
 	<MudText HtmlTag="em">Scraping competitions please wait...</MudText>
 }
 else
 {
-	<MudTextField Label="Search competitions..."
-	@bind-Value="SearchedCompetition"
-	Adornment="Adornment.Start"
-	AdornmentIcon="@Icons.Material.Filled.Search"
-	Immediate="true"
-	@oninput="FilterCompetitions" />
+	<MudGrid>
+		<MudItem xs="2">
+			<MudTextField Label="Search countries..."
+			@bind-Value="SearchedCountry"
+			Adornment="Adornment.Start"
+			AdornmentIcon="@Icons.Material.Filled.Search"
+			Immediate="true" />
+		</MudItem>
+		<MudItem xs="10" Class="d-flex justify-end">
+			<MudButton Color="Color.Primary"
+			Size="Size.Large"
+			Variant="Variant.Filled"
+			OnClick="NavigateToClubs">
+				Scrape clubs
+			</MudButton>
+		</MudItem>
+	</MudGrid>
 
-	@* 	<MudGrid Spacing="4" Justify="Justify.FlexStart">
-		@foreach (var competition in filteredCompetitions)
+
+	<MudList Dense="true" Gutters="true" T="Domain.DTOs.Response.Country" Class="mt-6">
+		@foreach (var country in filteredCountries)
 		{
-			<MudItem Class="mt-5">
-				<MudLink OnClick="() => SelectCompetition(competition)">
-					<MudPaper Elevation="5">
-						<MudImage Src="@competition.Logo" Alt="@competition.Name" />
-						<MudText Typo="Typo.body2" Align="Align.Center">@competition.Name</MudText>
-					</MudPaper>
-				</MudLink>
-			</MudItem>
+			<MudListItem Class="cursor-pointer">
+				<MudListSubheader>
+					<MudStack @onclick="() => ToggleCountrySelection(country)" Row="true" AlignItems="AlignItems.Center">
+						<MudAvatar>
+							<MudImage Src="@country.Flag" Alt="@country.Name" />
+						</MudAvatar>
+						<MudSpacer />
+						<MudText Typo="Typo.h6">@country.Name</MudText>
+						<MudSpacer />
+						<MudIcon Icon="@(selectedCountries.Contains(country)
+							? Icons.Material.Filled.ArrowDropUp
+							: Icons.Material.Filled.ArrowDropDown)"
+								 Color="Color.Primary"
+								 Size="Size.Large" />
+					</MudStack>
+				</MudListSubheader>
+				<MudCollapse Expanded="@selectedCountries.Contains(country)">
+
+					<MudDataGrid T="Domain.DTOs.Response.Competition"
+								 Dense="true"
+								 Hover="true"
+								 Filterable="false"
+								 MultiSelection="true"
+								 ColumnResizeMode="ResizeMode.Container"
+								 @key="country.TransfermarktId"
+								 SelectedItems="ItemSelectionService.SelectedCompetitions"
+								 Items="@country.Competitions">
+						<Columns>
+							<SelectColumn T="Domain.DTOs.Response.Competition" />
+							<TemplateColumn T="Domain.DTOs.Response.Competition" Title="Logo">
+								<CellTemplate>
+									<MudAvatar>
+										<MudImage Src="@context.Item.Logo" Alt="@context.Item.Name" />
+									</MudAvatar>
+								</CellTemplate>
+							</TemplateColumn>
+							<PropertyColumn Property="x => x.Name" Sortable="false"/>
+							<PropertyColumn Property="x => x.Cup" Sortable="false" />
+							<PropertyColumn Property="x => x.Tier" Title="League tier" Sortable="false" />
+							<PropertyColumn Property="x => x.MarketValue" Title="Market value" Sortable="false" />
+							<PropertyColumn Property="x => x.Coefficient" Title="UEFA coefficient" Sortable="false" />
+							<PropertyColumn Property="x => x.ClubsCount" Title="Number of clubs" Sortable="false" />
+							<PropertyColumn Property="x => x.Participants" Title="Cup participants" Sortable="false" />
+							<PropertyColumn Property="x => x.CurrentChampion" Title="Current champion" Sortable="false" />
+							<PropertyColumn Property="x => x.MostTimesChampion" Title="Most times champion" Sortable="false" />
+							<PropertyColumn Property="x => x.PlayersCount" Title="Number of players" Sortable="false" />
+							<PropertyColumn Property="x => x.AgeAverage" Title="Age average" Sortable="false" />
+							<PropertyColumn Property="x => x.ForeignersCount" Title="Number of foreigners" Sortable="false" />
+							<PropertyColumn Property="x => x.MarketValueAverage" Title="Average market value" Sortable="false" />
+						</Columns>
+					</MudDataGrid>
+				</MudCollapse>
+			</MudListItem>
 		}
-	</MudGrid> *@
-	<div style="height: calc(100vh - 150px);"> 
-		<MudList T="Domain.DTOs.Response.Competition" Style="overflow-y: auto;">
-			@foreach (var competition in filteredCompetitions)
-			{
-				<MudListItem>
-					<div style="padding: 8px;">
-						<MudImage Src="@competition.Logo" Alt="@competition.Name" />
-						<MudText Typo="Typo.body2" Align="Align.Center">@competition.Name</MudText>
-					</div>
-				</MudListItem>
-			}
-		</MudList>
-	</div>
+	</MudList>
 }
 
 @code {
-	private IEnumerable<Domain.DTOs.Response.Competition> competitions = null!;
-	private List<Domain.DTOs.Response.Competition> filteredCompetitions = new();
-	private int? CountryTransfermarktId { get; set; }
-	private string _searchedCompetition = string.Empty;
+	private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
+	private HashSet<Domain.DTOs.Response.Country> selectedCountries = new();
+	private List<Domain.DTOs.Response.Country> filteredCountries = new();
+	private string _searchedCountry = string.Empty;
 
-	private string SearchedCompetition
+	private string SearchedCountry
 	{
-		get => _searchedCompetition;
+		get => _searchedCountry;
 		set
 		{
-			if (_searchedCompetition != value)
+			if (_searchedCountry != value)
 			{
-				_searchedCompetition = value;
-				FilterCompetitions();
+				_searchedCountry = value;
+				FilterCountries();
 			}
 		}
 	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		// competitions = await CompetitionClient.GetCompetitionsAsync(ItemSelectionService.SelectedCountry.TransfermarktId);
+		var countryDtos = Mapper.Map<IEnumerable<Domain.DTOs.Request.Country>>(ItemSelectionService.SelectedCountries);
 
-		// filteredCompetitions = competitions.ToList();		
+		countries = await CountryClient.GetCountriesAsync(countryDtos);
+
+		filteredCountries = countries.ToList();
 	}
 
-	private void FilterCompetitions()
+	private void ToggleCountrySelection(Domain.DTOs.Response.Country country)
 	{
-		filteredCompetitions = competitions?
-			.Where(competition => competition.Name.Contains(_searchedCompetition, StringComparison.OrdinalIgnoreCase))
-			.ToList() ?? new List<Domain.DTOs.Response.Competition>();
+		if (!selectedCountries.Add(country))
+		{
+			selectedCountries.Remove(country);
+		}
 	}
 
-	private void SelectCompetition(Domain.DTOs.Response.Competition competition)
+	private void FilterCountries()
 	{
-		// ItemSelectionService.SelectedCompetition = competition;
+		filteredCountries = countries?
+			.Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
+			.ToList() ?? new List<Domain.DTOs.Response.Country>();
+	}
+
+	private void NavigateToClubs()
+	{
+		NavigationHistoryService.NavigateTo("/clubs");
 	}
 }

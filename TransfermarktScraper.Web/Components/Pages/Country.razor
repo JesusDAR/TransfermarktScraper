@@ -44,7 +44,7 @@ else
 
             <MudItem xs="2">
                 <MudPaper>
-                    <MudButton OnClick="() => ToggleSelection(country)" FullWidth="true" Class="justify-start px-2">
+                    <MudButton OnClick="() => ToggleCountrySelection(country)" FullWidth="true" Class="justify-start px-2">
                         <MudStack Row="true" AlignItems="AlignItems.Center">
                             <MudStack Row="true" AlignItems="AlignItems.Center">
                                 <MudAvatar>
@@ -52,7 +52,6 @@ else
                                 </MudAvatar>
                                 <MudText Class="ml-2">@country.Name</MudText>
                             </MudStack>
-
                         </MudStack>
                     </MudButton>
                 </MudPaper>
@@ -90,7 +89,7 @@ else
         filteredCountries = countries.ToList();
     }
 
-    private void ToggleSelection(Domain.DTOs.Response.Country country)
+    private void ToggleCountrySelection(Domain.DTOs.Response.Country country)
     {
         if (!ItemSelectionService.SelectedCountries.Add(country))
         {

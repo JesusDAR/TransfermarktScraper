@@ -11,6 +11,7 @@
 @inject ICountryClient CountryClient
 @inject IOptions<ClientSettings> ClientSettings
 @inject INavigationHistoryService NavigationHistoryService
+@inject IItemSelectionService ItemSelectionService
 
 <PageTitle>Countries</PageTitle>
 
@@ -28,8 +29,7 @@ else
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true" />
         </MudItem>
-        <MudSpacer />
-        <MudItem xs="2">
+        <MudItem xs="10" Class="d-flex justify-end">
             <MudButton Color="Color.Primary"
                        Size="Size.Large"
                        Variant="Variant.Filled"
@@ -38,24 +38,29 @@ else
             </MudButton>
         </MudItem>
     </MudGrid>
-
-    <MudGrid Spacing="4" Justify="Justify.FlexStart" Class="mt-6">
+    <MudGrid Spacing="3" Justify="Justify.FlexStart" Class="mt-6">
         @foreach (var country in filteredCountries)
         {
+
             <MudItem xs="2">
-                <MudCard Class="@(selectedCountries.Contains(country) ? "mud-paper-outlined mud-elevation-5" : "mud-paper")">
-                    <MudButton OnClick="() => ToggleSelection(country)" Class="pa-0">
-                        <MudCardContent Class="d-flex align-items-center">
-                            <MudImage Src="@country.Flag" Alt="@country.Name" Style="width: 20%;" />
-                            <MudText Align="Align.Center" Class="flex-grow-1 mt-3" Style="width: 60%;">@($"{country.Name}")</MudText>
-                            @if (selectedCountries.Contains(country))
-                            {
-                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary"/>
-                            }
-                        </MudCardContent>
+                <MudPaper>
+                    <MudButton OnClick="() => ToggleSelection(country)" FullWidth="true" Class="justify-start px-2">
+                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudAvatar>
+                                    <MudImage Src="@country.Flag" Alt="@country.Name" />
+                                </MudAvatar>
+                                <MudText Class="ml-2">@country.Name</MudText>
+                            </MudStack>
+
+                        </MudStack>
                     </MudButton>
-                </MudCard>
+                </MudPaper>
             </MudItem>
+            @if (ItemSelectionService.SelectedCountries.Contains(country))
+            {
+                <MudBadge Size="Size.Medium" Class="mt-4" Overlap="true" Origin="Origin.TopRight" Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+            }
         }
     </MudGrid>
 }
@@ -63,7 +68,6 @@ else
 @code {
     private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
     private List<Domain.DTOs.Response.Country> filteredCountries = new();
-    private List<Domain.DTOs.Response.Country> selectedCountries = new();
     private string _searchedCountry = string.Empty;
 
     private string SearchedCountry
@@ -86,6 +90,14 @@ else
         filteredCountries = countries.ToList();
     }
 
+    private void ToggleSelection(Domain.DTOs.Response.Country country)
+    {
+        if (!ItemSelectionService.SelectedCountries.Add(country))
+        {
+            ItemSelectionService.SelectedCountries.Remove(country);
+        }
+    }
+
     private void FilterCountries()
     {
         filteredCountries = countries?
@@ -93,20 +105,8 @@ else
             .ToList() ?? new List<Domain.DTOs.Response.Country>();
     }
 
-    private void ToggleSelection(Domain.DTOs.Response.Country country)
-    {
-        if (selectedCountries.Contains(country))
-        {
-            selectedCountries.Remove(country); // Unselect
-        }
-        else
-        {
-            selectedCountries.Add(country); // Select
-        }
-    }
-
     private void NavigateToCompetitions()
     {
-        NavigationHistoryService.NavigateTo("/competitions");
+        NavigationHistoryService.NavigateTo("/competition");
     }
 }

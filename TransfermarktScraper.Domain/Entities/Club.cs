@@ -45,7 +45,7 @@ namespace TransfermarktScraper.Domain.Entities
         public float? MarketValue { get; set; }
 
         /// <summary>
-        /// Gets or sets the market value of the club.
+        /// Gets or sets the market value average of the players of the club.
         /// </summary>
         [BsonElement("marketValueAverage")]
         public float? MarketValueAverage { get; set; }

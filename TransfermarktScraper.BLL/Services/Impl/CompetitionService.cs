@@ -60,7 +60,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
             {
-                var competitionsScraped = await ScrapeCompetitionsAsync(countryTransfermarktId, competitions, cancellationToken);
+                var competitionsScraped = await ScrapeCompetitionsAsync(competitions, cancellationToken);
 
                 competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
             }
@@ -140,14 +140,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Scrapes competition data from a given URL for each competition in the provided list.
         /// Updates each competition's details with data fetched from Transfermarkt.
         /// </summary>
-        /// <param name="countryTransfermarktId">The ID of the country from Transfermarkt to associate with the competitions.</param>
         /// <param name="competitions">The list of competitions to scrape data for.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// A collection of updated <see cref="Competition"/> objects with scraped data.
         /// </returns>
         private async Task<IEnumerable<Competition>> ScrapeCompetitionsAsync(
-            string countryTransfermarktId,
             IEnumerable<Competition> competitions,
             CancellationToken cancellationToken)
         {
@@ -188,7 +186,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 // Competition Clubs
                 if (competition.Cup == Domain.Enums.Cup.None)
                 {
-                    var clubIds = await GetClubsAsync(countryTransfermarktId, cancellationToken);
+                    var clubIds = await GetClubsAsync(competition.TransfermarktId, cancellationToken);
                     competition.ClubIds = clubIds;
                 }
             }

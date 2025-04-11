@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             var result = await _httpClient.GetFromJsonAsync<IEnumerable<Competition>>(uri);
 
-            return result ?? new List<Competition>();
+            return result ?? Enumerable.Empty<Competition>();
         }
     }
 }

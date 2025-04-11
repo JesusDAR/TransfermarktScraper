@@ -21,6 +21,11 @@
         public string CompetitionControllerPath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the Club controller.
+        /// </summary>
+        public string ClubControllerPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the path of the Settings controller.
         /// </summary>
         public string SettingsControllerPath { get; set; } = string.Empty;

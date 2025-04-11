@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
@@ -46,6 +45,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var clubDto = _mapper.Map<Domain.DTOs.Response.Club>(club);
 
             return clubDto;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Domain.DTOs.Response.Club>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
+        {
+            var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
+
+            var clubDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Club>>(clubs);
+
+            return clubDtos;
         }
 
         /// <summary>

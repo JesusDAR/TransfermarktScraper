@@ -32,9 +32,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// If scraping is forced or the data is unavailable, it scrapes the countries and returns them.
         /// </summary>
         /// <param name="countryTransfermarktId">The Transfermarkt country ID used to identify the country.</param>
-        /// <param name="forceScraping">
-        /// A boolean flag that determines whether to force scraping of the competitions data, even if it exists in the database.
-        /// </param>
+        /// <param name="forceScraping"> A boolean flag that determines whether to force scraping of the competitions data, even if it exists in the database. </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Competition"/> objects,

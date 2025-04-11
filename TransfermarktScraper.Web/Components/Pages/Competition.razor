@@ -53,7 +53,7 @@ else
 	<MudList Dense="true" Gutters="true" T="Domain.DTOs.Response.Country" Class="mt-6">
 		@foreach (var country in filteredCountries)
 		{
-			<MudListItem Ripple="false" Class="cursor-pointer">
+			<MudListItem Ripple="false">
 				<MudListSubheader @onclick="() => ToggleCountrySelection(country)">
 					<MudStack Row="true" AlignItems="AlignItems.Center">
 						<MudAvatar>
@@ -78,9 +78,7 @@ else
 								 MultiSelection="true"
 								 ColumnResizeMode="ResizeMode.Container"
 								 SelectedItems="@ItemSelectionService.SelectedCompetitions"
-								 SelectedItemsChanged="OnCompetitionCheckboxSelectionChanged"
 								 @key="country.TransfermarktId"
-								 RowClick="(e) => ToggleCompetitionSelection(e.Item)"
 								 Items="@country.Competitions">
 						<Columns>
 							<SelectColumn T="Domain.DTOs.Response.Competition" />
@@ -145,19 +143,6 @@ else
 		if (!selectedCountries.Add(country))
 		{
 			selectedCountries.Remove(country);
-		}
-	}
-
-	private void OnCompetitionCheckboxSelectionChanged(HashSet<Domain.DTOs.Response.Competition> selected)
-	{
-		ItemSelectionService.SelectedCompetitions = selected;
-	}
-
-	private void ToggleCompetitionSelection(Domain.DTOs.Response.Competition competition)
-	{
-		if (!ItemSelectionService.SelectedCompetitions.Add(competition))
-		{
-			ItemSelectionService.SelectedCompetitions.Remove(competition);
 		}
 	}
 

@@ -29,8 +29,19 @@ else
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Immediate="true" />
         </MudItem>
-        <MudItem xs="10" Class="d-flex justify-end">
+        <MudSpacer />
+        <MudItem xs="2" Class="d-flex justify-end">
             <MudButton Color="Color.Primary"
+                       FullWidth="true"
+                       Size="Size.Large"
+                       Variant="Variant.Filled"
+                       OnClick="SelectAllCountries">
+                Select All
+            </MudButton>
+        </MudItem>
+        <MudItem xs="2" Class="d-flex justify-end">
+            <MudButton Color="Color.Primary"
+                       FullWidth="true"
                        Size="Size.Large"
                        Variant="Variant.Filled"
                        OnClick="NavigateToCompetitions">
@@ -102,6 +113,18 @@ else
         filteredCountries = countries?
             .Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
             .ToList() ?? new List<Domain.DTOs.Response.Country>();
+    }
+
+    private void SelectAllCountries()
+    {
+        if (ItemSelectionService.SelectedCountries.Count() == countries.Count())
+        {
+            ItemSelectionService.SelectedCountries = new HashSet<Domain.DTOs.Response.Country>();
+        }
+        else
+        {
+            ItemSelectionService.SelectedCountries = countries.ToHashSet();
+        }
     }
 
     private void NavigateToCompetitions()

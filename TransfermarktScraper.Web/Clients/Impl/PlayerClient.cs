@@ -39,5 +39,5 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             return result ?? Enumerable.Empty<Player>();
         }
-    }s
+    }
 }

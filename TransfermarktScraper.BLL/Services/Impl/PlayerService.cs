@@ -74,6 +74,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 await PersistPlayersAsync(club, players, cancellationToken);
             }
+            else
+            {
+                players = club.Players;
+            }
 
             var playerDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Player>>(players);
 
@@ -253,7 +257,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var portraitImageLocator = dataLocator.Locator(selector);
 
                 selector = "data-src";
-                portraitUrl = await dataLocator.GetAttributeAsync(selector);
+                portraitUrl = await portraitImageLocator.GetAttributeAsync(selector);
                 return portraitUrl ?? throw new Exception();
             }
             catch (Exception ex)
@@ -297,8 +301,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var selector = ".hauptlink a";
             try
             {
-                var dataSelector = playerDataLocators[1];
-                var linkLocator = dataSelector.Locator(selector);
+                var dataLocator = playerDataLocators[1];
+                var linkLocator = dataLocator.Locator(selector);
 
                 selector = "href";
                 link = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception();
@@ -486,8 +490,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var footLocator = playerDataLocators[5];
-                var footString = await footLocator.InnerTextAsync();
+                var dataLocator = playerDataLocators[5];
+                var footString = await dataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(footString))
                 {
@@ -517,8 +521,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var contractStartLocator = playerDataLocators[6];
-                var contractStartString = await contractStartLocator.InnerTextAsync();
+                var dataLocator = playerDataLocators[6];
+                var contractStartString = await dataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(contractStartString))
                 {
@@ -548,8 +552,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             try
             {
-                var contractEndLocator = playerDataLocators[8];
-                var contractEndString = await contractEndLocator.InnerTextAsync();
+                var dataLocator = playerDataLocators[8];
+                var contractEndString = await dataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(contractEndString))
                 {

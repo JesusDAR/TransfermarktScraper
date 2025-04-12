@@ -131,7 +131,7 @@ else
 		{
 			var clubsList = await ClubClient.GetClubsAsync(competition.TransfermarktId);
 
-			clubs = new Dictionary<string, IEnumerable<Domain.DTOs.Response.Club>>
+			clubs = new Dictionary<string, IEnumerable<Domain.DTOs.Response.Club>>()
 			{
 				[competition.TransfermarktId] = clubsList
 			};

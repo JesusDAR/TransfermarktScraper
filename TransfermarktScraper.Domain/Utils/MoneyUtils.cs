@@ -25,13 +25,18 @@ namespace TransfermarktScraper.Domain.Utils
         /// </summary>
         /// <param name="money">The monetary string (e.g., "10k", "5m", "3bn").</param>
         /// <returns>The numeric value as an float.</returns>
-        /// <exception cref="FormatException">Thrown when the input format is invalid.</exception>
+        /// <exception cref="UtilException">Thrown when the input format is invalid.</exception>
         public static float ConvertToFloat(string money)
         {
             money = money.Trim().ToLower();
 
             try
             {
+                if (string.IsNullOrWhiteSpace(money))
+                {
+                    return default;
+                }
+
                 if (money.EndsWith("k", StringComparison.OrdinalIgnoreCase))
                 {
                     string numericPart = money.Substring(0, money.Length - 1);

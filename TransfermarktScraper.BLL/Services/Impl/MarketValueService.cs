@@ -44,7 +44,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var marketValues = new List<MarketValue>();
 
-            var url = new Uri(string.Concat("/", playerTransfermarktId));
+            var url = new Uri(string.Concat(_scraperSettings.BaseUrl, _scraperSettings.MarketValuePath, "/", playerTransfermarktId));
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace TransfermarktScraper.Domain.Entities
@@ -18,7 +19,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the list of competition IDs associated with the club.
         /// </summary>
         [BsonElement("competitionIds")]
-        public IEnumerable<string> CompetitionIds { get; set; } = new List<string>();
+        public IEnumerable<string> CompetitionIds { get; set; } = Enumerable.Empty<string>;
 
         /// <summary>
         /// Gets or sets the crest of the club.

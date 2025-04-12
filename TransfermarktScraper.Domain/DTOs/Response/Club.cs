@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
@@ -15,7 +16,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the list of competition IDs associated with the club.
         /// </summary>
-        public IEnumerable<string> CompetitionIds { get; set; } = new List<string>();
+        public IEnumerable<string> CompetitionIds { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
         /// Gets or sets the crest of the club.
@@ -50,7 +51,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the players of the club.
         /// </summary>
-        public IEnumerable<Player>? Players { get; set; }
+        public IEnumerable<Player> Players { get; set; } = Enumerable.Empty<Player>();
 
         /// <summary>
         /// Gets or sets the number of players of the club.

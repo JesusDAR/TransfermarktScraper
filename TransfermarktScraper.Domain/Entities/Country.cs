@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -13,7 +14,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the competitions of the country.
         /// </summary>
         [BsonElement("competitions")]
-        public IEnumerable<Competition> Competitions { get; set; } = new List<Competition>();
+        public IEnumerable<Competition> Competitions { get; set; } = Enumerable.Empty<Competition>();
 
         /// <summary>
         /// Gets or sets the flag of the country.

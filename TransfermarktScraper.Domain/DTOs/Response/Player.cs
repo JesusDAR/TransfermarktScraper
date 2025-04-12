@@ -70,6 +70,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public string? Number { get; set; }
 
         /// <summary>
+        /// Gets or sets the portrait of the player.
+        /// </summary>
+        required public string Portrait { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the position of the player.
         /// </summary>
         public Position Position { get; set; } = Position.Unknown;

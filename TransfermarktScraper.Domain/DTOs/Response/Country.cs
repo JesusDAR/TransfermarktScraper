@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
@@ -10,7 +11,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the competitions of the country.
         /// </summary>
-        public IEnumerable<Competition> Competitions { get; set; } = new List<Competition>();
+        public IEnumerable<Competition> Competitions { get; set; } = Enumerable.Empty<Competition>();
 
         /// <summary>
         /// Gets or sets the flag of the country.

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,17 +36,6 @@ namespace Microsoft.Extensions.Hosting
 
             builder.Services.ConfigureHttpClientDefaults(http =>
             {
-                // Turn on resilience by default
-                http.AddStandardResilienceHandler(options =>
-                {
-                    options.AttemptTimeout.Timeout = TimeSpan.FromHours(12);
-                    options.TotalRequestTimeout.Timeout = TimeSpan.FromHours(12);
-
-                    // Ajustamos el Circuit Breaker
-                    options.CircuitBreaker.SamplingDuration = TimeSpan.FromHours(24);
-                });
-
-                // Turn on service discovery by default
                 http.AddServiceDiscovery();
             });
 

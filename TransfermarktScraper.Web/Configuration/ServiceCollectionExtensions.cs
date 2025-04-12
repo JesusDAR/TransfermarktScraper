@@ -39,21 +39,21 @@ namespace TransfermarktScraper.Web.Configuration
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.CompetitionControllerPath);
-                client.Timeout = Timeout.InfiniteTimeSpan;
+                client.Timeout = TimeSpan.FromHours(12);
             });
 
             services.AddHttpClient<IClubClient, ClubClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.ClubControllerPath);
-                client.Timeout = Timeout.InfiniteTimeSpan;
+                client.Timeout = TimeSpan.FromHours(12);
             });
 
             services.AddHttpClient<ISettingsClient, SettingsClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
-                client.Timeout = Timeout.InfiniteTimeSpan;
+                client.Timeout = TimeSpan.FromHours(12);
             });
 
             // Register navigation history service

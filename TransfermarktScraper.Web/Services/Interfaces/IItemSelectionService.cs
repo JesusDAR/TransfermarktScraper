@@ -24,8 +24,8 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         public HashSet<Club> SelectedClubs { get; set; }
 
         /// <summary>
-        /// Gets or sets the currently selected player.
+        /// Gets or sets the currently selected players.
         /// </summary>
-        public Player? SelectedPlayer { get; set; }
+        public HashSet<Player> SelectedPlayers { get; set; }
     }
 }

@@ -53,6 +53,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Starting the scraping countries process...");
+
             var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
 
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
@@ -89,6 +91,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Starting the scraping competitions process...");
+
             var countriesDtos = new List<Domain.DTOs.Response.Country>();
 
             foreach (var country in countries)

@@ -125,7 +125,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     _logger.LogDebug("Inserting {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                     countries = countries.OrderBy(country => int.Parse(country.TransfermarktId));
                     await _countries.InsertManyAsync(countries);
-                    _logger.LogDebug("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
+                    _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                 }
                 else
                 {
@@ -147,7 +147,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     {
                         _logger.LogDebug("Inserting {Count} countries in the database...", countriesToInsert.Count.ToString());
                         await _countries.InsertManyAsync(countriesToInsert, cancellationToken: cancellationToken);
-                        _logger.LogDebug("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
+                        _logger.LogInformation("Successfully inserted {Count} countries in the database...", countriesToInsert.Count.ToString());
                     }
 
                     var bulkOperations = countriesToUpdate
@@ -161,7 +161,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                     _logger.LogDebug("Updating {Count} countries in the database...", bulkOperations.Count);
                     var result = await _countries.BulkWriteAsync(bulkOperations, cancellationToken: cancellationToken);
-                    _logger.LogDebug("Successfully updated {Count} countries in the database...", bulkOperations.Count);
+                    _logger.LogInformation("Successfully updated {Count} countries in the database...", bulkOperations.Count);
                 }
 
                 return countries;
@@ -199,7 +199,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     competitionsList.Count.ToString(),
                     country.Name);
                 await _countries.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-                _logger.LogDebug(
+                _logger.LogInformation(
                     "Successfully updated {Count} competitions from {Country.Name} in the database...",
                     competitionsList.Count.ToString(),
                     country.Name);

@@ -50,6 +50,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<Domain.DTOs.Response.Club>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Starting the scraping clubs process...");
+
             var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
 
             var clubDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Club>>(clubs);

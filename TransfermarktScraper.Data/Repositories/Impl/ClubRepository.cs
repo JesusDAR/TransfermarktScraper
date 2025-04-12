@@ -71,7 +71,15 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 if (existingClub == null)
                 {
+                    _logger.LogDebug(
+                        "Inserting club with name {Club.Name} and Transfermarkt ID {Club.TransfermarktId} in the database...",
+                        club.Name,
+                        club.TransfermarktId);
                     await _clubs.InsertOneAsync(club);
+                    _logger.LogInformation(
+                        "Successfully inserted club with name {Club.Name} Transfermarkt ID {Club.TransfermarktId} in the database...",
+                        club.Name,
+                        club.TransfermarktId);
 
                     return club;
                 }
@@ -93,13 +101,19 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     .Set(c => c.PlayersCount, club.PlayersCount)
                     .Set(c => c.UpdateDate, club.UpdateDate);
 
-                _logger.LogDebug("Updating club with Transfermarkt ID {Club.TransfermarktId} in the database...", club.TransfermarktId);
+                _logger.LogDebug(
+                    "Updating club with name {Club.Name} and Transfermarkt ID {Club.TransfermarktId} in the database...",
+                    club.Name,
+                    club.TransfermarktId);
                 await _clubs.UpdateOneAsync(
                     filter,
                     update,
                     new UpdateOptions { IsUpsert = false },
                     cancellationToken);
-                _logger.LogDebug("Successfully updated club with Transfermarkt ID {Club.TransfermarktId} in the database...", club.TransfermarktId);
+                _logger.LogInformation(
+                    "Successfully updated club with name {Club.Name} Transfermarkt ID {Club.TransfermarktId} in the database...",
+                    club.Name,
+                    club.TransfermarktId);
 
                 return new Club
                 {
@@ -172,7 +186,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     update,
                     new UpdateOptions { IsUpsert = false },
                     cancellationToken: cancellationToken);
-                _logger.LogDebug("Successfully Inserted/Updated {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
+                _logger.LogInformation("Successfully Inserted/Updated {Count} players of {Club} in the database...", newPlayers.Count, club.Name);
 
                 return players;
             }

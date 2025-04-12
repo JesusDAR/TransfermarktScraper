@@ -26,6 +26,11 @@
         public string ClubControllerPath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the Player controller.
+        /// </summary>
+        public string PlayerControllerPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the path of the Settings controller.
         /// </summary>
         public string SettingsControllerPath { get; set; } = string.Empty;

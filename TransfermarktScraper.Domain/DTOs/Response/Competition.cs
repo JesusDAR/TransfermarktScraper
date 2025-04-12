@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TransfermarktScraper.Domain.Enums;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
@@ -16,7 +17,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the list of club IDs associated with the competition.
         /// </summary>
-        public IEnumerable<string> ClubIds { get; set; } = new List<string>();
+        public IEnumerable<string> ClubIds { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
         /// Gets or sets the coefficient of the competition.

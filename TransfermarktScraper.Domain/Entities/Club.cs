@@ -19,7 +19,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the list of competition IDs associated with the club.
         /// </summary>
         [BsonElement("competitionIds")]
-        public IEnumerable<string> CompetitionIds { get; set; } = Enumerable.Empty<string>;
+        public IEnumerable<string> CompetitionIds { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
         /// Gets or sets the crest of the club.

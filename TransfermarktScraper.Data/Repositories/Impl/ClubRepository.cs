@@ -30,14 +30,15 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Club?> GetAsync(string clubTransfermarktId, CancellationToken cancellationToken)
+        public async Task<Club> GetAsync(string clubTransfermarktId, CancellationToken cancellationToken)
         {
             try
             {
-                var club = await _clubs.Find(club => club.TransfermarktId == clubTransfermarktId).FirstOrDefaultAsync(cancellationToken);
+                var club = await _clubs.Find(club => club.TransfermarktId == clubTransfermarktId)
+                    .FirstAsync(cancellationToken);
                 return club;
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve the club with Transfermarkt ID: {clubTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAsync), nameof(ClubRepository), _logger);
@@ -53,7 +54,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     club.CompetitionIds.Contains(competitionTransfermarktId)).ToListAsync(cancellationToken);
                 return clubs;
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve all clubs from competition with Transfermarkt ID: {competitionTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(ClubRepository), _logger);
@@ -129,7 +130,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     UpdateDate = club.UpdateDate,
                 };
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed inserting or updating club with Transfermarkt ID: {club.TransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(InsertOrUpdateAsync), nameof(ClubRepository), _logger);

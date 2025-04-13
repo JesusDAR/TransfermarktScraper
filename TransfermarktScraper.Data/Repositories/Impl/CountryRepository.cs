@@ -38,7 +38,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 return country;
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve the country with Transfermarkt ID: {countryTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAsync), nameof(CountryRepository), _logger);
@@ -53,7 +53,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 var countries = await _countries.Find(_ => true).ToListAsync(cancellationToken);
                 return countries;
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve all countries from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
@@ -82,7 +82,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 var message = string.Concat($"Failed to retrieve all competitions of the country with Transfermarkt ID: {countryTransfermarktId} from the database. ", ex.Message);
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve all competitions of the country with Transfermarkt ID: {countryTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
@@ -98,7 +98,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 await _countries.InsertManyAsync(countries, cancellationToken: cancellationToken);
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to add range of countries to the database.";
                 throw DatabaseException.LogError(message, nameof(AddRangeAsync), nameof(CountryRepository), _logger);
@@ -166,7 +166,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 return countries;
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed inserting or updating {countries.Count()} countries in the database.";
                 throw DatabaseException.LogError(message, nameof(InsertOrUpdateRangeAsync), nameof(CountryRepository), _logger);
@@ -211,7 +211,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 var message = string.Concat($"Failed to update competitions of the country with Transfermarkt ID: {countryTransfermarktId} in the database. ", ex.Message);
                 throw DatabaseException.LogError(message, nameof(UpdateRangeAsync), nameof(CountryRepository), _logger);
             }
-            catch (MongoException)
+            catch (Exception)
             {
                 var message = $"Failed to update competitions of the country with Transfermarkt ID: {countryTransfermarktId} in the database.";
                 throw DatabaseException.LogError(message, nameof(UpdateRangeAsync), nameof(CountryRepository), _logger);

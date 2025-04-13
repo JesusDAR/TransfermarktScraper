@@ -58,12 +58,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var club = await _clubRepository.GetAsync(clubTransfermarktId, cancellationToken);
 
-            if (club == null)
-            {
-                var message = $"{nameof(club)}: {clubTransfermarktId} not found in database.";
-                throw DatabaseException.LogError(nameof(GetPlayersAsync), nameof(PlayerService), message, _logger);
-            }
-
             var players = Enumerable.Empty<Player>();
 
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;

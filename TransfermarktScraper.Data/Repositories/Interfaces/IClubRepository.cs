@@ -18,7 +18,7 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains the <see cref="Club"/> if found; otherwise, null.
         /// </returns>
-        Task<Club?> GetAsync(string clubTransfermarktId, CancellationToken cancellationToken);
+        Task<Club> GetAsync(string clubTransfermarktId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously retrieves all <see cref="Club"/> from a competition.

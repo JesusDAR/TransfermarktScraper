@@ -4,7 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities
+namespace TransfermarktScraper.Domain.Entities.Stat.Season
 {
     /// <summary>
     /// Represents a player season competition stat entity.
@@ -21,17 +21,17 @@ namespace TransfermarktScraper.Domain.Entities
         {
             if (string.IsNullOrEmpty(playerTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty", nameof(playerTransfermarktId));
+                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty");
             }
 
             if (string.IsNullOrEmpty(seasonTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(SeasonTransfermarktId)} cannot be null or empty", nameof(seasonTransfermarktId));
+                throw new ArgumentException($"{nameof(SeasonTransfermarktId)} cannot be null or empty");
             }
 
             if (string.IsNullOrEmpty(competitionTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(CompetitionTransfermarktId)} cannot be null or empty", nameof(competitionTransfermarktId));
+                throw new ArgumentException($"{nameof(CompetitionTransfermarktId)} cannot be null or empty");
             }
 
             PlayerTransfermarktId = playerTransfermarktId;
@@ -194,7 +194,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// <summary>
         /// Gets or sets the player match stats in the competition for the season.
         /// </summary>
-        [BsonElement("playerMatchStats")]
-        public IEnumerable<PlayerMatchStat>? PlayerMatchStats { get; set; }
+        [BsonElement("playerSeasonCompetitionMatchStats")]
+        public IEnumerable<PlayerSeasonCompetitionMatchStat>? PlayerSeasonCompetitionMatchStats { get; set; }
     }
 }

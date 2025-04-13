@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace TransfermarktScraper.Domain.Entities.Embedded
+namespace TransfermarktScraper.Domain.Entities.Stat.Career
 {
     /// <summary>
     /// Represents a player career stat embedded entity.
@@ -35,16 +35,16 @@ namespace TransfermarktScraper.Domain.Entities.Embedded
         public int OwnGoals { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted in the player career.
+        /// Gets or sets the number of times the player was substituted on in the player career.
         /// </summary>
-        [BsonElement("substitutedIn")]
-        public int SubstitutedIn { get; set; }
+        [BsonElement("substitutionsOn")]
+        public int SubstitutionsOn { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted off in the player career.
         /// </summary>
-        [BsonElement("substitutedOff")]
-        public int SubstitutedOff { get; set; }
+        [BsonElement("substitutionsOff")]
+        public int SubstitutionsOff { get; set; }
 
         /// <summary>
         /// Gets or sets the number of yellow cards received in the player career.
@@ -85,7 +85,7 @@ namespace TransfermarktScraper.Domain.Entities.Embedded
         /// <summary>
         /// Gets or sets the player career stats per competition.
         /// </summary>
-        [BsonElement("playerCompetitionStats")]
+        [BsonElement("playerCareerCompetitionStats")]
         public IEnumerable<PlayerCareerCompetitionStat>? PlayerCareerCompetitionStats { get; set; }
     }
 }

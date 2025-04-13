@@ -4,34 +4,34 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities
+namespace TransfermarktScraper.Domain.Entities.Stat.Season
 {
     /// <summary>
     /// Represents a player season entity.
     /// </summary>
-    public class PlayerSeason
+    public class PlayerSeasonStat
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlayerSeason"/> class.
+        /// Initializes a new instance of the <see cref="PlayerSeasonStat"/> class.
         /// </summary>
         /// <param name="playerTransfermarktId">The unique player Transfermarkt identifier.</param>
         /// <param name="seasonTransfermarktId">The unique season Transfermarkt identifier.</param>
-        public PlayerSeason(string playerTransfermarktId, string seasonTransfermarktId)
+        public PlayerSeasonStat(string playerTransfermarktId, string seasonTransfermarktId)
         {
             if (string.IsNullOrEmpty(playerTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty", nameof(playerTransfermarktId));
+                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty");
             }
 
             if (string.IsNullOrEmpty(seasonTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(SeasonTransfermarktId)} cannot be null or empty", nameof(seasonTransfermarktId));
+                throw new ArgumentException($"{nameof(SeasonTransfermarktId)} cannot be null or empty");
             }
 
             PlayerTransfermarktId = playerTransfermarktId;
             SeasonTransfermarktId = seasonTransfermarktId;
             TransfermarktId = EntityUtils.GetHash($"{playerTransfermarktId}|{seasonTransfermarktId}");
-            UpdateDate = DateTime.UtcNow;
+            UpdateDate = DateTime.Now;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// <summary>
         /// Gets or sets the competition stats for the player.
         /// </summary>
-        [BsonElement("playerCompetitionStats")]
-        public IEnumerable<PlayerSeasonCompetitionStat>? PlayerCompetitionStats { get; set; }
+        [BsonElement("playerSeasonCompetitionStats")]
+        public IEnumerable<PlayerSeasonCompetitionStat>? PlayerSeasonCompetitionStats { get; set; }
     }
 }

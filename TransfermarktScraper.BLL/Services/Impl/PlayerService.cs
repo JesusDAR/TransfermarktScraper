@@ -130,7 +130,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 // Get Player stats TODO
 
-                var player = new Player
+                var player = new Player()
                 {
                     Number = number,
                     Portrait = portrait,

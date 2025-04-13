@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities
+namespace TransfermarktScraper.Domain.Entities.Stat.Career
 {
     /// <summary>
     /// Represents a player career competition stat entity.

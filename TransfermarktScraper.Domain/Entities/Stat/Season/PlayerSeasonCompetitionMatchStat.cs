@@ -4,40 +4,40 @@ using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities
+namespace TransfermarktScraper.Domain.Entities.Stat.Season
 {
     /// <summary>
-    /// Represents the player match stat entity.
+    /// Represents the player season competition match stat entity.
     /// </summary>
-    public class PlayerMatchStat
+    public class PlayerSeasonCompetitionMatchStat
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlayerMatchStat"/> class.
+        /// Initializes a new instance of the <see cref="PlayerSeasonCompetitionMatchStat"/> class.
         /// </summary>
         /// <param name="playerTransfermarktId">The unique player Transfermarkt identifier.</param>
         /// <param name="homeClubTransfermarktId">The unique home club Transfermarkt identifier.</param>
         /// <param name="awayClubTransfermarktId">The unique away club Transfermarkt identifier.</param>
         /// <param name="date">The date of the match.</param>
-        public PlayerMatchStat(string playerTransfermarktId, string homeClubTransfermarktId, string awayClubTransfermarktId, DateTime date)
+        public PlayerSeasonCompetitionMatchStat(string playerTransfermarktId, string homeClubTransfermarktId, string awayClubTransfermarktId, DateTime date)
         {
             if (string.IsNullOrEmpty(playerTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty", nameof(playerTransfermarktId));
+                throw new ArgumentException($"{nameof(PlayerTransfermarktId)} cannot be null or empty");
             }
 
             if (string.IsNullOrEmpty(homeClubTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(HomeClubTransfermarktId)} cannot be null or empty", nameof(homeClubTransfermarktId));
+                throw new ArgumentException($"{nameof(HomeClubTransfermarktId)} cannot be null or empty");
             }
 
             if (string.IsNullOrEmpty(awayClubTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(AwayClubTransfermarktId)} cannot be null or empty", nameof(awayClubTransfermarktId));
+                throw new ArgumentException($"{nameof(AwayClubTransfermarktId)} cannot be null or empty");
             }
 
             if (date == default)
             {
-                throw new ArgumentException($"{nameof(Date)} cannot be the default value", nameof(date));
+                throw new ArgumentException($"{nameof(Date)} cannot be the default value");
             }
 
             PlayerTransfermarktId = playerTransfermarktId;
@@ -45,7 +45,7 @@ namespace TransfermarktScraper.Domain.Entities
             AwayClubTransfermarktId = awayClubTransfermarktId;
             Date = date;
             TransfermarktId = EntityUtils.GetHash($"{playerTransfermarktId}|{homeClubTransfermarktId}|{awayClubTransfermarktId}|{date:yyyyMMdd}");
-            UpdateDate = DateTime.UtcNow;
+            UpdateDate = DateTime.Now;
         }
 
         /// <summary>

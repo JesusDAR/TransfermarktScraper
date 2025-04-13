@@ -164,14 +164,14 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                         existingPlayer.Nationalities = player.Nationalities;
                         existingPlayer.Number = player.Number;
                         existingPlayer.Portrait = player.Portrait;
-                        existingPlayer.UpdateDate = DateTime.UtcNow;
+                        existingPlayer.UpdateDate = DateTime.Now;
 
                         newPlayers.Add(existingPlayer);
                     }
                     else
                     {
                         // Insert new player
-                        player.UpdateDate = DateTime.UtcNow;
+                        player.UpdateDate = DateTime.Now;
                         newPlayers.Add(player);
                     }
                 }

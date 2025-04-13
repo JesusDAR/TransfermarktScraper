@@ -224,7 +224,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         /// <param name="countries">The collection of countries to update.</param>
         private void SetUpdateTime(IEnumerable<Country> countries)
         {
-            var time = DateTime.UtcNow;
+            var time = DateTime.Now;
 
             foreach (var country in countries)
             {

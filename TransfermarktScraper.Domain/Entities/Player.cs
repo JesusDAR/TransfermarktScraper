@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
-using TransfermarktScraper.Domain.Entities.Embedded;
 using TransfermarktScraper.Domain.Enums;
+using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.Domain.Entities
 {
@@ -11,6 +11,19 @@ namespace TransfermarktScraper.Domain.Entities
     /// </summary>
     public class Player : Base
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// </summary>
+        public Player()
+        {
+            if (string.IsNullOrEmpty(TransfermarktId))
+            {
+                throw new ArgumentException($"{nameof(TransfermarktId)} cannot be null or empty.");
+            }
+
+            PlayerStatId = EntityUtils.GetHash($"{TransfermarktId}|stat");
+        }
+
         /// <summary>
         /// Gets or sets the age of the player.
         /// </summary>
@@ -96,9 +109,9 @@ namespace TransfermarktScraper.Domain.Entities
         public Position Position { get; set; } = Position.Unknown;
 
         /// <summary>
-        /// Gets or sets the player stat.
+        /// Gets or sets the uniqye player stat Id.
         /// </summary>
-        [BsonElement("playerStat")]
-        public IEnumerable<PlayerStat>? PlayerStat { get; set; }
+        [BsonElement("playerStatId")]
+        public string PlayerStatId { get; set; }
     }
 }

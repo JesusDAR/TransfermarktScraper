@@ -93,43 +93,43 @@ namespace TransfermarktScraper.Domain.Entities.Stat.Career
         public int OwnGoals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted in the competition for the whole the player career.
+        /// Gets or sets the number of times the player was substituted on in the competition for the whole player career.
         /// </summary>
-        [BsonElement("substitutedIn")]
-        public int SubstitutedIn { get; set; } = 0;
+        [BsonElement("substitutionsOn")]
+        public int SubstitutionsOn { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted off in the competition for the whole the player career.
+        /// Gets or sets the number of times the player was substituted off in the competition for the whole player career.
         /// </summary>
-        [BsonElement("substitutedOff")]
-        public int SubstitutedOff { get; set; } = 0;
+        [BsonElement("substitutionsOff")]
+        public int SubstitutionsOff { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of yellow cards received in the competition for the whole the player career.
+        /// Gets or sets the number of yellow cards received in the competition for the whole player career.
         /// </summary>
         [BsonElement("yellowCards")]
         public int YellowCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of second yellow cards received in the competition for the whole the player career.
+        /// Gets or sets the number of second yellow cards received in the competition for the whole player career.
         /// </summary>
         [BsonElement("secondYellowCards")]
         public int SecondYellowCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of red cards received in the competition for the whole the player career.
+        /// Gets or sets the number of red cards received in the competition for the whole player career.
         /// </summary>
         [BsonElement("redCards")]
         public int RedCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of penalty goals scored in the competition for the whole the player career.
+        /// Gets or sets the number of penalty goals scored in the competition for the whole player career.
         /// </summary>
         [BsonElement("penaltyGoals")]
         public int PenaltyGoals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of minutes per goal scored in the competition for the whole the player career.
+        /// Gets or sets the number of minutes per goal scored in the competition for the whole player career.
         /// </summary>
         [BsonElement("minutesPerGoal")]
         public int MinutesPerGoal { get; set; } = 0;

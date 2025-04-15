@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -90,45 +90,43 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             await _page.GotoAsync(uri);
 
-            var playerRowsLocators = await GetPlayerRowLocatorsAsync();
+            var tableRowsLocators = await GetTableRowLocatorsAsync();
 
             var players = new List<Player>();
 
-            foreach (var playerRowLocator in playerRowsLocators)
+            foreach (var tableRowLocator in tableRowsLocators)
             {
-                var playerDataLocators = await GetPlayerDataLocatorsAsync(playerRowLocator);
+                var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
 
-                var number = await GetNumberAsync(playerDataLocators);
+                var number = await GetNumberAsync(tableDataLocators, 0);
 
-                var portrait = await GetPortraitAsync(playerDataLocators);
+                var portrait = await GetPortraitAsync(tableDataLocators, 1);
 
-                var name = await GetNameAsync(playerDataLocators);
+                var name = await GetNameAsync(tableDataLocators, 1);
 
-                var link = await GetLinkAsync(playerDataLocators);
+                var link = await GetLinkAsync(tableDataLocators, 1);
 
-                var transfermarktId = GetTransfermarktId(link);
+                var playerTransfermarktId = GetPlayerTransfermarktId(link);
 
-                var position = await GetPositionAsync(playerDataLocators);
+                var position = await GetPositionAsync(tableDataLocators, 1);
 
-                var dateOfBirth = await GetDateOfBirthAsync(playerDataLocators);
+                var dateOfBirth = await GetDateOfBirthAsync(tableDataLocators, 2);
 
-                var age = await GetAgeAsync(playerDataLocators);
+                var age = await GetAgeAsync(tableDataLocators, 2);
 
-                var nationalities = await GetNationalitiesAsync(playerDataLocators);
+                var nationalities = await GetNationalitiesAsync(tableDataLocators, 3);
 
-                var height = await GetHeightAsync(playerDataLocators);
+                var height = await GetHeightAsync(tableDataLocators, 4);
 
-                var foot = await GetFootAsync(playerDataLocators);
+                var foot = await GetFootAsync(tableDataLocators, 5);
 
-                var contractStart = await GetContractStartAsync(playerDataLocators);
+                var contractStart = await GetContractStartAsync(tableDataLocators, 6);
 
-                var contractEnd = await GetContractEndAsync(playerDataLocators);
+                var contractEnd = await GetContractEndAsync(tableDataLocators, 8);
 
-                var marketValue = await GetMarketValueAsync(playerDataLocators);
+                var marketValue = await GetMarketValueAsync(tableDataLocators, 9);
 
-                var marketValues = await _marketValueService.GetMarketValuesAsync(transfermarktId, cancellationToken);
-
-                // Get Player stats TODO
+                var marketValues = await _marketValueService.GetMarketValuesAsync(playerTransfermarktId, cancellationToken);
 
                 var player = new Player()
                 {
@@ -136,7 +134,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     Portrait = portrait,
                     Name = name,
                     Link = link,
-                    TransfermarktId = transfermarktId,
+                    TransfermarktId = playerTransfermarktId,
                     Position = position,
                     DateOfBirth = dateOfBirth,
                     Age = age,
@@ -167,69 +165,71 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
         /// representing the player rows.
         /// </returns>
-        private async Task<IReadOnlyList<ILocator>> GetPlayerRowLocatorsAsync()
+        private async Task<IReadOnlyList<ILocator>> GetTableRowLocatorsAsync()
         {
             var selector = "#yw1";
             try
             {
                 await _page.WaitForSelectorAsync(selector);
-                var playerGridLocator = _page.Locator(selector);
+                var gridLocator = _page.Locator(selector);
 
                 selector = "table.items > tbody > tr";
-                var playerRowLocator = playerGridLocator.Locator(selector);
-                var playerRowLocators = await playerRowLocator.AllAsync();
+                var tableRowLocator = gridLocator.Locator(selector);
+                var tableRowLocators = await tableRowLocator.AllAsync();
 
-                return playerRowLocators;
+                return tableRowLocators;
             }
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetPlayerRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetTableRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
         }
 
         /// <summary>
         /// Retrieves the locators for player data within player data grid.
         /// </summary>
+        /// <param name="tableRowLocator">The table row locator.</param>
         /// <returns>
         /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
         /// representing the player datas.
         /// </returns>
-        private async Task<IReadOnlyList<ILocator>> GetPlayerDataLocatorsAsync(ILocator playerRowLocator)
+        private async Task<IReadOnlyList<ILocator>> GetTableDataLocatorsAsync(ILocator tableRowLocator)
         {
             var selector = "> td";
             try
             {
-                var playerDataLocator = playerRowLocator.Locator(selector);
-                var playerDataLocators = await playerDataLocator.AllAsync();
+                var tableDataLocator = tableRowLocator.Locator(selector);
+                var tableDataLocators = await tableDataLocator.AllAsync();
 
-                return playerDataLocators;
+                return tableDataLocators;
             }
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetPlayerDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetTableDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
         }
 
         /// <summary>
         /// Extracts the player number from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The player number.</returns>
-        private async Task<string?> GetNumberAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<string?> GetNumberAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             string? playerNumber = default;
 
             try
             {
-                var dataLocator = playerDataLocators[0];
-                playerNumber = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                playerNumber = await tableDataLocator.InnerTextAsync();
                 return playerNumber;
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(playerNumber)} failed.";
+                var message = $"Getting {nameof(playerNumber)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetNumberAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -239,24 +239,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the url of the player portrait from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The url of the player portrait.</returns>
-        private async Task<string> GetPortraitAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<string> GetPortraitAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             var portraitUrl = string.Empty;
             var selector = "table.inline-table img";
             try
             {
-                var dataLocator = playerDataLocators[1];
-                var portraitImageLocator = dataLocator.Locator(selector);
+                var tableDataLocator = tableDataLocators[index];
+                var portraitImageLocator = tableDataLocator.Locator(selector);
 
                 selector = "data-src";
-                portraitUrl = await portraitImageLocator.GetAttributeAsync(selector);
-                return portraitUrl ?? throw new Exception();
+                portraitUrl = await portraitImageLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(portraitUrl)} from the '{selector}' attribute.");
+                return portraitUrl;
             }
             catch (Exception ex)
             {
-                var message = $"Using selector: '{selector}' failed.";
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 throw ScrapingException.LogError(nameof(GetPortraitAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
         }
@@ -264,22 +265,23 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the player name from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The player name.</returns>
-        private async Task<string> GetNameAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<string> GetNameAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             string name = string.Empty;
             var selector = ".hauptlink";
             try
             {
-                var dataLocator = playerDataLocators[1];
-                var nameLocator = dataLocator.Locator(selector);
+                var tableDataLocator = tableDataLocators[index];
+                var nameLocator = tableDataLocator.Locator(selector);
                 name = await nameLocator.InnerTextAsync();
                 return name;
             }
             catch (Exception ex)
             {
-                var message = $"Using selector: '{selector}' failed.";
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 throw ScrapingException.LogError(nameof(GetNameAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
         }
@@ -287,24 +289,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the player link in Transfermarkt from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The player link in Transfermarkt.</returns>
-        private async Task<string> GetLinkAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<string> GetLinkAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             string link = string.Empty;
             var selector = ".hauptlink a";
             try
             {
-                var dataLocator = playerDataLocators[1];
-                var linkLocator = dataLocator.Locator(selector);
+                var tableDataLocator = tableDataLocators[index];
+                var linkLocator = tableDataLocator.Locator(selector);
 
                 selector = "href";
-                link = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception();
+                link = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(link)} from the '{selector}' attribute.");
                 return link;
             }
             catch (Exception ex)
             {
-                var message = $"Using selector: '{selector}' failed.";
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 throw ScrapingException.LogError(nameof(GetLinkAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
         }
@@ -314,33 +317,34 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="link">The player link in Transfermarkt.</param>
         /// <returns>The Transfermarkt player identifier.</returns>
-        private string GetTransfermarktId(string link)
+        private string GetPlayerTransfermarktId(string link)
         {
             var index = link.LastIndexOf('/');
-            string transfermarktId = link.Substring(index + 1);
-            return transfermarktId;
+            string playerTransfermarktId = link.Substring(index + 1);
+            return playerTransfermarktId;
         }
 
         /// <summary>
         /// Extracts the player position from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The enum representing the player position.</returns>
-        private async Task<Domain.Enums.Position> GetPositionAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<Domain.Enums.Position> GetPositionAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             Domain.Enums.Position position = default;
             var selector = "table tr:nth-child(2)";
             try
             {
-                var dataLocator = playerDataLocators[1];
-                var positionLocator = dataLocator.Locator(selector);
+                var tableDataLocator = tableDataLocators[index];
+                var positionLocator = tableDataLocator.Locator(selector);
                 var positionString = await positionLocator.InnerTextAsync();
                 position = PositionExtensions.ToEnum(positionString);
                 return position;
             }
             catch (Exception ex)
             {
-                var message = $"Using selector: '{selector}' failed.";
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetPositionAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -350,23 +354,24 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the player birth date from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The birth date of the player.</returns>
-        private async Task<DateTime?> GetDateOfBirthAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<DateTime?> GetDateOfBirthAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             DateTime? dateOfBirth = null;
 
             try
             {
-                var dataLocator = playerDataLocators[2];
-                var text = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var text = await tableDataLocator.InnerTextAsync();
                 var dateOfBirthString = Regex.Replace(text, @"\s*\(\d+\)", string.Empty);
                 dateOfBirth = DateUtils.ConvertToDateTime(dateOfBirthString);
                 return dateOfBirth;
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(dateOfBirth)} failed.";
+                var message = $"Getting {nameof(dateOfBirth)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetDateOfBirthAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -376,16 +381,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the player age from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The age of the player.</returns>
-        private async Task<int> GetAgeAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<int> GetAgeAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             int age = default;
 
             try
             {
-                var dataLocator = playerDataLocators[2];
-                var text = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var text = await tableDataLocator.InnerTextAsync();
                 Match match = Regex.Match(text, @"\((\d+)\)");
                 if (match.Success)
                 {
@@ -398,7 +404,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(age)} failed.";
+                var message = $"Getting {nameof(age)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetAgeAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -408,29 +414,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the collection of nationalities of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The nationalities of the player.</returns>
-        private async Task<IEnumerable<string>> GetNationalitiesAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<IEnumerable<string>> GetNationalitiesAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             var nationalities = new List<string>();
             var selector = "img";
             try
             {
-                var dataLocator = playerDataLocators[3];
-                var imgLocator = dataLocator.Locator(selector);
+                var tableDataLocator = tableDataLocators[index];
+                var imgLocator = tableDataLocator.Locator(selector);
                 var imgLocators = await imgLocator.AllAsync();
                 selector = "src";
 
                 foreach (var locator in imgLocators)
                 {
-                    var src = await locator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain attribute src from selector '{selector}'.");
+                    var src = await locator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the nationality image from the '{selector}' attribute.");
                     var nationality = ImageUtils.GetTransfermarktIdFromImageUrl(src);
                     nationalities.Add(nationality);
                 }
             }
             catch (Exception ex)
             {
-                var message = $"Using selector: '{selector}' failed.";
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetNationalitiesAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -440,16 +447,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the height of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The height of the player.</returns>
-        private async Task<int> GetHeightAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<int> GetHeightAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             int height = default;
 
             try
             {
-                var dataLocator = playerDataLocators[4];
-                var text = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var text = await tableDataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(text))
                 {
@@ -466,7 +474,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(height)} failed.";
+                var message = $"Getting {nameof(height)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetHeightAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -476,16 +484,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the preferred foot of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The enum representing the preferred foot of the player.</returns>
-        private async Task<Foot> GetFootAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<Foot> GetFootAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             Foot foot = default;
 
             try
             {
-                var dataLocator = playerDataLocators[5];
-                var footString = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var footString = await tableDataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(footString))
                 {
@@ -497,7 +506,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(foot)} failed.";
+                var message = $"Getting {nameof(foot)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetFootAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -507,16 +516,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the starting date of the contract of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The starting date of the contract of the player.</returns>
-        private async Task<DateTime?> GetContractStartAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<DateTime?> GetContractStartAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             DateTime? contractStart = default;
 
             try
             {
-                var dataLocator = playerDataLocators[6];
-                var contractStartString = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var contractStartString = await tableDataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(contractStartString))
                 {
@@ -528,7 +538,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(contractStart)} failed.";
+                var message = $"Getting {nameof(contractStart)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetContractStartAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -538,16 +548,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the ending date of the contract of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The ending date of the contract of the player.</returns>
-        private async Task<DateTime?> GetContractEndAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<DateTime?> GetContractEndAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             DateTime? contractEnd = default;
 
             try
             {
-                var dataLocator = playerDataLocators[8];
-                var contractEndString = await dataLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var contractEndString = await tableDataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(contractEndString))
                 {
@@ -559,7 +570,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(contractEnd)} failed.";
+                var message = $"Getting {nameof(contractEnd)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetContractEndAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 
@@ -569,16 +580,17 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Extracts the current market value of the player from the provided locators.
         /// </summary>
-        /// <param name="playerDataLocators">A list of locators containing player information.</param>
+        /// <param name="tableDataLocators">A list of locators containing player information.</param>
+        /// <param name="index">The table data index.</param>
         /// <returns>The current market value of the player.</returns>
-        private async Task<float?> GetMarketValueAsync(IReadOnlyList<ILocator> playerDataLocators)
+        private async Task<float?> GetMarketValueAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             float? marketValue = default;
 
             try
             {
-                var marketValueLocator = playerDataLocators[9];
-                var marketValueString = await marketValueLocator.InnerTextAsync();
+                var tableDataLocator = tableDataLocators[index];
+                var marketValueString = await tableDataLocator.InnerTextAsync();
 
                 if (TableUtils.IsTableDataCellEmpty(marketValueString))
                 {
@@ -591,7 +603,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(marketValue)} failed.";
+                var message = $"Getting {nameof(marketValue)} failed. Table data index: {index}.";
                 ScrapingException.LogWarning(nameof(GetMarketValueAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
 

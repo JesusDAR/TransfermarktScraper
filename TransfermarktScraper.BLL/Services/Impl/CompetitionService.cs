@@ -76,9 +76,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             await _page.RouteAsync("**/quickselect/competitions/**", async route =>
             {
                 var url = route.Request.Url;
-                _logger.LogDebug("Intercepted competition URL: {url}", url);
+                _logger.LogDebug("Intercepted competition quickselect URL: {url}", url);
 
-                var countryTransfermarktId = ExtractTransfermarktId(url);
+                var countryTransfermarktId = ExtractCountryTransfermarktId(url);
 
                 var response = await route.FetchAsync();
 
@@ -313,7 +313,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task SetInfoBoxValuesAsync(Competition competition, ILocator infoBoxLocator)
         {
             var selector = "li";
-
             try
             {
                 var itemLocators = await infoBoxLocator.Locator(selector).AllAsync();
@@ -455,17 +454,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the Transfermarkt ID from a given URL.
+        /// Extracts the country Transfermarkt ID from a given URL.
         /// </summary>
-        /// /// <returns>
-        /// A string representing the extracted Transfermarkt ID. If no match is found, an empty string is returned.
+        /// <param name="url">The competition link in Transfermarkt.</param>
+        /// <returns>
+        /// A string representing the extracted country Transfermarkt ID.
         /// </returns>
-        private string ExtractTransfermarktId(string url)
+        private string ExtractCountryTransfermarktId(string url)
         {
             string pattern = @"/(\d+)$";
             var match = Regex.Match(url, pattern);
-            string transfermarktId = match.Groups[1].Value;
-            return transfermarktId;
+            string countryTransfermarktId = match.Groups[1].Value;
+            return countryTransfermarktId;
         }
     }
 }

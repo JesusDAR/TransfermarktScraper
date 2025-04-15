@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
 using AutoMapper;
@@ -116,7 +116,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Persists a collection of countries by inserting or updating them in the database.
         /// </summary>
-        /// <param name="countries">The collection of country DTOs to persist.</param>
+        /// <param name="countries">The collection of country entities to persist.</param>
         /// <returns>A task that represents the asynchronous operation, containing the persisted countries.</returns>
         private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {

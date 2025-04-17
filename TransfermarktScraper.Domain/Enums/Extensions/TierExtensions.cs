@@ -21,7 +21,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Tier.SecondTier => "Second Tier",
                 Tier.ThirdTier => "Third Tier",
                 Tier.YouthLeague => "Youth League",
-                Tier.Unknown => "Unknown",
+                Tier.Unknown => "Unknown Tier",
                 Tier.None => string.Empty,
                 _ => HandleUnsupportedEnum(tier),
             };
@@ -36,16 +36,32 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         {
             tierString = tierString.ToLower();
 
-            return tierString switch
+            if (tierString.Contains("first tier"))
             {
-                "first tier" => Tier.FirstTier,
-                "second tier" => Tier.SecondTier,
-                "third tier" => Tier.ThirdTier,
-                "youth league" => Tier.YouthLeague,
-                "unknown" => Tier.Unknown,
-                "" => Tier.None,
-                _ => HandleUnsupportedString(tierString),
-            };
+                return Tier.FirstTier;
+            }
+
+            if (tierString.Contains("second tier"))
+            {
+                return Tier.SecondTier;
+            }
+
+            if (tierString.Contains("third tier"))
+            {
+                return Tier.ThirdTier;
+            }
+
+            if (tierString.Contains("youth league"))
+            {
+                return Tier.YouthLeague;
+            }
+
+            if (!string.IsNullOrEmpty(tierString))
+            {
+                return Tier.Unknown;
+            }
+
+            return HandleUnsupportedString(tierString);
         }
 
         /// <summary>

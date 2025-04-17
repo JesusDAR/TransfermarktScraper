@@ -1,4 +1,6 @@
-﻿using TransfermarktScraper.BLL.Models;
+﻿using AngleSharp.Html.Dom;
+using TransfermarktScraper.BLL.Models;
+using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.BLL.Services.Interfaces
@@ -20,6 +22,19 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Competition"/> objects.</returns>
         public Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping = false, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Scrapes the competition row from the Transfermarkt competition search results page based on a known competition name and ID.
+        /// </summary>
+        /// <param name="document">The HTML document containing the competition search results.</param>
+        /// <param name="competitionTransfermarktId">The unique Transfermarkt ID of the competition.</param>
+        /// <param name="competitionName">The competition name used to search.</param>
+        /// <param name="competitionLink">The URL link to the competition page.</param>
+        /// <param name="url">The URL of the page being scraped (used for logging errors).</param>
+        /// <returns>
+        /// A <see cref="CompetitionSearchResult"/> that containes a <see cref="Domain.Entities.Competition"/> and the HTML element (`td`) containing the country name associated with the competition.
+        /// </returns>
+        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url);
 
         /// <summary>
         /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country and competition data from the URL intercepted.

@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Entities.Stat;
 
 namespace TransfermarktScraper.Data.Context.Interfaces
 {
@@ -22,5 +23,10 @@ namespace TransfermarktScraper.Data.Context.Interfaces
         /// Gets the collection of clubs.
         /// </summary>
         IMongoCollection<Club> Clubs { get; }
+
+        /// <summary>
+        /// Gets the collection of player stats.
+        /// </summary>
+        IMongoCollection<PlayerStat> PlayerStats { get; }
     }
 }

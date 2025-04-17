@@ -52,7 +52,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         public DateTime UpdateDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the overall career stats of the player.
+        /// Gets or sets the overall career stat of the player.
         /// </summary>
         [BsonElement("playerCareerStat")]
         required public PlayerCareerStat PlayerCareerStat { get; set; }

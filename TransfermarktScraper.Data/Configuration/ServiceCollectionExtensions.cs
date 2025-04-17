@@ -30,6 +30,7 @@ namespace TransfermarktScraper.Data.Configuration
             // Register repositories
             services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<IClubRepository, ClubRepository>();
+            services.AddScoped<IPlayerStatRepository, PlayerStatRepository>();
 
             return services;
         }

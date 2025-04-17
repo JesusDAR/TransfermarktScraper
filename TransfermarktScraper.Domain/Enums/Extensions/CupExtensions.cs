@@ -16,10 +16,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         {
             return cup switch
             {
-                Cup.DomesticCup => "Domestic Cup",
-                Cup.DomesticSuperCup => "Domestic Super Cup",
-                Cup.International => "International",
-                Cup.Unknown => "Unknown",
+                Cup.Domestic => "Domestic Cup",
+                Cup.International => "International Cup",
+                Cup.Unknown => "Unknown Cup",
                 Cup.None => string.Empty,
                 _ => HandleUnsupportedEnum(cup),
             };
@@ -34,15 +33,22 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         {
             cupString = cupString.ToLower();
 
-            return cupString switch
+            if (cupString.Contains("domestic"))
             {
-                "domestic cup" => Cup.DomesticCup,
-                "domestic super cup" => Cup.DomesticSuperCup,
-                "international" => Cup.International,
-                "unknown" => Cup.Unknown,
-                "" => Cup.None,
-                _ => HandleUnsupportedString(cupString),
-            };
+                return Cup.Domestic;
+            }
+
+            if (cupString.Contains("international"))
+            {
+                return Cup.International;
+            }
+
+            if (!string.IsNullOrWhiteSpace(cupString))
+            {
+                return Cup.Unknown;
+            }
+
+            return HandleUnsupportedString(cupString);
         }
 
         /// <summary>

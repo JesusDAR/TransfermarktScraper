@@ -21,6 +21,16 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<Country?> GetAsync(string countryTransfermarktId, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Asynchronously retrieves a <see cref="Competition"/> by its unique Transfermarkt identifier.
+        /// </summary>
+        /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier of the <see cref="Competition"/>.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains the <see cref="Competition"/> if found; otherwise, null.
+        /// </returns>
+        Task<Competition?> GetCompetitionAsync(string competitionTransfermarktId, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Asynchronously retrieves all <see cref="Country"/>.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>

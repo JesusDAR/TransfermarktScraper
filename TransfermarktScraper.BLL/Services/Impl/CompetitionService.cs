@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -68,6 +70,73 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var competitionDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Competition>>(competitions);
 
             return competitionDtos;
+        }
+
+        /// <inheritdoc/>
+        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url)
+        {
+            IElement countryTableData;
+            CompetitionSearchResult competitionSearchResult;
+            var selector = "h2.content-box-headline";
+            try
+            {
+                var competitionHeaders = document.QuerySelectorAll(selector) ?? throw new Exception();
+
+                selector = "competitions";
+                var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.TextContent.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
+
+                selector = "table.items";
+                var competitionTable = competitionHeader?.ParentElement?.QuerySelector(selector) ?? throw new Exception();
+
+                selector = "tbody tr";
+                var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception();
+
+                selector = $"a[title='{competitionName}']";
+                var competitionTableRow = competitionTableRows.First(competitionTableRow => competitionTableRow.QuerySelector(selector) != null) ?? throw new Exception();
+
+                selector = "td";
+                var competitionTableDatas = competitionTableRow?.QuerySelectorAll(selector) ?? throw new Exception();
+
+                countryTableData = competitionTableDatas[2];
+
+                var clubsCountString = competitionTableDatas[3].TextContent.Trim();
+                var clubsCount = int.Parse(clubsCountString);
+
+                var playersCountString = competitionTableDatas[4].TextContent.Trim();
+                var playersCount = int.Parse(playersCountString);
+
+                var marketValueNumericString = competitionTableDatas[5].TextContent.Trim();
+                var marketValueString = MoneyUtils.ExtractNumericPart(marketValueNumericString);
+                var marketValue = MoneyUtils.ConvertToFloat(marketValueString);
+
+                var marketValueAverageNumericString = competitionTableDatas[6].TextContent.Trim();
+                var marketValueAverageString = MoneyUtils.ExtractNumericPart(marketValueAverageNumericString);
+                var marketValueAverage = MoneyUtils.ConvertToFloat(marketValueAverageString);
+
+                var competition = new Competition
+                {
+                    Name = competitionName,
+                    Link = competitionLink,
+                    TransfermarktId = competitionTransfermarktId,
+                    ClubsCount = clubsCount,
+                    PlayersCount = playersCount,
+                    MarketValue = marketValue,
+                    MarketValueAverage = marketValueAverage,
+                };
+
+                competitionSearchResult = new CompetitionSearchResult
+                {
+                    Competition = competition,
+                    CountryTableData = countryTableData,
+                };
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(ScrapeCompetitionFromSearchResults), nameof(CompetitionService), message, url, _logger, ex);
+            }
+
+            return competitionSearchResult;
         }
 
         /// <inheritdoc/>
@@ -386,9 +455,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var boxTexts = await marKetValueBoxLocator.AllInnerTextsAsync();
                 var boxText = boxTexts.First();
 
-                var marketValueText = boxText.Replace(lastUpdateText, string.Empty).Trim();
-                marketValueText = MoneyUtils.ExtractNumericPart(marketValueText);
-                competition.MarketValue = MoneyUtils.ConvertToFloat(marketValueText);
+                var marketValueNumericString = boxText.Replace(lastUpdateText, string.Empty).Trim();
+                var marketValueString = MoneyUtils.ExtractNumericPart(marketValueNumericString);
+                competition.MarketValue = MoneyUtils.ConvertToFloat(marketValueString);
             }
             catch (Exception ex)
             {

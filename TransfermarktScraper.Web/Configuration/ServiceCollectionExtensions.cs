@@ -56,6 +56,13 @@ namespace TransfermarktScraper.Web.Configuration
                 client.Timeout = TimeSpan.FromHours(12);
             });
 
+            services.AddHttpClient<IPlayerStatClient, PlayerStatClient>((serviceProvider, client) =>
+            {
+                var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
+                client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.PlayerStatsControllerPath);
+                client.Timeout = TimeSpan.FromHours(12);
+            });
+
             services.AddHttpClient<ISettingsClient, SettingsClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;

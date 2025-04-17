@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -19,7 +20,7 @@ namespace TransfermarktScraper.BLL.Configuration
         /// <param name="services">The service collection to which the services will be added.</param>
         /// <param name="configuration">The application configuration.</param>
         /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
-        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             // Bind ScraperSettings from appsettings.json
             services.Configure<ScraperSettings>(options =>
@@ -74,6 +75,15 @@ namespace TransfermarktScraper.BLL.Configuration
                 return page;
             });
 
+            // Register Country HttpClient
+            services.AddHttpClient("CountryClient")
+                .ConfigureHttpClient((provider, client) =>
+                {
+                    var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+                    client.BaseAddress = new Uri(scraperSettings.BaseUrl + scraperSettings.SearchPath);
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                });
+
             // Register MarketValue HttpClient
             services.AddHttpClient("MarketValueClient")
                 .ConfigureHttpClient((provider, client) =>
@@ -83,6 +93,9 @@ namespace TransfermarktScraper.BLL.Configuration
                     client.Timeout = TimeSpan.FromSeconds(2);
                 });
 
+            // Register AngleSharp HTML parser
+            services.AddSingleton<HtmlParser>();
+
             // Register services
             services.AddSingleton<ISettingsService, SettingsService>();
             services.AddScoped<ICountryService, CountryService>();
@@ -90,6 +103,7 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped<IClubService, ClubService>();
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMarketValueService, MarketValueService>();
+            services.AddScoped<IPlayerStatService, PlayerStatService>();
 
             return services;
         }

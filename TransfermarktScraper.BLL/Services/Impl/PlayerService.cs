@@ -58,6 +58,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var club = await _clubRepository.GetAsync(clubTransfermarktId, cancellationToken);
 
+            if (club == null)
+            {
+                var message = $"Error while retrieving {nameof(club)}: {clubTransfermarktId} not found in database.";
+                throw new InvalidOperationException(message);
+            }
+
             var players = Enumerable.Empty<Player>();
 
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
@@ -430,7 +436,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 foreach (var locator in imgLocators)
                 {
-                    var src = await locator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the nationality image from the '{selector}' attribute.");
+                    string src = string.Empty;
+                    src = await locator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(src)} from the '{selector}' attribute.");
                     var nationality = ImageUtils.GetTransfermarktIdFromImageUrl(src);
                     nationalities.Add(nationality);
                 }
@@ -590,14 +597,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var marketValueString = await tableDataLocator.InnerTextAsync();
+                var marketValueNumericString = await tableDataLocator.InnerTextAsync();
 
-                if (TableUtils.IsTableDataCellEmpty(marketValueString))
+                if (TableUtils.IsTableDataCellEmpty(marketValueNumericString))
                 {
                     return marketValue;
                 }
 
-                var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValueString);
+                var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValueNumericString);
                 marketValue = MoneyUtils.ConvertToFloat(marketValueNumeric);
                 return marketValue;
             }

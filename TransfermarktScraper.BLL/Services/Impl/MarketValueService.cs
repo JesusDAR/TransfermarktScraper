@@ -22,7 +22,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Initializes a new instance of the <see cref="MarketValueService"/> class.
         /// </summary>
-        /// <param name="httpClientFactory">The http client factory to get the markte value client used to request market values to Transfermarkt.</param>
+        /// <param name="httpClientFactory">The http client factory to get the market value client used to request market values to Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
         /// <param name="logger">The logger.</param>
         public MarketValueService(
@@ -44,14 +44,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var marketValues = new List<MarketValue>();
 
-            var url = new Uri(string.Concat(_scraperSettings.BaseUrl, _scraperSettings.MarketValuePath, "/", playerTransfermarktId));
+            var url = string.Concat("/", playerTransfermarktId);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
 
             if (response == null || !response.IsSuccessStatusCode)
             {
-                var message = $"Getting page: {_httpClient.BaseAddress + url.ToString()} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
-                throw ScrapingException.LogError(url.ToString(), nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _logger);
+                var message = $"Getting page: {_httpClient.BaseAddress + url} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
+                throw ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
             }
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -61,7 +61,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             if (marketValueResult?.MarketValueItemResults == null)
             {
                 var message = $"No market value data found for {nameof(Player)}: {playerTransfermarktId}";
-                ScrapingException.LogWarning(_httpClient.BaseAddress + url.ToString(), nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _logger);
+                ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
                 return marketValues;
             }
 
@@ -74,7 +74,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var clubCrest = marketValueItemResult.Wappen;
 
                 var dateString = marketValueItemResult.DatumMw;
-                var date = DateUtils.ConvertToDateTime(dateString) ?? throw UtilException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), "date cannot be null or empty.", _httpClient.BaseAddress + url.ToString(), _logger);
+                var date = DateUtils.ConvertToDateTime(dateString);
 
                 var clubTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(clubCrest);
 
@@ -86,7 +86,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
                 catch (Exception ex)
                 {
-                    ScrapingException.LogError(_httpClient.BaseAddress + url.ToString(), nameof(GetMarketValuesAsync), nameof(MarketValueService), ex.Message, _logger);
+                    ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), ex.Message, _httpClient.BaseAddress + url, _logger);
                 }
 
                 var marketValue = new MarketValue

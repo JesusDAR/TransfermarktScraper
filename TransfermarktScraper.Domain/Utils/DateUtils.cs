@@ -14,7 +14,7 @@ namespace TransfermarktScraper.Domain.Utils
         /// </summary>
         /// <param name="date">The date string to convert (expected format: "MMM d, yyyy" e.g., "Jun 26, 1999").</param>
         /// <returns>A DateTime object representing the parsed date.</returns>
-        public static DateTime? ConvertToDateTime(string date)
+        public static DateTime ConvertToDateTime(string date)
         {
             try
             {

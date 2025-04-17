@@ -24,5 +24,10 @@
         /// Gets or sets the name of the collection that stores club data.
         /// </summary>
         public string? ClubCollection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the collection that stores player stat data.
+        /// </summary>
+        public string? PlayerStatCollection { get; set; }
     }
 }

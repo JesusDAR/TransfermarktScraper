@@ -111,8 +111,8 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                         break;
 
                     case CompetitionInfoBox.MarketValueAverage:
-                        var money = MoneyUtils.ExtractNumericPart(spanText);
-                        competition.MarketValueAverage = MoneyUtils.ConvertToFloat(money);
+                        var marketValueString = MoneyUtils.ExtractNumericPart(spanText);
+                        competition.MarketValueAverage = MoneyUtils.ConvertToFloat(marketValueString);
                         break;
 
                     case CompetitionInfoBox.AgeAverage:

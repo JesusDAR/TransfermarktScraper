@@ -33,6 +33,25 @@ namespace TransfermarktScraper.Domain.Mappers
             // MarketValue
             CreateMap<Entities.MarketValue, DTOs.Response.MarketValue>();
             CreateMap<DTOs.Response.MarketValue, Entities.MarketValue>();
+
+            // PlayerStat
+            CreateMap<Entities.Stat.PlayerStat, DTOs.Response.Stat.PlayerStat>();
+            CreateMap<DTOs.Response.Stat.PlayerStat, Entities.Stat.PlayerStat>();
+
+            CreateMap<DTOs.Response.Stat.Career.PlayerCareerStat, Entities.Stat.Career.PlayerCareerStat>();
+            CreateMap<Entities.Stat.Career.PlayerCareerStat, DTOs.Response.Stat.Career.PlayerCareerStat>();
+
+            CreateMap<DTOs.Response.Stat.Career.PlayerCareerCompetitionStat, Entities.Stat.Career.PlayerCareerCompetitionStat>();
+            CreateMap<Entities.Stat.Career.PlayerCareerCompetitionStat, DTOs.Response.Stat.Career.PlayerCareerCompetitionStat>();
+
+            CreateMap<DTOs.Response.Stat.Season.PlayerSeasonStat, Entities.Stat.Season.PlayerSeasonStat>();
+            CreateMap<Entities.Stat.Season.PlayerSeasonStat, DTOs.Response.Stat.Season.PlayerSeasonStat>();
+
+            CreateMap<DTOs.Response.Stat.Season.PlayerSeasonCompetitionStat, Entities.Stat.Season.PlayerSeasonCompetitionStat>();
+            CreateMap<Entities.Stat.Season.PlayerSeasonCompetitionStat, DTOs.Response.Stat.Season.PlayerSeasonCompetitionStat>();
+
+            CreateMap<DTOs.Response.Stat.Season.PlayerSeasonCompetitionMatchStat, Entities.Stat.Season.PlayerSeasonCompetitionMatchStat>();
+            CreateMap<Entities.Stat.Season.PlayerSeasonCompetitionMatchStat, DTOs.Response.Stat.Season.PlayerSeasonCompetitionMatchStat>();
         }
     }
 }

@@ -33,5 +33,15 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> DTOs with the full competitions data.</returns>
         public Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries, bool forceScraping = false, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Checks if the country and competition exists in the repository and scrapes the country and competition information from Transfermarkt if it does not.
+        /// </summary>
+        /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
+        /// <param name="competitionLink">The original link to the competition page.</param>
+        /// <param name="competitionName">The name of the competition, used to construct the search URL.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken);
     }
 }

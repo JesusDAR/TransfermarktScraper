@@ -18,16 +18,11 @@
         /// <summary>
         /// Domestic cup.
         /// </summary>
-        DomesticCup = 2,
-
-        /// <summary>
-        /// Domestic super cup.
-        /// </summary>
-        DomesticSuperCup = 3,
+        Domestic = 2,
 
         /// <summary>
         /// International cup.
         /// </summary>
-        International = 4,
+        International = 3,
     }
 }

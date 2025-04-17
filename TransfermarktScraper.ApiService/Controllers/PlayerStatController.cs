@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.Domain.Entities.Stat;
+using TransfermarktScraper.Domain.DTOs.Response.Stat;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -32,8 +32,8 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </summary>
         /// <param name="playerTransfermarktId">The Transfermarkt player ID used to identify the player.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns> An <see cref="ActionResult{T}"/> containing a list of <see cref="PlayerStat"/> objects.</returns>
-        /// <response code="200">Returns the list of player stats successfully scraped.</response>
+        /// <returns> An <see cref="ActionResult{T}"/> containing a <see cref="PlayerStat"/> object.</returns>
+        /// <response code="200">Returns the of player stat successfully scraped.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
         [HttpGet]

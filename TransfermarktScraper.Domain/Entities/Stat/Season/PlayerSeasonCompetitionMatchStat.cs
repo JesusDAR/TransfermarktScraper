@@ -194,10 +194,10 @@ namespace TransfermarktScraper.Domain.Entities.Stat.Season
         public int RedCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the minute when the player was substituted in.
+        /// Gets or sets the minute when the player was substituted on.
         /// </summary>
-        [BsonElement("substitutedIn")]
-        public int? SubstitutedIn { get; set; }
+        [BsonElement("substitutedOn")]
+        public int? SubstitutedOn { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted off.

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace TransfermarktScraper.Domain.Exceptions
 {
     /// <summary>
-    /// Base class for exceptions with built-in logging capabilities
+    /// Base class for exceptions with built-in logging capabilities.
     /// </summary>
     public abstract class LoggedException : Exception
     {

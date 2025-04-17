@@ -120,7 +120,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat.Season
         public int SecondYellowCards { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of red cards receive in the competition for the season.
+        /// Gets or sets the number of red cards received in the competition for the season.
         /// </summary>
         [BsonElement("redCards")]
         public int RedCards { get; set; } = 0;
@@ -156,16 +156,16 @@ namespace TransfermarktScraper.Domain.Entities.Stat.Season
         public int StartingEleven { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of times the player was substituted in the competition for the season.
+        /// Gets or sets the number of times the player was substituted on in the competition for the season.
         /// </summary>
-        [BsonElement("substitutedIn")]
-        public int SubstitutedIn { get; set; } = 0;
+        [BsonElement("substitutionsOn")]
+        public int SubstitutionsOn { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted off in the competition for the season.
         /// </summary>
-        [BsonElement("substitutedOff")]
-        public int SubstitutedOff { get; set; } = 0;
+        [BsonElement("substitutionsOff")]
+        public int SubstitutionsOff { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets the number of times the player was on the bench the whole match in the competition for the season.

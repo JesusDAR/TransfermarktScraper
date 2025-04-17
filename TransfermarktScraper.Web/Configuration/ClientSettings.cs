@@ -31,6 +31,11 @@
         public string PlayerControllerPath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the PlayerStats controller.
+        /// </summary>
+        public string PlayerStatsControllerPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the path of the Settings controller.
         /// </summary>
         public string SettingsControllerPath { get; set; } = string.Empty;

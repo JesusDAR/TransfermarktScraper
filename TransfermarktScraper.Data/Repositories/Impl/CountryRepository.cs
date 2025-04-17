@@ -46,6 +46,26 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
+        public async Task<Competition?> GetCompetitionAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var country = await _countries
+                    .Find(country => country.Competitions.Any(competition => competition.TransfermarktId == competitionTransfermarktId))
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                var competition = country?.Competitions.FirstOrDefault(c => c.TransfermarktId == competitionTransfermarktId);
+
+                return competition;
+            }
+            catch (Exception)
+            {
+                var message = $"Failed to retrieve the competition with Transfermarkt ID: {competitionTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetCompetitionAsync), nameof(CountryRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<Country>> GetAllAsync(CancellationToken cancellationToken)
         {
             try
@@ -190,21 +210,19 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 var filter = Builders<Country>.Filter.Eq(c => c.TransfermarktId, country.TransfermarktId);
 
-                var competitionsList = competitions.ToList();
-
-                var update = Builders<Country>.Update.Set(c => c.Competitions, competitionsList);
+                var update = Builders<Country>.Update.Set(c => c.Competitions, competitions);
 
                 _logger.LogDebug(
                     "Updating {Count} competitions from {Country.Name} in the database...",
-                    competitionsList.Count.ToString(),
+                    competitions.Count(),
                     country.Name);
                 await _countries.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
                 _logger.LogInformation(
                     "Successfully updated {Count} competitions from {Country.Name} in the database...",
-                    competitionsList.Count.ToString(),
+                    competitions.Count(),
                     country.Name);
 
-                return competitionsList;
+                return competitions;
             }
             catch (DatabaseException ex)
             {

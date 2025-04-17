@@ -22,10 +22,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Initializes a new instance of the <see cref="ClubService"/> class.
         /// </summary>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="clubRepository">The club repository for accessing and managing the club data.</param>
+        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
-        public ClubService(IMapper mapper, IClubRepository clubRepository, ILogger<ClubService> logger)
+        public ClubService(IClubRepository clubRepository, IMapper mapper, ILogger<ClubService> logger)
         {
             _mapper = mapper;
             _clubRepository = clubRepository;
@@ -359,12 +359,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
 
                 var tableDataLocator = tableDataLocators[index];
-                var marketValueAverageString = await tableDataLocator.InnerTextAsync();
+                var marketValueAverageNumericString = await tableDataLocator.InnerTextAsync();
 
-                if (!TableUtils.IsTableDataCellEmpty(marketValueAverageString))
+                if (!TableUtils.IsTableDataCellEmpty(marketValueAverageNumericString))
                 {
-                    var marketValueAverageNumeric = MoneyUtils.ExtractNumericPart(marketValueAverageString);
-                    marketValueAverage = MoneyUtils.ConvertToFloat(marketValueAverageNumeric);
+                    var marketValueAverageString = MoneyUtils.ExtractNumericPart(marketValueAverageNumericString);
+                    marketValueAverage = MoneyUtils.ConvertToFloat(marketValueAverageString);
                 }
             }
             catch (Exception ex)

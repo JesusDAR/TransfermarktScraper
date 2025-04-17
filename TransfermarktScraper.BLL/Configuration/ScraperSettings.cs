@@ -47,6 +47,11 @@
         public string MarketValuePath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the searching in Transfermarkt.
+        /// </summary>
+        public string SearchPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the path of the player stats.
         /// </summary>
         public string PlayerStatsPath { get; set; } = string.Empty;

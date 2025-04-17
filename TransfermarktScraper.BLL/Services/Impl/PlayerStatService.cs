@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
+using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities.Stat;
 using TransfermarktScraper.Domain.Entities.Stat.Career;
 using TransfermarktScraper.Domain.Exceptions;
@@ -16,6 +18,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly IPage _page;
         private readonly ScraperSettings _scraperSettings;
         private readonly ICountryService _countryService;
+        private readonly IPlayerStatRepository _playerStatRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<PlayerStatService> _logger;
 
         /// <summary>
@@ -23,32 +27,52 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="page">The Playwright page used for web scraping.</param>
         /// <param name="countryService">The country service for scraping country data from Transfermarkt.</param>
+        /// <param name="playerStatRepository">The player stat repository for accessing and managing the player stat data.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
+        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public PlayerStatService(
             IPage page,
             ICountryService countryService,
+            IPlayerStatRepository playerStatRepository,
             IOptions<ScraperSettings> scraperSettings,
+            IMapper mapper,
             ILogger<PlayerStatService> logger)
         {
             _page = page;
             _countryService = countryService;
+            _playerStatRepository = playerStatRepository;
             _scraperSettings = scraperSettings.Value;
+            _mapper = mapper;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task<PlayerStat> GetPlayerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
+        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
         {
-            var playerStat = await ScrapePlayerStatAsync(playerTransfermarkId, cancellationToken);
+            var playerStat = await _playerStatRepository.GetPlayerStatAsync(playerTransfermarkId, cancellationToken);
 
-            return playerStat;
+            if (playerStat == null)
+            {
+                playerStat = await ScrapePlayerStatAsync(playerTransfermarkId, cancellationToken);
+            }
+
+            var playerStatDto = _mapper.Map<Domain.DTOs.Response.Stat.PlayerStat>(playerStat);
+
+            return playerStatDto;
         }
 
         /// <inheritdoc/>
-        public async Task<PlayerStat> GetPlayerSeasonStatAsync(string playerTransfermarkId, string seasonTransfermarkId, CancellationToken cancellationToken)
+        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerSeasonStatAsync(string playerTransfermarkId, string seasonTransfermarkId, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task<PlayerStat> PersistPlayerStatAsync(PlayerStat playerStat, CancellationToken cancellationToken)
+        {
+            playerStat = await _playerStatRepository.InsertAsync(playerStat, cancellationToken);
+
+            return playerStat;
         }
 
         private async Task<PlayerStat> ScrapePlayerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
@@ -211,7 +235,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var competitionTransfermarktId = ExtractCompetitionTransfermarktId(competitionLink);
 
-                await CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, cancellationToken);
+                await CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, cancellationToken);
 
                 var playerCareerCompetitionStat = new PlayerCareerCompetitionStat(playerTransfermarkId, competitionTransfermarktId)
                 {
@@ -236,10 +260,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return playerCareerCompetitionStats;
         }
 
-        private async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string link, CancellationToken cancellationToken)
+        private async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken)
         {
-            //TODO
-            //await _countryService.CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, link, cancellationToken);
+            await _countryService.CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, cancellationToken);
         }
 
         /// <summary>
@@ -321,12 +344,15 @@ namespace TransfermarktScraper.BLL.Services.Impl
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var linkLocator = tableDataLocator.Locator(selector);
+                var competitionLinkLocator = tableDataLocator.Locator(selector);
 
                 selector = "href";
-                var link = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the competition link from the '{selector}' attribute.");
+                string competitionLink = string.Empty;
+                competitionLink = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLink)} from the '{selector}' attribute.");
 
-                return link;
+                competitionLink = competitionLink.Replace(_scraperSettings.BaseUrl, string.Empty);
+
+                return competitionLink;
             }
             catch (Exception ex)
             {

@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using TransfermarktScraper.Data.Configuration;
 using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Entities.Stat;
 
 namespace TransfermarktScraper.Data.Context.Impl
 {
@@ -14,6 +15,7 @@ namespace TransfermarktScraper.Data.Context.Impl
 
         private readonly string? _countryCollection;
         private readonly string? _clubCollection;
+        private readonly string? _playerStatCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbContext"/> class.
@@ -26,6 +28,7 @@ namespace TransfermarktScraper.Data.Context.Impl
 
             _countryCollection = options.Value.CountryCollection;
             _clubCollection = options.Value.ClubCollection;
+            _playerStatCollection = options.Value.PlayerStatCollection;
 
             try
             {
@@ -46,5 +49,8 @@ namespace TransfermarktScraper.Data.Context.Impl
 
         /// <inheritdoc/>
         public IMongoCollection<Club> Clubs => _database.GetCollection<Club>(_clubCollection);
+
+        /// <inheritdoc/>
+        public IMongoCollection<PlayerStat> PlayerStats => _database.GetCollection<PlayerStat>(_playerStatCollection);
     }
 }

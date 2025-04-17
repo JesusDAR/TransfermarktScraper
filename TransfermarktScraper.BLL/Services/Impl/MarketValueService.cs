@@ -42,64 +42,100 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<MarketValue>> GetMarketValuesAsync(string playerTransfermarktId, CancellationToken cancellationToken)
         {
-            var marketValues = new List<MarketValue>();
-
             var url = string.Concat("/", playerTransfermarktId);
 
-            var response = await _httpClient.GetAsync(url, cancellationToken);
+            HttpResponseMessage? response = null;
+            int maxRetries = 3;
+
+            _logger.LogInformation($"Getting market value from page: {_httpClient.BaseAddress + url}.");
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    response = await _httpClient.GetAsync(url, cancellationToken);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        break;
+                    }
+
+                    var message = $"Attempt {attempt}: Getting page: {_httpClient.BaseAddress + url} failed. Status code: {response.StatusCode}";
+                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                }
+                catch (Exception ex)
+                {
+                    var message = $"Attempt {attempt}: Exception while calling {_httpClient.BaseAddress + url}";
+                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger, ex);
+                }
+
+                if (attempt < maxRetries)
+                {
+                    var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                    await Task.Delay(delay, cancellationToken);
+                }
+            }
 
             if (response == null || !response.IsSuccessStatusCode)
             {
                 var message = $"Getting page: {_httpClient.BaseAddress + url} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
-                throw ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                return Enumerable.Empty<MarketValue>();
             }
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var marketValueResult = JsonSerializer.Deserialize<MarketValueResult>(content, _jsonOptions);
 
-            if (marketValueResult?.MarketValueItemResults == null)
+            if (marketValueResult == null || marketValueResult?.MarketValueItemResults == null)
             {
                 var message = $"No market value data found for {nameof(Player)}: {playerTransfermarktId}";
                 ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
-                return marketValues;
+                return Enumerable.Empty<MarketValue>();
             }
 
-            foreach (var marketValueItemResult in marketValueResult.MarketValueItemResults)
+            var marketValues = GetMarketValues(marketValueResult.MarketValueItemResults, url);
+
+            return marketValues;
+        }
+
+        private IEnumerable<MarketValue> GetMarketValues(IEnumerable<MarketValueItemResult> marketValueItemResults, string url)
+        {
+            var marketValues = new List<MarketValue>();
+
+            foreach (var marketValueItemResult in marketValueItemResults)
             {
-                var age = int.Parse(marketValueItemResult.Age);
-
-                var clubName = marketValueItemResult.Verein;
-
-                var clubCrest = marketValueItemResult.Wappen;
-
-                var dateString = marketValueItemResult.DatumMw;
-                var date = DateUtils.ConvertToDateTime(dateString);
-
-                var clubTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(clubCrest);
-
-                float value = 0;
                 try
                 {
+                    var age = int.Parse(marketValueItemResult.Age);
+
+                    var clubName = marketValueItemResult.Verein;
+
+                    var clubCrest = marketValueItemResult.Wappen;
+
+                    var dateString = marketValueItemResult.DatumMw;
+                    var date = DateUtils.ConvertToDateTime(dateString);
+
+                    var clubTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(clubCrest);
+
                     var valueNumeric = MoneyUtils.ExtractNumericPart(marketValueItemResult.Mw);
-                    value = MoneyUtils.ConvertToFloat(valueNumeric);
+                    var value = MoneyUtils.ConvertToFloat(valueNumeric);
+
+                    var marketValue = new MarketValue
+                    {
+                        Age = age,
+                        ClubName = clubName,
+                        ClubTransfermarktId = clubTransfermarktId,
+                        Value = value,
+                        ClubCrest = clubCrest,
+                        Date = date,
+                    };
+
+                    marketValues.Add(marketValue);
                 }
                 catch (Exception ex)
                 {
-                    ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), ex.Message, _httpClient.BaseAddress + url, _logger);
+                    ScrapingException.LogError(nameof(GetMarketValues), nameof(MarketValueService), ex.Message, _httpClient.BaseAddress + url, _logger);
                 }
-
-                var marketValue = new MarketValue
-                {
-                    Age = age,
-                    ClubName = clubName,
-                    ClubTransfermarktId = clubTransfermarktId,
-                    Value = value,
-                    ClubCrest = clubCrest,
-                    Date = date,
-                };
-
-                marketValues.Add(marketValue);
             }
 
             return marketValues;

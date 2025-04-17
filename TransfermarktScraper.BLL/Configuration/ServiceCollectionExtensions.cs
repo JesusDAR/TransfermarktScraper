@@ -90,7 +90,7 @@ namespace TransfermarktScraper.BLL.Configuration
                 {
                     var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
                     client.BaseAddress = new Uri(scraperSettings.BaseUrl + scraperSettings.MarketValuePath);
-                    client.Timeout = TimeSpan.FromSeconds(2);
+                    client.Timeout = TimeSpan.FromSeconds(5);
                 });
 
             // Register AngleSharp HTML parser

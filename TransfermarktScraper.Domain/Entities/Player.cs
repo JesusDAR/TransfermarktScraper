@@ -12,15 +12,17 @@ namespace TransfermarktScraper.Domain.Entities
     public class Player : Base
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Player"/> class.
+        /// Initializes a new instance of the <see cref="Player"/> class using the Transfermarkt player ID.
         /// </summary>
-        public Player()
+        /// <param name="playerTransfermarktId">The unique Transfermarkt identifier for the player.</param>
+        public Player(string playerTransfermarktId)
         {
-            if (string.IsNullOrEmpty(TransfermarktId))
+            if (string.IsNullOrEmpty(playerTransfermarktId))
             {
-                throw new ArgumentException($"{nameof(TransfermarktId)} cannot be null or empty.");
+                throw new ArgumentException($"{nameof(playerTransfermarktId)} cannot be null or empty.");
             }
 
+            TransfermarktId = playerTransfermarktId;
             PlayerStatId = EntityUtils.GetHash($"{TransfermarktId}|stat");
         }
 

@@ -134,7 +134,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var marketValues = await _marketValueService.GetMarketValuesAsync(playerTransfermarktId, cancellationToken);
 
-                var player = new Player()
+                var player = new Player(playerTransfermarktId)
                 {
                     Number = number,
                     Portrait = portrait,

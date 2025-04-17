@@ -93,7 +93,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the number of club participants in the cup.
         /// </summary>
         [BsonElement("participants")]
-        public int Participants { get; set; }
+        public int? Participants { get; set; }
 
         /// <summary>
         /// Gets or sets the number of players of the competition.

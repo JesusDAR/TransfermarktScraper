@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using TransfermarktScraper.Domain.Enums;
+using TransfermarktScraper.Domain.Enums.Extensions;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
@@ -20,11 +22,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         public IEnumerable<string> ClubIds { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
-        /// Gets or sets the coefficient of the competition.
-        /// </summary>
-        public float? Coefficient { get; set; }
-
-        /// <summary>
         /// Gets or sets the current champion of the competition.
         /// </summary>
         public string? CurrentChampion { get; set; }
@@ -37,7 +34,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the competition cup level.
         /// </summary>
-        public Cup Cup { get; set; } = Cup.None;
+        public string Cup { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the competition link in Transfermarkt.
@@ -52,12 +49,12 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the market value of the competition.
         /// </summary>
-        public float? MarketValue { get; set; }
+        public string? MarketValue { get; set; }
 
         /// <summary>
         /// Gets or sets the average market value of the competition.
         /// </summary>
-        public float? MarketValueAverage { get; set; }
+        public string? MarketValueAverage { get; set; }
 
         /// <summary>
         /// Gets or sets the club most successful of the competition.
@@ -72,7 +69,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the number of club participants in the cup.
         /// </summary>
-        public int Participants { get; set; }
+        public int? Participants { get; set; }
 
         /// <summary>
         /// Gets or sets the number of players of the competition.
@@ -87,6 +84,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the tier of the competition.
         /// </summary>
-        public Tier Tier { get; set; } = Tier.None;
+        public string Tier { get; set; } = string.Empty;
     }
 }

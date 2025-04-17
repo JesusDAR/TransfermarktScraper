@@ -24,10 +24,5 @@
         /// The club that has won the competition the most times.
         /// </summary>
         MostTimesChampion,
-
-        /// <summary>
-        /// The coefficient of the competition.
-        /// </summary>
-        Coefficient,
     }
 }

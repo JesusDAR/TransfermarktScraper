@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using TransfermarktScraper.Domain.Enums.Extensions;
+using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.Domain.Mappers
 {
@@ -19,12 +21,24 @@ namespace TransfermarktScraper.Domain.Mappers
             CreateMap<DTOs.Response.Country, DTOs.Request.Country>();
 
             // Competition
-            CreateMap<Entities.Competition, DTOs.Response.Competition>();
-            CreateMap<DTOs.Response.Competition, Entities.Competition>();
+            CreateMap<Entities.Competition, DTOs.Response.Competition>()
+                .ForMember(destination => destination.Tier, options => options.MapFrom(source => TierExtensions.ToString(source.Tier)))
+                .ForMember(destination => destination.Cup, options => options.MapFrom(source => CupExtensions.ToString(source.Cup)))
+                .ForMember(destination => destination.MarketValue, options => options.MapFrom(source => MoneyUtils.ConvertToString(source.MarketValue)))
+                .ForMember(destination => destination.MarketValueAverage, options => options.MapFrom(source => MoneyUtils.ConvertToString(source.MarketValueAverage)));
+            CreateMap<DTOs.Response.Competition, Entities.Competition>()
+                .ForMember(destination => destination.Tier, options => options.MapFrom(source => TierExtensions.ToEnum(source.Tier)))
+                .ForMember(destination => destination.Cup, options => options.MapFrom(source => CupExtensions.ToEnum(source.Cup)))
+                .ForMember(destination => destination.MarketValue, options => options.MapFrom(source => MoneyUtils.ConvertToFloat(source.MarketValue)))
+                .ForMember(destination => destination.MarketValueAverage, options => options.MapFrom(source => MoneyUtils.ConvertToFloat(source.MarketValueAverage)));
 
             // Club
-            CreateMap<Entities.Club, DTOs.Response.Club>();
-            CreateMap<DTOs.Response.Club, Entities.Club>();
+            CreateMap<Entities.Club, DTOs.Response.Club>()
+                .ForMember(destination => destination.MarketValue, options => options.MapFrom(source => MoneyUtils.ConvertToString(source.MarketValue)))
+                .ForMember(destination => destination.MarketValueAverage, options => options.MapFrom(source => MoneyUtils.ConvertToString(source.MarketValueAverage)));
+            CreateMap<DTOs.Response.Club, Entities.Club>()
+                .ForMember(destination => destination.MarketValue, options => options.MapFrom(source => MoneyUtils.ConvertToFloat(source.MarketValue)))
+                .ForMember(destination => destination.MarketValueAverage, options => options.MapFrom(source => MoneyUtils.ConvertToFloat(source.MarketValueAverage)));
 
             // Player
             CreateMap<Entities.Player, DTOs.Response.Player>();

@@ -36,12 +36,12 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the market value of the club.
         /// </summary>
-        public float? MarketValue { get; set; }
+        public string? MarketValue { get; set; }
 
         /// <summary>
         /// Gets or sets the market value average of the players of the club.
         /// </summary>
-        public float? MarketValueAverage { get; set; }
+        public string? MarketValueAverage { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the club.

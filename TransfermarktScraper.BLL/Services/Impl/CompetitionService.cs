@@ -149,19 +149,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countryTransfermarktId = ExtractCountryTransfermarktId(url);
 
-                var response = await route.FetchAsync();
+                IAPIResponse response;
 
-                var competitionQuickSelectResults = await FormatQuickSelectCompetitionResponseAsync(response);
-
-                await route.AbortAsync();
-
-                var countryQuickSelectResult = new CountryQuickSelectResult
+                try
                 {
-                    Id = countryTransfermarktId,
-                    CompetitionQuickSelectResults = competitionQuickSelectResults,
-                };
+                    response = await route.FetchAsync();
 
-                await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
+                    var competitionQuickSelectResults = await FormatQuickSelectCompetitionResponseAsync(response);
+
+                    await route.AbortAsync();
+
+                    var countryQuickSelectResult = new CountryQuickSelectResult
+                    {
+                        Id = countryTransfermarktId,
+                        CompetitionQuickSelectResults = competitionQuickSelectResults,
+                    };
+
+                    await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, $"Error in interceptor for country: {countryTransfermarktId}");
+                }
             });
         }
 

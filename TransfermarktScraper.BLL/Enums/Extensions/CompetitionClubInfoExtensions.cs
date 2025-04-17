@@ -23,7 +23,6 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 CompetitionClubInfo.Tier => "League level",
                 CompetitionClubInfo.CurrentChampion => "Reigning champion",
                 CompetitionClubInfo.MostTimesChampion => "Record-holding champions",
-                CompetitionClubInfo.Coefficient => "UEFA coefficient",
                 _ => HandleUnsupportedEnum(competitionClubInfo),
             };
         }
@@ -48,7 +47,6 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                 string s when s.Contains("League level", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.Tier,
                 string s when s.Contains("Reigning champion", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.CurrentChampion,
                 string s when s.Contains("Record-holding champions", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.MostTimesChampion,
-                string s when s.Contains("UEFA coefficient", StringComparison.OrdinalIgnoreCase) => CompetitionClubInfo.Coefficient,
                 _ => HandleUnsupportedString(competitionClubInfoString)
             };
         }
@@ -90,22 +88,6 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                         var linkLocator = labelLocator.Locator(selector);
                         spanText = await linkLocator.InnerTextAsync();
                         competition.MostTimesChampion = spanText;
-                        break;
-
-                    case CompetitionClubInfo.Coefficient:
-                        selector = "span";
-                        spanLocator = labelLocator.Locator(selector);
-                        var texts = await spanLocator.AllInnerTextsAsync();
-
-                        foreach (var text in texts)
-                        {
-                            var isCoefficient = float.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var coefficient);
-                            if (isCoefficient)
-                            {
-                                competition.Coefficient = coefficient;
-                            }
-                        }
-
                         break;
 
                     case CompetitionClubInfo.Unknown:

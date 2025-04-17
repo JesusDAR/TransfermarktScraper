@@ -16,8 +16,12 @@ namespace TransfermarktScraper.Domain.Utils
         /// <returns>The numeric part as a string (e.g., "10k", "5m", "3bn").</returns>
         public static string ExtractNumericPart(string money)
         {
-            var moneyArray = money.Where(char.IsLetterOrDigit).ToArray();
-            return new string(moneyArray);
+            var cleaned = money.Replace("€", string.Empty).Replace("$", string.Empty).Trim();
+
+            var result = new string(cleaned.Where(c =>
+                char.IsDigit(c) || c == '.' || c == ',' || c == 'm' || c == 'k' || c == 'b').ToArray());
+
+            return result.Replace(",", ".");
         }
 
         /// <summary>
@@ -26,17 +30,17 @@ namespace TransfermarktScraper.Domain.Utils
         /// <param name="money">The monetary string (e.g., "10k", "5m", "3bn").</param>
         /// <returns>The numeric value as an float.</returns>
         /// <exception cref="UtilException">Thrown when the input format is invalid.</exception>
-        public static float ConvertToFloat(string money)
+        public static float ConvertToFloat(string? money)
         {
+            if (string.IsNullOrWhiteSpace(money))
+            {
+                return default;
+            }
+
             money = money.Trim().ToLower();
 
             try
             {
-                if (string.IsNullOrWhiteSpace(money))
-                {
-                    return default;
-                }
-
                 if (money.EndsWith("k", StringComparison.OrdinalIgnoreCase))
                 {
                     string numericPart = money.Substring(0, money.Length - 1);
@@ -89,25 +93,32 @@ namespace TransfermarktScraper.Domain.Utils
         /// </summary>
         /// <param name="money">The monetary value as an float.</param>
         /// <returns>A formatted string representing the value in an abbreviated format.</returns>
-        public static string ConvertToString(float money)
+        public static string? ConvertToString(float? money)
         {
             try
             {
-                if (money >= 1_000_000_000 && money % 1_000_000_000 == 0)
+                if (money == null)
                 {
-                    return (money / 1_000_000_000) + "bn";
+                    return string.Empty;
                 }
-                else if (money >= 1_000_000 && money % 1_000_000 == 0)
+
+                decimal preciseValue = (decimal)money.Value;
+
+                if (preciseValue >= 1_000_000_000m)
                 {
-                    return (money / 1_000_000) + "m";
+                    return (preciseValue / 1_000_000_000m).ToString("0.##") + "bn";
                 }
-                else if (money >= 1000 && money % 1000 == 0)
+                else if (preciseValue >= 1_000_000m)
                 {
-                    return (money / 1000) + "k";
+                    return (preciseValue / 1_000_000m).ToString("0.##") + "m";
+                }
+                else if (preciseValue >= 1000m)
+                {
+                    return (preciseValue / 1000m).ToString("0.##") + "k";
                 }
                 else
                 {
-                    return money.ToString();
+                    return preciseValue.ToString("0.##");
                 }
             }
             catch (Exception)

@@ -125,7 +125,7 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                         break;
 
                     case CompetitionInfoBox.Participants:
-                        var isParticipants = int.TryParse(spanText.Trim(), out var participants);
+                        var isParticipants = int.TryParse(spanText.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var participants);
                         if (isParticipants)
                         {
                             competition.Participants = participants;

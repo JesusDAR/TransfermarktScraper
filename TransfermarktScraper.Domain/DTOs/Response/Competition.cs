@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
-using TransfermarktScraper.Domain.Enums;
-using TransfermarktScraper.Domain.Enums.Extensions;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {

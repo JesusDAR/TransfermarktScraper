@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Scalar.AspNetCore;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.Data.Configuration;
-using TransfermarktScraper.Domain.Configuration;
 
 namespace TransfermarktScraper.ApiService
 {
@@ -28,7 +27,6 @@ namespace TransfermarktScraper.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddDomainServices();
             builder.Services.AddDataServices(builder.Configuration);
             builder.Services.AddBusinessLogicServices(builder.Configuration);
             builder.Services.AddControllers();

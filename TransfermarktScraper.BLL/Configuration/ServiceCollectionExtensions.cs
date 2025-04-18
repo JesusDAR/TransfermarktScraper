@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
+using TransfermarktScraper.BLL.Mappers;
 using TransfermarktScraper.BLL.Services.Impl;
 using TransfermarktScraper.BLL.Services.Interfaces;
 
@@ -104,6 +105,15 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMarketValueService, MarketValueService>();
             services.AddScoped<IPlayerStatService, PlayerStatService>();
+
+            // Register Automapper services
+            services.AddAutoMapper(typeof(CountryProfile).Assembly);
+            services.AddAutoMapper(typeof(CompetitionProfile).Assembly);
+            services.AddAutoMapper(typeof(ClubProfile).Assembly);
+            services.AddAutoMapper(typeof(PlayerProfile).Assembly);
+            services.AddAutoMapper(typeof(PlayerStatProfile).Assembly);
+            services.AddAutoMapper(typeof(PlayerCareerStatProfile).Assembly);
+            services.AddAutoMapper(typeof(PlayerSeasonStatProfile).Assembly);
 
             return services;
         }

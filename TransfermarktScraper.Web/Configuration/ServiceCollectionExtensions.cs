@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Web.Clients.Impl;
 using TransfermarktScraper.Web.Clients.Interfaces;
+using TransfermarktScraper.Web.Mappers;
 using TransfermarktScraper.Web.Services.Impl;
 using TransfermarktScraper.Web.Services.Interfaces;
 
@@ -69,6 +70,9 @@ namespace TransfermarktScraper.Web.Configuration
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
                 client.Timeout = TimeSpan.FromHours(12);
             });
+
+            // Register Automapper services
+            services.AddAutoMapper(typeof(CountryProfile));
 
             // Register navigation history service
             services.AddScoped<INavigationHistoryService, NavigationHistoryService>();

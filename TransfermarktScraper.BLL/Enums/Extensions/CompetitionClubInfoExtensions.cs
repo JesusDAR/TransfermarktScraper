@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;

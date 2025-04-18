@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using TransfermarktScraper.Domain.Utils;
+using TransfermarktScraper.BLL.Utils;
 
 namespace TransfermarktScraper.BLL.Mappers
 {

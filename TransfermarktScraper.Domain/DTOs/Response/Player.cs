@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TransfermarktScraper.Domain.Enums;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
@@ -32,7 +31,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the preferred foot of the player.
         /// </summary>
-        public Foot Foot { get; set; } = Foot.Unknown;
+        public string Foot { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the height in cm of the player.
@@ -47,7 +46,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the current market value of the player.
         /// </summary>
-        public float? MarketValue { get; set; }
+        public string? MarketValue { get; set; }
 
         /// <summary>
         /// Gets or sets the market valueS of the player.
@@ -77,6 +76,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the position of the player.
         /// </summary>
-        public Position Position { get; set; } = Position.Unknown;
+        public string Position { get; set; } = string.Empty;
     }
 }

@@ -1,7 +1,6 @@
-﻿using System;
-using TransfermarktScraper.Domain.Exceptions;
+﻿using TransfermarktScraper.Domain.Exceptions;
 
-namespace TransfermarktScraper.Domain.Utils
+namespace TransfermarktScraper.BLL.Utils
 {
     /// <summary>
     /// Provides util methods to manage height values.

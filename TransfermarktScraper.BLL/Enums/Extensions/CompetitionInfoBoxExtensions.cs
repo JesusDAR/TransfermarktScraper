@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
+using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.BLL.Enums.Extensions
 {

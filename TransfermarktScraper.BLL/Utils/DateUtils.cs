@@ -1,8 +1,7 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using TransfermarktScraper.Domain.Exceptions;
 
-namespace TransfermarktScraper.Domain.Utils
+namespace TransfermarktScraper.BLL.Utils
 {
     /// <summary>
     /// Provides util methods to manage date values.

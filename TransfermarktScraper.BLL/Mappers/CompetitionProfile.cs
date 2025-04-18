@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Domain.Enums.Extensions;
-using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.BLL.Mappers
 {

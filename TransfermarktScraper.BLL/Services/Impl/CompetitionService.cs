@@ -11,9 +11,9 @@ using TransfermarktScraper.BLL.Enums.Extensions;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
 using Competition = TransfermarktScraper.Domain.Entities.Competition;
 
 namespace TransfermarktScraper.BLL.Services.Impl

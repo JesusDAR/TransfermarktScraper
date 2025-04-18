@@ -10,6 +10,7 @@ using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
@@ -160,7 +161,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                         selector = "title";
                         countryName = imgElement?.GetAttribute(selector) ?? throw new Exception();
 
-                        countryTransfermarktId = Utils.ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
+                        countryTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
                     }
                     catch (Exception ex)
                     {

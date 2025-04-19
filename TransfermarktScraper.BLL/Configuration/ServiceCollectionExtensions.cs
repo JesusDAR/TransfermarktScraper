@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
+using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,7 +22,7 @@ namespace TransfermarktScraper.BLL.Configuration
         /// <param name="services">The service collection to which the services will be added.</param>
         /// <param name="configuration">The application configuration.</param>
         /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
-        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Bind ScraperSettings from appsettings.json
             services.Configure<ScraperSettings>(options =>
@@ -38,6 +39,7 @@ namespace TransfermarktScraper.BLL.Configuration
             {
                 var playwright = provider.GetRequiredService<IPlaywright>();
                 var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+
                 return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
                 {
                     Headless = scraperSettings.HeadlessMode, // set to false to see the browser
@@ -106,14 +108,44 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped<IMarketValueService, MarketValueService>();
             services.AddScoped<IPlayerStatService, PlayerStatService>();
 
-            // Register Automapper services
-            services.AddAutoMapper(typeof(CountryProfile).Assembly);
-            services.AddAutoMapper(typeof(CompetitionProfile).Assembly);
-            services.AddAutoMapper(typeof(ClubProfile).Assembly);
-            services.AddAutoMapper(typeof(PlayerProfile).Assembly);
-            services.AddAutoMapper(typeof(PlayerStatProfile).Assembly);
-            services.AddAutoMapper(typeof(PlayerCareerStatProfile).Assembly);
-            services.AddAutoMapper(typeof(PlayerSeasonStatProfile).Assembly);
+            // Register mapping services
+            services.AddMappingServices();
+
+            return services;
+        }
+
+        private static IServiceCollection AddMappingServices(this IServiceCollection services)
+        {
+            services.AddScoped<CountryMapping>();
+            services.AddScoped<CompetitionMapping>();
+            services.AddScoped<ClubMapping>();
+            services.AddScoped<PlayerMapping>();
+            services.AddScoped<PlayerStatMapping>();
+            services.AddScoped<PlayerCareerStatMapping>();
+            services.AddScoped<PlayerSeasonStatMapping>();
+
+            var config = TypeAdapterConfig.GlobalSettings;
+
+            var mapperTypes = new[]
+            {
+                typeof(CountryMapping),
+                typeof(CompetitionMapping),
+                typeof(ClubMapping),
+                typeof(PlayerMapping),
+                typeof(PlayerStatMapping),
+                typeof(PlayerCareerStatMapping),
+                typeof(PlayerSeasonStatMapping),
+            };
+
+            foreach (var type in mapperTypes)
+            {
+                if (ActivatorUtilities.CreateInstance(services.BuildServiceProvider(), type) is IRegister mapper)
+                {
+                    mapper.Register(config);
+                }
+            }
+
+            services.AddMapster();
 
             return services;
         }

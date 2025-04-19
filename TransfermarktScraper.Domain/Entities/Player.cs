@@ -111,7 +111,7 @@ namespace TransfermarktScraper.Domain.Entities
         public Position Position { get; set; } = Position.Unknown;
 
         /// <summary>
-        /// Gets or sets the uniqye player stat Id.
+        /// Gets or sets the unique player stat Id.
         /// </summary>
         [BsonElement("playerStatId")]
         public string PlayerStatId { get; set; }

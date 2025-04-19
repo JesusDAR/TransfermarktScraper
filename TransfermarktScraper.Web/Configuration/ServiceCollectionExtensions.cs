@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -71,8 +72,9 @@ namespace TransfermarktScraper.Web.Configuration
                 client.Timeout = TimeSpan.FromHours(12);
             });
 
-            // Register Automapper services
-            services.AddAutoMapper(typeof(CountryProfile));
+            // Register Mapster services
+            services.AddScoped<CountryMapping>();
+            services.AddMapster();
 
             // Register navigation history service
             services.AddScoped<INavigationHistoryService, NavigationHistoryService>();

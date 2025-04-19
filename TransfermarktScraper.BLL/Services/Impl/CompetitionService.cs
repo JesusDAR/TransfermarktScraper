@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using AutoMapper;
+using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -25,7 +25,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly ICountryRepository _countryRepository;
         private readonly IClubService _clubService;
         private readonly ScraperSettings _scraperSettings;
-        private readonly IMapper _mapper;
         private readonly ILogger<CompetitionService> _logger;
 
         /// <summary>
@@ -35,21 +34,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryRepository">The country repository for accessing and managing the country data.</param>
         /// <param name="clubService">The club service for scraping club data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public CompetitionService(
             IPage page,
             ICountryRepository countryRepository,
             IClubService clubService,
             IOptions<ScraperSettings> scraperSettings,
-            IMapper mapper,
             ILogger<CompetitionService> logger)
         {
             _page = page;
             _countryRepository = countryRepository;
             _clubService = clubService;
             _scraperSettings = scraperSettings.Value;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -67,7 +63,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
             }
 
-            var competitionDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Competition>>(competitions);
+            var competitionDtos = competitions.Adapt<IEnumerable<Domain.DTOs.Response.Competition>>();
 
             return competitionDtos;
         }

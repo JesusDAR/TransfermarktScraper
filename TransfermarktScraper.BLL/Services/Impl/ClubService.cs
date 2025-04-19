@@ -1,13 +1,12 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using AutoMapper;
+using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
 using Club = TransfermarktScraper.Domain.Entities.Club;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -16,18 +15,15 @@ namespace TransfermarktScraper.BLL.Services.Impl
     public class ClubService : IClubService
     {
         private readonly IClubRepository _clubRepository;
-        private readonly IMapper _mapper;
         private readonly ILogger<ClubService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClubService"/> class.
         /// </summary>
         /// <param name="clubRepository">The club repository for accessing and managing the club data.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
-        public ClubService(IClubRepository clubRepository, IMapper mapper, ILogger<ClubService> logger)
+        public ClubService(IClubRepository clubRepository, ILogger<ClubService> logger)
         {
-            _mapper = mapper;
             _clubRepository = clubRepository;
             _logger = logger;
         }
@@ -42,7 +38,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             club = await PersistClubAsync(club, cancellationToken);
 
-            var clubDto = _mapper.Map<Domain.DTOs.Response.Club>(club);
+            var clubDto = club.Adapt<Domain.DTOs.Response.Club>();
 
             return clubDto;
         }
@@ -54,7 +50,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
 
-            var clubDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Club>>(clubs);
+            var clubDtos = clubs.Adapt<IEnumerable<Domain.DTOs.Response.Club>>();
 
             return clubDtos;
         }

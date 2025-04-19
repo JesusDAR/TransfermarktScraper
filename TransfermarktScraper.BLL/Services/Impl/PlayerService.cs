@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using AutoMapper;
+using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -11,7 +11,6 @@ using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
 using Player = TransfermarktScraper.Domain.Entities.Player;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -23,7 +22,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly IClubRepository _clubRepository;
         private readonly IMarketValueService _marketValueService;
         private readonly ScraperSettings _scraperSettings;
-        private readonly IMapper _mapper;
         private readonly ILogger<PlayerService> _logger;
 
         /// <summary>
@@ -33,21 +31,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="clubRepository">The club repository for accessing and managing the club data.</param>
         /// <param name="marketValueService">The market value service for obtaining market value data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public PlayerService(
             IPage page,
             IClubRepository clubRepository,
             IMarketValueService marketValueService,
             IOptions<ScraperSettings> scraperSettings,
-            IMapper mapper,
             ILogger<PlayerService> logger)
         {
             _page = page;
             _clubRepository = clubRepository;
             _marketValueService = marketValueService;
             _scraperSettings = scraperSettings.Value;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -79,7 +74,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 players = club.Players;
             }
 
-            var playerDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Player>>(players);
+            var playerDtos = players.Adapt<IEnumerable<Domain.DTOs.Response.Player>>();
 
             return playerDtos;
         }
@@ -316,18 +311,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
                 throw ScrapingException.LogError(nameof(GetLinkAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
             }
-        }
-
-        /// <summary>
-        /// Extracts the Transfermarkt player identifier from the provided locators.
-        /// </summary>
-        /// <param name="link">The player link in Transfermarkt.</param>
-        /// <returns>The Transfermarkt player identifier.</returns>
-        private string GetPlayerTransfermarktId(string link)
-        {
-            var index = link.LastIndexOf('/');
-            string playerTransfermarktId = link.Substring(index + 1);
-            return playerTransfermarktId;
         }
 
         /// <summary>
@@ -615,6 +598,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
 
             return marketValue;
+        }
+
+        /// <summary>
+        /// Extracts the Transfermarkt player identifier from the provided locators.
+        /// </summary>
+        /// <param name="link">The player link in Transfermarkt.</param>
+        /// <returns>The Transfermarkt player identifier.</returns>
+        private string GetPlayerTransfermarktId(string link)
+        {
+            var index = link.LastIndexOf('/');
+            string playerTransfermarktId = link.Substring(index + 1);
+            return playerTransfermarktId;
         }
     }
 }

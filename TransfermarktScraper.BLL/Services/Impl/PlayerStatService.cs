@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -19,7 +19,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly ScraperSettings _scraperSettings;
         private readonly ICountryService _countryService;
         private readonly IPlayerStatRepository _playerStatRepository;
-        private readonly IMapper _mapper;
         private readonly ILogger<PlayerStatService> _logger;
 
         /// <summary>
@@ -29,21 +28,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryService">The country service for scraping country data from Transfermarkt.</param>
         /// <param name="playerStatRepository">The player stat repository for accessing and managing the player stat data.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs.</param>
         /// <param name="logger">The logger.</param>
         public PlayerStatService(
             IPage page,
             ICountryService countryService,
             IPlayerStatRepository playerStatRepository,
             IOptions<ScraperSettings> scraperSettings,
-            IMapper mapper,
             ILogger<PlayerStatService> logger)
         {
             _page = page;
             _countryService = countryService;
             _playerStatRepository = playerStatRepository;
             _scraperSettings = scraperSettings.Value;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -57,7 +53,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 playerStat = await ScrapePlayerStatAsync(playerTransfermarkId, cancellationToken);
             }
 
-            var playerStatDto = _mapper.Map<Domain.DTOs.Response.Stat.PlayerStat>(playerStat);
+            var playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
 
             return playerStatDto;
         }

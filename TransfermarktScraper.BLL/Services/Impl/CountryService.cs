@@ -3,7 +3,7 @@ using System.Net;
 using System.Text.Json;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
-using AutoMapper;
+using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
@@ -27,7 +27,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private readonly ICountryRepository _countryRepository;
         private readonly ICompetitionService _competitionService;
         private readonly ScraperSettings _scraperSettings;
-        private readonly IMapper _mapper;
         private readonly ILogger<CountryService> _logger;
 
         /// <summary>
@@ -39,7 +38,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="countryRepository">The country repository for accessing and managing the country data.</param>
         /// <param name="competitionService">The competition service for scraping competition data from Transfermarkt.</param>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        /// <param name="mapper">The mapper to convert domain entities to DTOs and viceversa.</param>
         /// <param name="logger">The logger.</param>
         public CountryService (
             IPage page,
@@ -48,7 +46,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
             ICountryRepository countryRepository,
             ICompetitionService competitionService,
             IOptions<ScraperSettings> scraperSettings,
-            IMapper mapper,
             ILogger<CountryService> logger)
         {
             _page = page;
@@ -57,7 +54,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
             _countryRepository = countryRepository;
             _competitionService = competitionService;
             _scraperSettings = scraperSettings.Value;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -76,7 +72,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesUpdatedOrInserted);
+                countryDtos = countriesUpdatedOrInserted.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
 
                 return countryDtos;
             }
@@ -89,12 +85,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countriesInserted);
+                countryDtos = countriesInserted.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
 
                 return countryDtos;
             }
 
-            countryDtos = _mapper.Map<IEnumerable<Domain.DTOs.Response.Country>>(countries);
+            countryDtos = countries.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
 
             return countryDtos;
         }

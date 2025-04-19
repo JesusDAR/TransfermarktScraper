@@ -76,6 +76,16 @@
         public int PenaltyGoals { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of goals that the goalkeeper has conceded in the competition for the whole player career.
+        /// </summary>
+        public int GoalsConceded { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the number of clean sheets for the goalkeeper in the competition for the whole player career.
+        /// </summary>
+        public int CleanSheets { get; set; } = 0;
+
+        /// <summary>
         /// Gets or sets the number of minutes per goal scored in the competition for the whole player career.
         /// </summary>
         public int MinutesPerGoal { get; set; }

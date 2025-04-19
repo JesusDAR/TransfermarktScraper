@@ -8,6 +8,7 @@ using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities.Stat;
 using TransfermarktScraper.Domain.Entities.Stat.Career;
+using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -44,13 +45,13 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
+        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
-            var playerStat = await _playerStatRepository.GetPlayerStatAsync(playerTransfermarkId, cancellationToken);
+            var playerStat = await _playerStatRepository.GetPlayerStatAsync(playerStatRequest.PlayerTransfermarktId, cancellationToken);
 
             if (playerStat == null)
             {
-                playerStat = await ScrapePlayerStatAsync(playerTransfermarkId, cancellationToken);
+                playerStat = await ScrapePlayerStatAsync(playerStatRequest, cancellationToken);
             }
 
             var playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
@@ -71,20 +72,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
             return playerStat;
         }
 
-        private async Task<PlayerStat> ScrapePlayerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
+        /// <summary>
+        /// Scrapes player stat data from the Transfermarkt based on the given player stat request.
+        /// </summary>
+        /// <param name="playerStatRequest">The player stat request DTO.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A <see cref="PlayerStat"/> object containing the player's career stat and a collection of Transfermarkt season Ids.
+        /// </returns>
+        private async Task<PlayerStat> ScrapePlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
-            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerTransfermarkId, _scraperSettings.DetailedViewPath);
+            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath);
 
             await _page.GotoAsync(uri);
 
             var playerSeasonIds = await GetPlayerSeasonIdsAsync();
 
-            var playerCareerStat = await GetPlayerCareerStatAsync(playerTransfermarkId, cancellationToken);
+            var playerCareerStat = await GetPlayerCareerStatAsync(playerStatRequest, cancellationToken);
 
-            var playerStat = new PlayerStat(playerTransfermarkId)
+            var playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
             {
                 PlayerCareerStat = playerCareerStat,
-                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new Domain.Entities.Stat.Season.PlayerSeasonStat(playerTransfermarkId, seasonTransfermarkId)),
+                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new Domain.Entities.Stat.Season.PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
             };
 
             return playerStat;
@@ -132,38 +141,76 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Retrieves the overall career statistics of a player from Transfermarkt.
         /// </summary>
-        /// <param name="playerTransfermarkId">The unique identifier of the player on Transfermarkt.</param>
+        /// <param name="playerStatRequest">The player stat request DTO.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="PlayerCareerStat"/> entity.</returns>
-        private async Task<PlayerCareerStat> GetPlayerCareerStatAsync(string playerTransfermarkId, CancellationToken cancellationToken)
+        private async Task<PlayerCareerStat> GetPlayerCareerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
+            var playerPosition = PositionExtensions.ToEnum(playerStatRequest.Position);
+
             var tableDataLocators = await GetTableFooterDataLocatorsAsync();
 
             var appearances = await GetAppearancesAsync(tableDataLocators, 2);
 
             var goals = await GetGoalsAsync(tableDataLocators, 3);
 
-            var assists = await GetAssistsAsync(tableDataLocators, 4);
+            int assists = default;
+            int ownGoals = default;
+            int substitutionsOn = default;
+            int substitutionsOff = default;
+            int yellowCards = default;
+            int secondYellowCards = default;
+            int redCards = default;
+            int goalsConceded = default;
+            int cleanSheets = default;
+            int minutesPerGoal = default;
+            int penaltyGoals = default;
+            int minutesPlayed = default;
 
-            var ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
+            if (playerPosition == Domain.Enums.Position.Goalkeeper)
+            {
+                ownGoals = await GetOwnGoalsAsync(tableDataLocators, 4);
 
-            var substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
+                substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 5);
 
-            var substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
+                substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 6);
 
-            var yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
+                yellowCards = await GetYellowCardsAsync(tableDataLocators, 7);
 
-            var secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
+                secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 8);
 
-            var redCards = await GetRedCardsAsync(tableDataLocators, 10);
+                redCards = await GetRedCardsAsync(tableDataLocators, 9);
 
-            var penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
+                goalsConceded = await GetGoalsConcededAsync(tableDataLocators, 10);
 
-            var minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
+                cleanSheets = await GetCleanSheetsAsync(tableDataLocators, 11);
 
-            var minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
+                minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 12);
+            }
+            else
+            {
+                assists = await GetAssistsAsync(tableDataLocators, 4);
 
-            var playerCareerCompetitionStats = await GetPlayerCareerCompetitionStatsAsync(playerTransfermarkId, cancellationToken);
+                ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
+
+                substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
+
+                substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
+
+                yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
+
+                secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
+
+                redCards = await GetRedCardsAsync(tableDataLocators, 10);
+
+                penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
+
+                minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
+
+                minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
+            }
+
+            var playerCareerCompetitionStats = await GetPlayerCareerCompetitionStatsAsync(playerStatRequest.PlayerTransfermarktId, playerPosition, cancellationToken);
 
             var playerCareerStat = new PlayerCareerStat
             {
@@ -189,9 +236,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Retrieves the player's career stats per competition from Transfermarkt.
         /// </summary>
         /// <param name="playerTransfermarkId">The unique identifier of the player on Transfermarkt.</param>
+        /// <param name="playerPosition">The player position, used to know it the player is a goalkeeper or a field player.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <see cref="PlayerCareerCompetitionStat"/> entities.</returns>
-        private async Task<IEnumerable<PlayerCareerCompetitionStat>> GetPlayerCareerCompetitionStatsAsync(string playerTransfermarkId, CancellationToken cancellationToken)
+        private async Task<IEnumerable<PlayerCareerCompetitionStat>> GetPlayerCareerCompetitionStatsAsync(string playerTransfermarkId, Domain.Enums.Position playerPosition, CancellationToken cancellationToken)
         {
             var tableRowLocators = await GetTableRowLocatorsAsync();
 
@@ -209,25 +257,61 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var goals = await GetGoalsAsync(tableDataLocators, 3);
 
-                var assists = await GetAssistsAsync(tableDataLocators, 4);
+                int assists = default;
+                int ownGoals = default;
+                int substitutionsOn = default;
+                int substitutionsOff = default;
+                int yellowCards = default;
+                int secondYellowCards = default;
+                int redCards = default;
+                int goalsConceded = default;
+                int cleanSheets = default;
+                int minutesPerGoal = default;
+                int penaltyGoals = default;
+                int minutesPlayed = default;
 
-                var ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
+                if (playerPosition == Domain.Enums.Position.Goalkeeper)
+                {
+                    ownGoals = await GetOwnGoalsAsync(tableDataLocators, 4);
 
-                var substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
+                    substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 5);
 
-                var substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
+                    substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 6);
 
-                var yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
+                    yellowCards = await GetYellowCardsAsync(tableDataLocators, 7);
 
-                var secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
+                    secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 8);
 
-                var redCards = await GetRedCardsAsync(tableDataLocators, 10);
+                    redCards = await GetRedCardsAsync(tableDataLocators, 9);
 
-                var penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
+                    goalsConceded = await GetGoalsConcededAsync(tableDataLocators, 10);
 
-                var minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
+                    cleanSheets = await GetCleanSheetsAsync(tableDataLocators, 11);
 
-                var minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
+                    minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 12);
+                }
+                else
+                {
+                    assists = await GetAssistsAsync(tableDataLocators, 4);
+
+                    ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
+
+                    substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
+
+                    substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
+
+                    yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
+
+                    secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
+
+                    redCards = await GetRedCardsAsync(tableDataLocators, 10);
+
+                    penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
+
+                    minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
+
+                    minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
+                }
 
                 var competitionTransfermarktId = ExtractCompetitionTransfermarktId(competitionLink);
 
@@ -624,6 +708,60 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
 
             return redCards;
+        }
+
+        /// <summary>
+        /// Extracts the goalkeeper career goals conceded from the provided locators.
+        /// </summary>
+        /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
+        /// <param name="index">The table data index.</param>
+        /// <returns>The goalkeeper career goals.</returns>
+        private async Task<int> GetGoalsConcededAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        {
+            int goalsConceded = default;
+            try
+            {
+                var tableDataLocator = tableDataLocators[index];
+                var goalsConcededString = await tableDataLocator.InnerTextAsync();
+                if (!TableUtils.IsTableDataCellEmpty(goalsConcededString) && !int.TryParse(goalsConcededString, out goalsConceded))
+                {
+                    throw new Exception($"Failed to parse {goalsConcededString}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Getting {nameof(goalsConceded)} failed. Table data index: {index}.";
+                ScrapingException.LogWarning(nameof(GetGoalsConcededAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
+
+            return goalsConceded;
+        }
+
+        /// <summary>
+        /// Extracts the goalkeeper clean sheets from the provided locators.
+        /// </summary>
+        /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
+        /// <param name="index">The table data index.</param>
+        /// <returns>The goalkeeper clean sheets.</returns>
+        private async Task<int> GetCleanSheetsAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        {
+            int cleanSheets = default;
+            try
+            {
+                var tableDataLocator = tableDataLocators[index];
+                var cleanSheetsString = await tableDataLocator.InnerTextAsync();
+                if (!TableUtils.IsTableDataCellEmpty(cleanSheetsString) && !int.TryParse(cleanSheetsString, out cleanSheets))
+                {
+                    throw new Exception($"Failed to parse {cleanSheetsString}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = $"Getting {nameof(cleanSheets)} failed. Table data index: {index}.";
+                ScrapingException.LogWarning(nameof(GetCleanSheetsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
+
+            return cleanSheets;
         }
 
         /// <summary>

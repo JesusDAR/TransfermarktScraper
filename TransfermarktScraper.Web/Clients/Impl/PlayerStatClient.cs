@@ -1,7 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Domain.DTOs.Response.Stat;
 using TransfermarktScraper.Web.Clients.Interfaces;
@@ -29,13 +28,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<PlayerStat?> GetPlayerStatAsync(string playerTransfermarktId)
+        public async Task<PlayerStat?> GetPlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStat)
         {
-            var uri = QueryHelpers.AddQueryString(_clientSettings.PlayerStatsControllerPath, "playerTransfermarktId", playerTransfermarktId);
+            var result = await _httpClient.PostAsJsonAsync(_clientSettings.PlayerStatsControllerPath, playerStat);
 
-            var result = await _httpClient.GetFromJsonAsync<PlayerStat>(uri);
+            if (result != null && result.IsSuccessStatusCode)
+            {
+                var content = await result.Content.ReadFromJsonAsync<PlayerStat>();
 
-            return result;
+                return content;
+            }
+
+            return null;
         }
     }
 }

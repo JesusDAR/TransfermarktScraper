@@ -11,10 +11,10 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// <summary>
         /// Retrieves the player stats based on the specified Transfermarkt player ID.
         /// </summary>
-        /// <param name="playerTransfermarktId">The unique Transfermarkt ID of the player.</param>
+        /// <param name="playerStat">The player stat request.</param>
         /// <returns>
         /// A <see cref="PlayerStat"/> object if found; otherwise, null.
         /// </returns>
-        Task<PlayerStat?> GetPlayerStatAsync(string playerTransfermarktId);
+        Task<PlayerStat?> GetPlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStat);
     }
 }

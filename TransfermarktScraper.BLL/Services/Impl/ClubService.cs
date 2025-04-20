@@ -111,7 +111,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Persists a club entity in the database, inserting or updating it as necessary.
         /// </summary>
         /// <param name="club">The club entity to persist.</param>
-        /// <param name="cancellationToken">The cancellatio token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The persisted <see cref="Club"/> entity.</returns>
         private async Task<Club> PersistClubAsync(Club club, CancellationToken cancellationToken)
         {

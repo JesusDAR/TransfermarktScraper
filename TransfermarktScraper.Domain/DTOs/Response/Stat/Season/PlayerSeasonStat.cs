@@ -23,7 +23,67 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat.Season
         required public string SeasonTransfermarktId { get; set; }
 
         /// <summary>
-        /// Gets or sets the competition stats for the player.
+        /// Gets or sets the number of appearances in all competitions of the season.
+        /// </summary>
+        public int Appearances { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of goals in all competitions of the season.
+        /// </summary>
+        public int Goals { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of assists in all competitions of the season.
+        /// </summary>
+        public int Assists { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of own goals in all competitions of the season.
+        /// </summary>
+        public int OwnGoals { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of yellow cards received in all competitions of the season.
+        /// </summary>
+        public int YellowCards { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of second yellow cards received in all competitions of the season.
+        /// </summary>
+        public int SecondYellowCards { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of red cards received in all competitions of the season.
+        /// </summary>
+        public int RedCards { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of penalty goals scored in all competitions of the season.
+        /// </summary>
+        public int PenaltyGoals { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of goals that the goalkeeper has conceded in all competitions of the season.
+        /// </summary>
+        public int GoalsConceded { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the number of clean sheets for the goalkeeper in all competitions of the season.
+        /// </summary>
+        public int CleanSheets { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the number of minutes per goal scored in all competitions of the season.
+        /// </summary>
+        public int MinutesPerGoal { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of minutes played in all competitions of the season.
+        /// </summary>
+        public int MinutesPlayed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the competition stats for the player in the season.
         /// </summary>
         public IEnumerable<PlayerSeasonCompetitionStat>? PlayerSeasonCompetitionStats { get; set; }
     }

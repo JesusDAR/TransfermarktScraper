@@ -1,4 +1,4 @@
-﻿namespace TransfermarktScraper.Domain.DTOs.Request
+﻿namespace TransfermarktScraper.Domain.DTOs.Request.Stat
 {
     /// <summary>
     /// Represents the request DTO for a player stat.

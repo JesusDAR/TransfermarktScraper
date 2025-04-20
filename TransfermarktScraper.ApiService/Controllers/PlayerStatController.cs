@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Response.Stat;
+using PlayerStat = TransfermarktScraper.Domain.DTOs.Response.Stat.PlayerStat;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -41,7 +41,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<PlayerStat>> GetPlayerStatAsync(
-            [FromBody] Domain.DTOs.Request.PlayerStat playerStat,
+            [FromBody] Domain.DTOs.Request.Stat.PlayerStat playerStat,
             CancellationToken cancellationToken)
         {
             try

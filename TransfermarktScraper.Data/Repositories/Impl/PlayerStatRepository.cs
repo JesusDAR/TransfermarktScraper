@@ -1,10 +1,13 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities.Stat;
+using TransfermarktScraper.Domain.Entities.Stat.Season;
 using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
 
@@ -41,6 +44,39 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             {
                 var message = $"Failed to retrieve the player stat with player Transfermarkt ID: {playerTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetPlayerStatAsync), nameof(PlayerStatRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<PlayerSeasonStat>> GetPlayerSeasonStatsAsync(string playerTransfermarktId, IEnumerable<string> seasonTransfermarktIds, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var transfermarktIds = seasonTransfermarktIds
+                    .Select(seasonTransfermarktId => EntityUtils.GetHash($"{playerTransfermarktId}|{seasonTransfermarktId}"))
+                    .ToList();
+
+                var projection = Builders<PlayerStat>.Projection
+                    .ElemMatch(
+                        playerStat => playerStat.PlayerSeasonStats,
+                        Builders<PlayerSeasonStat>.Filter.In(playerSeasonStat => playerSeasonStat.TransfermarktId, transfermarktIds));
+
+                var filter = Builders<PlayerStat>.Filter
+                    .Eq(
+                        playerStat => playerStat.TransfermarktId,
+                        EntityUtils.GetHash($"{playerTransfermarktId}|stat"));
+
+                var playerStat = await _playerStats
+                    .Find(filter)
+                    .Project<PlayerStat>(projection)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                return playerStat.PlayerSeasonStats ?? Enumerable.Empty<PlayerSeasonStat>();
+            }
+            catch (System.Exception)
+            {
+                var message = $"Failed to retrieve the player season stats with player Transfermarkt ID: {playerTransfermarktId} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetPlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
             }
         }
 

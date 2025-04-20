@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using TransfermarktScraper.Domain.DTOs.Response.Stat;
+using PlayerStat = TransfermarktScraper.Domain.DTOs.Response.Stat.PlayerStat;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {
@@ -15,6 +15,6 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// <returns>
         /// A <see cref="PlayerStat"/> object if found; otherwise, null.
         /// </returns>
-        Task<PlayerStat?> GetPlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStat);
+        Task<PlayerStat?> GetPlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStat);
     }
 }

@@ -107,7 +107,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var link = await GetLinkAsync(tableDataLocators, 1);
 
-                var playerTransfermarktId = GetPlayerTransfermarktId(link);
+                var playerTransfermarktId = ExtractPlayerTransfermarktId(link);
 
                 var position = await GetPositionAsync(tableDataLocators, 1);
 
@@ -605,7 +605,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="link">The player link in Transfermarkt.</param>
         /// <returns>The Transfermarkt player identifier.</returns>
-        private string GetPlayerTransfermarktId(string link)
+        private string ExtractPlayerTransfermarktId(string link)
         {
             var index = link.LastIndexOf('/');
             string playerTransfermarktId = link.Substring(index + 1);

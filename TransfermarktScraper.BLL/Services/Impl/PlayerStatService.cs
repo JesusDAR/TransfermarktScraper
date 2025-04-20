@@ -6,10 +6,11 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
-using TransfermarktScraper.Domain.Entities.Stat;
 using TransfermarktScraper.Domain.Entities.Stat.Career;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
+using PlayerSeasonStat = TransfermarktScraper.Domain.Entities.Stat.Season.PlayerSeasonStat;
+using PlayerStat = TransfermarktScraper.Domain.Entities.Stat.PlayerStat;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -45,13 +46,15 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
+        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
             var playerStat = await _playerStatRepository.GetPlayerStatAsync(playerStatRequest.PlayerTransfermarktId, cancellationToken);
 
             if (playerStat == null)
             {
                 playerStat = await ScrapePlayerStatAsync(playerStatRequest, cancellationToken);
+
+                playerStat = await PersistPlayerStatAsync(playerStat, cancellationToken);
             }
 
             var playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
@@ -60,9 +63,33 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Domain.DTOs.Response.Stat.PlayerStat> GetPlayerSeasonStatAsync(string playerTransfermarkId, string seasonTransfermarkId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>> GetPlayerSeasonStatAsync(Domain.DTOs.Request.Stat.Season.PlayerSeasonStat playerSeasonStatRequest, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var playerSeasonStats = await _playerStatRepository.GetPlayerSeasonStatsAsync(playerSeasonStatRequest.PlayerTransfermarktId, playerSeasonStatRequest.PlayerTransfermarktSeasonIds, cancellationToken);
+
+            IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat> playerSeasonStatDtos;
+
+            if (!playerSeasonStats.Any(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null))
+            {
+                playerSeasonStatDtos = playerSeasonStats.Adapt<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>>();
+
+                return playerSeasonStatDtos;
+            }
+
+            playerSeasonStats = playerSeasonStats.Where(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null);
+
+            var playerSeasonStatsScraped = new List<PlayerSeasonStat>();
+
+            foreach (var playerSeasonStat in playerSeasonStats)
+            {
+                var playerSeasonStatScraped = await ScrapePlayerSeasonStatAsync(playerSeasonStat);
+
+                playerSeasonStatsScraped.Add(playerSeasonStatScraped);
+            }
+
+            playerSeasonStatDtos = playerSeasonStatsScraped.Adapt<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>>();
+
+            return playerSeasonStatDtos;
         }
 
         private async Task<PlayerStat> PersistPlayerStatAsync(PlayerStat playerStat, CancellationToken cancellationToken)
@@ -80,7 +107,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A <see cref="PlayerStat"/> object containing the player's career stat and a collection of Transfermarkt season Ids.
         /// </returns>
-        private async Task<PlayerStat> ScrapePlayerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
+        private async Task<PlayerStat> ScrapePlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
             var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath);
 
@@ -93,10 +120,23 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
             {
                 PlayerCareerStat = playerCareerStat,
-                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new Domain.Entities.Stat.Season.PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
+                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
             };
 
             return playerStat;
+        }
+
+        private async Task<PlayerSeasonStat> ScrapePlayerSeasonStatAsync(PlayerSeasonStat playerSeasonStat)
+        {
+            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerSeasonStat.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerSeasonStat.SeasonTransfermarktId);
+
+            await _page.GotoAsync(uri);
+
+            var playerSeasonStat;
+            var playerSeasonCompetitionStats;
+            var playerSeasonCompetitionMatchStats;
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -144,7 +184,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="playerStatRequest">The player stat request DTO.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="PlayerCareerStat"/> entity.</returns>
-        private async Task<PlayerCareerStat> GetPlayerCareerStatAsync(Domain.DTOs.Request.PlayerStat playerStatRequest, CancellationToken cancellationToken)
+        private async Task<PlayerCareerStat> GetPlayerCareerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, CancellationToken cancellationToken)
         {
             var playerPosition = PositionExtensions.ToEnum(playerStatRequest.Position);
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TransfermarktScraper.Domain.DTOs.Response.Stat.Season
+namespace TransfermarktScraper.Domain.DTOs.Response.Stat
 {
     /// <summary>
     /// Represents the response DTO for a player season stat.
@@ -78,7 +78,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat.Season
         public int MinutesPerGoal { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of minutes played in all competitions of the season.
+        /// Gets or sets the number of minutes the player was on the field in all competitions of the season.
         /// </summary>
         public int MinutesPlayed { get; set; }
 

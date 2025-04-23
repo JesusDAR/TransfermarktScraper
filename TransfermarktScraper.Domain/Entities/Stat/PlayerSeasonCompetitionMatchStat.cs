@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities.Stat.Season
+namespace TransfermarktScraper.Domain.Entities.Stat
 {
     /// <summary>
     /// Represents the player season competition match stat entity.

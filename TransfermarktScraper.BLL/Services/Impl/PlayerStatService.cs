@@ -1,15 +1,17 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
+using TransfermarktScraper.BLL.Models.PlayerStat;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
-using TransfermarktScraper.Domain.Entities.Stat.Career;
+using TransfermarktScraper.Domain.Entities.Stat;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
-using PlayerSeasonStat = TransfermarktScraper.Domain.Entities.Stat.Season.PlayerSeasonStat;
+using PlayerSeasonStat = TransfermarktScraper.Domain.Entities.Stat.PlayerSeasonStat;
 using PlayerStat = TransfermarktScraper.Domain.Entities.Stat.PlayerStat;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -50,53 +52,55 @@ namespace TransfermarktScraper.BLL.Services.Impl
         {
             var playerStat = await _playerStatRepository.GetPlayerStatAsync(playerStatRequest.PlayerTransfermarktId, cancellationToken);
 
+            Domain.DTOs.Response.Stat.PlayerStat playerStatDto;
+
             if (playerStat == null)
             {
-                playerStat = await ScrapePlayerStatAsync(playerStatRequest, cancellationToken);
+                if (!playerStatRequest.PlayerTransfermarktSeasonIds.Any(playerTransfermarktSeasonId => playerTransfermarktSeasonId.Equals("ges")))
+                {
+                    var message = $"The overall career stats must be the first stats to be scraped for the player with {nameof(playerStatRequest.PlayerTransfermarktId)}: {playerStatRequest.PlayerTransfermarktId}.";
+                    throw new InvalidOperationException(message);
+                }
 
-                playerStat = await PersistPlayerStatAsync(playerStat, cancellationToken);
+                await ScrapePlayerStatAsync(playerStatRequest, playerStat, cancellationToken);
+
+                playerStat = await _playerStatRepository.InsertAsync(playerStat, cancellationToken);
+
+                playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
+
+                return playerStatDto;
             }
-
-            var playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
-
-            return playerStatDto;
-        }
-
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>> GetPlayerSeasonStatAsync(Domain.DTOs.Request.Stat.Season.PlayerSeasonStat playerSeasonStatRequest, CancellationToken cancellationToken)
-        {
-            var playerSeasonStats = await _playerStatRepository.GetPlayerSeasonStatsAsync(playerSeasonStatRequest.PlayerTransfermarktId, playerSeasonStatRequest.PlayerTransfermarktSeasonIds, cancellationToken);
-
-            IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat> playerSeasonStatDtos;
-
-            if (!playerSeasonStats.Any(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null))
+            else
             {
-                playerSeasonStatDtos = playerSeasonStats.Adapt<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>>();
+                playerStatDto = playerStat.Adapt<Domain.DTOs.Response.Stat.PlayerStat>();
 
-                return playerSeasonStatDtos;
+                var playerSeasonStats = await _playerStatRepository.GetPlayerSeasonStatsAsync(playerStatRequest.PlayerTransfermarktId, playerStatRequest.PlayerTransfermarktSeasonIds, cancellationToken);
+
+                IEnumerable<Domain.DTOs.Response.Stat.PlayerSeasonStat> playerSeasonStatDtos;
+
+                if (!playerSeasonStats.Any(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null))
+                {
+                    playerSeasonStatDtos = playerSeasonStats.Adapt<IEnumerable<Domain.DTOs.Response.Stat.PlayerSeasonStat>>();
+
+                    playerStatDto.PlayerSeasonStats = playerSeasonStatDtos;
+                }
+                else
+                {
+                    playerSeasonStats = playerSeasonStats.Where(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null);
+
+                    playerStatRequest.PlayerTransfermarktSeasonIds = playerSeasonStats.Select(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId);
+
+                    await ScrapePlayerStatAsync(playerStatRequest, playerStat, cancellationToken);
+
+                    playerStat = await _playerStatRepository.UpdatePlayerSeasonStatsAsync(playerStat, cancellationToken);
+
+                    playerSeasonStatDtos = playerStat.PlayerSeasonStats.Adapt<IEnumerable<Domain.DTOs.Response.Stat.PlayerSeasonStat>>();
+
+                    playerStatDto.PlayerSeasonStats = playerSeasonStatDtos;
+                }
+
+                return playerStatDto;
             }
-
-            playerSeasonStats = playerSeasonStats.Where(playerSeasonStat => playerSeasonStat.PlayerSeasonCompetitionStats == null);
-
-            var playerSeasonStatsScraped = new List<PlayerSeasonStat>();
-
-            foreach (var playerSeasonStat in playerSeasonStats)
-            {
-                var playerSeasonStatScraped = await ScrapePlayerSeasonStatAsync(playerSeasonStat);
-
-                playerSeasonStatsScraped.Add(playerSeasonStatScraped);
-            }
-
-            playerSeasonStatDtos = playerSeasonStatsScraped.Adapt<IEnumerable<Domain.DTOs.Response.Stat.Season.PlayerSeasonStat>>();
-
-            return playerSeasonStatDtos;
-        }
-
-        private async Task<PlayerStat> PersistPlayerStatAsync(PlayerStat playerStat, CancellationToken cancellationToken)
-        {
-            playerStat = await _playerStatRepository.InsertAsync(playerStat, cancellationToken);
-
-            return playerStat;
         }
 
         /// <summary>
@@ -107,36 +111,33 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A <see cref="PlayerStat"/> object containing the player's career stat and a collection of Transfermarkt season Ids.
         /// </returns>
-        private async Task<PlayerStat> ScrapePlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, CancellationToken cancellationToken)
+        private async Task ScrapePlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, PlayerStat? playerStat, CancellationToken cancellationToken)
         {
-            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath);
-
-            await _page.GotoAsync(uri);
-
-            var playerSeasonIds = await GetPlayerSeasonIdsAsync();
-
-            var playerCareerStat = await GetPlayerCareerStatAsync(playerStatRequest, cancellationToken);
-
-            var playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
+            var uri = string.Empty;
+            if (playerStat == null)
             {
-                PlayerCareerStat = playerCareerStat,
-                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
-            };
+                uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", "ges");
 
-            return playerStat;
-        }
+                await _page.GotoAsync(uri);
 
-        private async Task<PlayerSeasonStat> ScrapePlayerSeasonStatAsync(PlayerSeasonStat playerSeasonStat)
-        {
-            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerSeasonStat.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerSeasonStat.SeasonTransfermarktId);
+                var playerSeasonIds = await GetPlayerSeasonIds();
 
-            await _page.GotoAsync(uri);
+                playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
+                {
+                    PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
+                };
+            }
 
-            var playerSeasonStat;
-            var playerSeasonCompetitionStats;
-            var playerSeasonCompetitionMatchStats;
+            foreach (var playerTransfermarktSeasonId in playerStatRequest.PlayerTransfermarktSeasonIds)
+            {
+                uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerTransfermarktSeasonId);
 
-            throw new NotImplementedException();
+                var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerTransfermarktSeasonId, cancellationToken);
+
+                playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerTransfermarktSeasonId, cancellationToken);
+
+                //GetMatches
+            }
         }
 
         /// <summary>
@@ -145,7 +146,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A collection of strings representing the season Transfermarkt IDs in which the player has participated.
         /// </returns>
-        private async Task<IEnumerable<string>> GetPlayerSeasonIdsAsync()
+        private async Task<IEnumerable<string>> GetPlayerSeasonIds()
         {
             var selector = "select[name='saison']";
             try
@@ -174,17 +175,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetPlayerSeasonIdsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetPlayerSeasonIds), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
         }
 
         /// <summary>
-        /// Retrieves the overall career statistics of a player from Transfermarkt.
+        /// Retrieves the overall stats of a player season from Transfermarkt.
         /// </summary>
         /// <param name="playerStatRequest">The player stat request DTO.</param>
+        /// <param name="playerTransfermarktSeasonId">The Transfermarkt season unique ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="PlayerCareerStat"/> entity.</returns>
-        private async Task<PlayerCareerStat> GetPlayerCareerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, CancellationToken cancellationToken)
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="PlayerSeasonStat"/> entity.</returns>
+        private async Task<PlayerSeasonStat> GetPlayerSeasonStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, string playerTransfermarktSeasonId, CancellationToken cancellationToken)
         {
             var playerPosition = PositionExtensions.ToEnum(playerStatRequest.Position);
 
@@ -250,9 +252,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
             }
 
-            var playerCareerCompetitionStats = await GetPlayerCareerCompetitionStatsAsync(playerStatRequest.PlayerTransfermarktId, playerPosition, cancellationToken);
-
-            var playerCareerStat = new PlayerCareerStat
+            var playerSeasonStat = new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, playerTransfermarktSeasonId)
             {
                 Appearances = appearances,
                 Goals = goals,
@@ -266,24 +266,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 PenaltyGoals = penaltyGoals,
                 MinutesPerGoal = minutesPerGoal,
                 MinutesPlayed = minutesPlayed,
-                PlayerCareerCompetitionStats = playerCareerCompetitionStats,
             };
 
-            return playerCareerStat;
+            return playerSeasonStat;
         }
 
         /// <summary>
-        /// Retrieves the player's career stats per competition from Transfermarkt.
+        /// Retrieves the player's season stats per competition from Transfermarkt.
         /// </summary>
-        /// <param name="playerTransfermarkId">The unique identifier of the player on Transfermarkt.</param>
-        /// <param name="playerPosition">The player position, used to know it the player is a goalkeeper or a field player.</param>
+        /// <param name="playerStatRequest">The player stat request DTO.</param>
+        /// <param name="playerTransfermarktSeasonId">The Transfermarkt season unique ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <see cref="PlayerCareerCompetitionStat"/> entities.</returns>
-        private async Task<IEnumerable<PlayerCareerCompetitionStat>> GetPlayerCareerCompetitionStatsAsync(string playerTransfermarkId, Domain.Enums.Position playerPosition, CancellationToken cancellationToken)
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <see cref="PlayerSeasonCompetitionStat"/> entities.</returns>
+        private async Task<IEnumerable<PlayerSeasonCompetitionStat>> GetPlayerSeasonCompetitionStatsAsync(Domain.DTOs.Request.Stat.PlayerStat playerStatRequest, string playerTransfermarktSeasonId, CancellationToken cancellationToken)
         {
-            var tableRowLocators = await GetTableRowLocatorsAsync();
+            var playerPosition = PositionExtensions.ToEnum(playerStatRequest.Position);
 
-            var playerCareerCompetitionStats = new List<PlayerCareerCompetitionStat>();
+            var tableRowLocators = await GetCompetitionTableRowLocatorsAsync();
+
+            var playerSeasonCompetitionStats = new List<PlayerSeasonCompetitionStat>();
 
             foreach (var tableRowLocator in tableRowLocators)
             {
@@ -357,7 +358,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 await CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, cancellationToken);
 
-                var playerCareerCompetitionStat = new PlayerCareerCompetitionStat(playerTransfermarkId, competitionTransfermarktId)
+                var competitionFooterResult = await GetCompetitionFooterResultAsync(competitionTransfermarktId);
+
+                var playerSeasonCompetitionStat = new PlayerSeasonCompetitionStat(playerStatRequest.PlayerTransfermarktId, competitionTransfermarktId, playerTransfermarktSeasonId)
                 {
                     CompetitionName = competitionName,
                     Appearances = appearances,
@@ -372,12 +375,35 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     PenaltyGoals = penaltyGoals,
                     MinutesPerGoal = minutesPerGoal,
                     MinutesPlayed = minutesPlayed,
+                    CleanSheets = cleanSheets,
+                    GoalsConceded = goalsConceded,
+                    Squad = competitionFooterResult.Squad,
+                    StartingEleven = competitionFooterResult.StartingEleven,
+                    OnTheBench = competitionFooterResult.OnTheBench,
+                    Suspended = competitionFooterResult.Suspended,
+                    Injured = competitionFooterResult.Injured,
+                    Absence = competitionFooterResult.Absence,
                 };
 
-                playerCareerCompetitionStats.Add(playerCareerCompetitionStat);
+                playerSeasonCompetitionStats.Add(playerSeasonCompetitionStat);
             }
 
-            return playerCareerCompetitionStats;
+            foreach (var playerSeasonCompetitionStat in playerSeasonCompetitionStats)
+            {
+                tableRowLocators = await GetMatchTableRowLocatorsAsync(playerSeasonCompetitionStat.CompetitionTransfermarktId);
+
+                foreach (var tableRowLocator in tableRowLocators)
+                {
+                    var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
+
+                    //var playerSeasonCompetitionMatchStat = new PlayerSeasonCompetitionMatchStat(playerStatRequest.PlayerTransfermarktId, )
+                    //{
+
+                    //}
+                }
+            }
+
+            return playerSeasonCompetitionStats;
         }
 
         private async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken)
@@ -410,10 +436,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the table row locators from the page.
+        /// Extracts the competition table row locators from the page.
         /// </summary>
-        /// <returns>The table row locators.</returns>
-        private async Task<IReadOnlyList<ILocator>> GetTableRowLocatorsAsync()
+        /// <returns>The competition table row locators.</returns>
+        private async Task<IReadOnlyList<ILocator>> GetCompetitionTableRowLocatorsAsync()
         {
             var selector = "#yw1 > table.items > tbody";
             try
@@ -427,7 +453,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetTableRowLocatorsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetCompetitionTableRowLocatorsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
+        }
+
+        private async Task<IReadOnlyList<ILocator>> GetMatchTableRowLocatorsAsync(string competitionTransfermarktId)
+        {
+            var selector = $"a[name='{competitionTransfermarktId}'] >> .. >> table >> tfoot";
+            try
+            {
+                var tableBodyLocator = _page.Locator(selector);
+
+                selector = "tr";
+                var tableRowLocators = await tableBodyLocator.Locator(selector).AllAsync();
+                return tableRowLocators;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetMatchTableRowLocatorsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
         }
 
@@ -449,6 +493,81 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var message = $"Using selector: '{selector}' failed.";
                 throw ScrapingException.LogError(nameof(GetTableDataLocatorsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
+        }
+
+        private async Task<CompetitionFooterResult> GetCompetitionFooterResultAsync(string competitionTransfermarktId)
+        {
+            var selector = $"a[name='{competitionTransfermarktId}'] >> .. >> table >> tfoot";
+            try
+            {
+                var tableFooterLocator = _page.Locator(selector);
+                var tableFooterText = await tableFooterLocator.InnerTextAsync();
+                var competitionFooterResult = ParseCompetitionFooterText(tableFooterText);
+                return competitionFooterResult;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetCompetitionFooterResultAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
+        }
+
+        private CompetitionFooterResult ParseCompetitionFooterText(string tableFooterText)
+        {
+            var competitionFooterResult = new CompetitionFooterResult();
+
+            if (string.IsNullOrEmpty(tableFooterText))
+            {
+                return competitionFooterResult;
+            }
+
+            var entries = tableFooterText
+                .Replace("\n", string.Empty)
+                .Replace("\t", string.Empty)
+                .Split(',')
+                .Select(entry => entry.Trim())
+                .Where(entry => !string.IsNullOrEmpty(entry));
+
+            foreach (var entry in entries)
+            {
+                var parts = entry.Split(':');
+
+                var key = parts[0].Trim().ToLower();
+                var value = parts[1].Trim();
+
+                if (int.TryParse(value, out int numericValue))
+                {
+                    switch (key)
+                    {
+                        case "squad":
+                            competitionFooterResult.Squad = numericValue;
+                            break;
+                        case "starting eleven":
+                            competitionFooterResult.StartingEleven = numericValue;
+                            break;
+                        case "substituted in":
+                            competitionFooterResult.SubstitutionsOn = numericValue;
+                            break;
+                        case "substituted off":
+                            competitionFooterResult.SubstitutionsOff = numericValue;
+                            break;
+                        case "on the bench":
+                            competitionFooterResult.OnTheBench = numericValue;
+                            break;
+                        case "suspended":
+                            competitionFooterResult.Suspended = numericValue;
+                            break;
+                        case "injured":
+                            competitionFooterResult.Injured = numericValue;
+                            break;
+                        case "absence":
+                            competitionFooterResult.Absence = numericValue;
+                            break;
+                    }
+                }
+            }
+
+            return competitionFooterResult;
         }
 
         /// <summary>

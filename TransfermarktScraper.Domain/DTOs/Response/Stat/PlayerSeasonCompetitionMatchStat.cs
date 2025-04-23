@@ -1,7 +1,7 @@
 ﻿using System;
 using TransfermarktScraper.Domain.Enums;
 
-namespace TransfermarktScraper.Domain.DTOs.Response.Stat.Season
+namespace TransfermarktScraper.Domain.DTOs.Response.Stat
 {
     /// <summary>
     /// Represents the response DTO for a player season competition match stat.

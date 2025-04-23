@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TransfermarktScraper.Domain.Entities.Stat;
-using TransfermarktScraper.Domain.Entities.Stat.Season;
 
 namespace TransfermarktScraper.Data.Repositories.Interfaces
 {
@@ -41,5 +40,14 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation with a result of the inserted <see cref="PlayerStat"/> object.</returns>
         Task<PlayerStat> InsertAsync(PlayerStat playerStat, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Updates the <see cref="PlayerSeasonStat"/> collection of a <see cref="PlayerStat"/> entity in the database.
+        /// Only existing <see cref="PlayerSeasonStat"/> entries are replaced; the rest remain unchanged.
+        /// </summary>
+        /// <param name="playerStat">The <see cref="PlayerStat"/> object containing the updated season stats.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The updated <see cref="PlayerStat"/> object.</returns>
+        Task<PlayerStat> UpdatePlayerSeasonStatsAsync(PlayerStat playerStat, CancellationToken cancellationToken);
     }
 }

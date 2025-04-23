@@ -121,7 +121,6 @@ namespace TransfermarktScraper.BLL.Configuration
             services.AddScoped<ClubMapping>();
             services.AddScoped<PlayerMapping>();
             services.AddScoped<PlayerStatMapping>();
-            services.AddScoped<PlayerCareerStatMapping>();
             services.AddScoped<PlayerSeasonStatMapping>();
 
             var config = TypeAdapterConfig.GlobalSettings;
@@ -133,7 +132,6 @@ namespace TransfermarktScraper.BLL.Configuration
                 typeof(ClubMapping),
                 typeof(PlayerMapping),
                 typeof(PlayerStatMapping),
-                typeof(PlayerCareerStatMapping),
                 typeof(PlayerSeasonStatMapping),
             };
 

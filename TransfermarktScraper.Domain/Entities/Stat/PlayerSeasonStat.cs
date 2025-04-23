@@ -4,10 +4,10 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
 
-namespace TransfermarktScraper.Domain.Entities.Stat.Season
+namespace TransfermarktScraper.Domain.Entities.Stat
 {
     /// <summary>
-    /// Represents a player season entity.
+    /// Represents a player season stat entity.
     /// </summary>
     public class PlayerSeasonStat
     {
@@ -140,6 +140,12 @@ namespace TransfermarktScraper.Domain.Entities.Stat.Season
         /// </summary>
         [BsonElement("minutesPerGoal")]
         public int? MinutesPerGoal { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of minutes the player was on the field in all competitions of the season.
+        /// </summary>
+        [BsonElement("minutesPlayed")]
+        public int? MinutesPlayed { get; set; }
 
         /// <summary>
         /// Gets or sets the competition stats for the player in the season.

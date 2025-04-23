@@ -1,7 +1,9 @@
-﻿namespace TransfermarktScraper.Domain.DTOs.Request.Stat
+﻿using System.Collections.Generic;
+
+namespace TransfermarktScraper.Domain.DTOs.Request.Stat
 {
     /// <summary>
-    /// Represents the request DTO for a player stat.
+    /// Represents the request DTO for a player season stats or for many player seasons stats.
     /// </summary>
     public class PlayerStat
     {
@@ -14,5 +16,10 @@
         /// Gets or sets the player position.
         /// </summary>
         required public string Position { get; set; }
+
+        /// <summary>
+        /// Gets or sets the player Transfermarkt season IDs.
+        /// </summary>
+        required public IEnumerable<string> PlayerTransfermarktSeasonIds { get; set; }
     }
 }

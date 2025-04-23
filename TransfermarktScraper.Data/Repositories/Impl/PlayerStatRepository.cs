@@ -7,7 +7,6 @@ using MongoDB.Driver;
 using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities.Stat;
-using TransfermarktScraper.Domain.Entities.Stat.Season;
 using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils;
 
@@ -90,8 +89,59 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             }
             catch (System.Exception)
             {
-                var message = $"Failed to insert player stat with {nameof(playerStat.PlayerTransfermarktId)}: {playerStat.PlayerTransfermarktId} to the database.";
+                var message = $"Failed to insert player stat with {nameof(playerStat.PlayerTransfermarktId)}: {playerStat.PlayerTransfermarktId} into the database.";
                 throw DatabaseException.LogError(message, nameof(InsertAsync), nameof(PlayerStatRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<PlayerStat> UpdatePlayerSeasonStatsAsync(PlayerStat playerStat, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var existingPlayerStat = await GetPlayerStatAsync(playerStat.PlayerTransfermarktId, cancellationToken);
+
+                if (existingPlayerStat == null)
+                {
+                    var message = $"Player stat with player Transfermarkt ID: {playerStat.PlayerTransfermarktId} not found in the database.";
+                    throw DatabaseException.LogError(message, nameof(UpdatePlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
+                }
+
+                var transfermarktIds = playerStat.PlayerSeasonStats
+                    .ToDictionary(playerSeasonStat => EntityUtils.GetHash($"{playerSeasonStat.PlayerTransfermarktId}|{playerSeasonStat.SeasonTransfermarktId}"));
+
+                var newPlayerSeasonStats = new List<PlayerSeasonStat>();
+
+                foreach (var existingPlayerSeasonStat in existingPlayerStat.PlayerSeasonStats)
+                {
+                    if (transfermarktIds.TryGetValue(existingPlayerSeasonStat.TransfermarktId, out var newPlayerSeasonStat))
+                    {
+                        newPlayerSeasonStats.Add(newPlayerSeasonStat);
+                    }
+                    else
+                    {
+                        newPlayerSeasonStats.Add(existingPlayerSeasonStat);
+                    }
+                }
+
+                var filter = Builders<PlayerStat>.Filter
+                    .Eq(
+                    playerStat => playerStat.TransfermarktId,
+                    playerStat.TransfermarktId);
+
+                var update = Builders<PlayerStat>.Update
+                    .Set(
+                    playerStat => playerStat.PlayerSeasonStats,
+                    playerStat.PlayerSeasonStats);
+
+                await _playerStats.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+
+                return playerStat;
+            }
+            catch (System.Exception)
+            {
+                var message = $"Failed to update season stats for player with {nameof(playerStat.PlayerTransfermarktId)}: {playerStat.PlayerTransfermarktId} into the database.";
+                throw DatabaseException.LogError(message, nameof(UpdatePlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
             }
         }
     }

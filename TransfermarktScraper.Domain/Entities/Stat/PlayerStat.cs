@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using TransfermarktScraper.Domain.Entities.Stat.Career;
-using TransfermarktScraper.Domain.Entities.Stat.Season;
 using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.Domain.Entities.Stat
@@ -50,12 +48,6 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         [BsonElement("updateDate")]
         [BsonRepresentation(BsonType.DateTime)]
         public DateTime UpdateDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the overall career stat of the player.
-        /// </summary>
-        [BsonElement("playerCareerStat")]
-        required public PlayerCareerStat PlayerCareerStat { get; set; }
 
         /// <summary>
         /// Gets or sets the player season stats.

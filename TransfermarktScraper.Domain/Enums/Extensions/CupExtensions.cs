@@ -31,7 +31,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// <returns>The corresponding <see cref="Cup"/> enum value.</returns>
         public static Cup ToEnum(string cupString)
         {
-            cupString = cupString.ToLower();
+            cupString = cupString.ToLower().Trim();
 
             if (cupString.Contains("domestic"))
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace TransfermarktScraper.Domain.DTOs.Response.Stat
 {
@@ -128,13 +129,8 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         public int Injured { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of matches the player missed because of an absence in the competition for the season.
-        /// </summary>
-        public int Absence { get; set; }
-
-        /// <summary>
         /// Gets or sets the player match stats in the competition for the season.
         /// </summary>
-        public IEnumerable<PlayerSeasonCompetitionMatchStat>? PlayerSeasonCompetitionMatchStats { get; set; }
+        public IEnumerable<PlayerSeasonCompetitionMatchStat> PlayerSeasonCompetitionMatchStats { get; set; } = Enumerable.Empty<PlayerSeasonCompetitionMatchStat>();
     }
 }

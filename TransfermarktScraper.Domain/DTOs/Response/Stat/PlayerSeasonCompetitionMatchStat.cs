@@ -36,7 +36,12 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets a naming for the match.
         /// </summary>
-        required public string Matchday { get; set; }
+        required public string MatchDay { get; set; }
+
+        /// <summary>
+        /// Gets or sets the link of the match.
+        /// </summary>
+        required public string Link { get; set; }
 
         /// <summary>
         /// Gets or sets the home club name.
@@ -49,11 +54,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         required public string AwayClubName { get; set; }
 
         /// <summary>
-        /// Gets or sets the link of the match.
-        /// </summary>
-        required public string Link { get; set; }
-
-        /// <summary>
         /// Gets or sets the home club scored goals in the match.
         /// </summary>
         public int HomeClubGoals { get; set; }
@@ -64,19 +64,19 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         public int AwayClubGoals { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the player club won the match.
+        /// Gets or sets the result of the match for the club.
         /// </summary>
-        public bool IsWon { get; set; }
+        public MatchResult MatchResult { get; set; } = MatchResult.Unknown;
 
         /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the addition time.
         /// </summary>
-        public bool IsResultAddition { get; set; }
+        public bool IsResultAddition { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the penalties.
         /// </summary>
-        public bool IsResultPenalties { get; set; }
+        public bool IsResultPenalties { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the position of the player during the match.
@@ -132,5 +132,10 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// Gets or sets the number of minutes the player was on the field.
         /// </summary>
         public int? MinutesPlayed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reason why the player did not played any minute of the match.
+        /// </summary>
+        public NotPlayingReason NotPlayingReason { get; set; } = NotPlayingReason.None;
     }
 }

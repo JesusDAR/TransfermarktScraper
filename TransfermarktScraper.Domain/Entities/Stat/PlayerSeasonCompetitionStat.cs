@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
@@ -198,15 +199,9 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         public int Injured { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the number of matches the player missed because of an absence in the competition for the season.
-        /// </summary>
-        [BsonElement("absence")]
-        public int Absence { get; set; } = 0;
-
-        /// <summary>
         /// Gets or sets the player match stats in the competition for the season.
         /// </summary>
         [BsonElement("playerSeasonCompetitionMatchStats")]
-        public IEnumerable<PlayerSeasonCompetitionMatchStat>? PlayerSeasonCompetitionMatchStats { get; set; }
+        public IList<PlayerSeasonCompetitionMatchStat> PlayerSeasonCompetitionMatchStats { get; set; } = new List<PlayerSeasonCompetitionMatchStat>();
     }
 }

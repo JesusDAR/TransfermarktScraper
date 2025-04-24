@@ -14,7 +14,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the competitions of the country.
         /// </summary>
         [BsonElement("competitions")]
-        public IEnumerable<Competition> Competitions { get; set; } = Enumerable.Empty<Competition>();
+        public IList<Competition> Competitions { get; set; } = new List<Competition>();
 
         /// <summary>
         /// Gets or sets the flag of the country.

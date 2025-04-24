@@ -34,7 +34,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// <returns>The corresponding <see cref="Tier"/> enum value.</returns>
         public static Tier ToEnum(string tierString)
         {
-            tierString = tierString.ToLower();
+            tierString = tierString.ToLower().Trim();
 
             if (tierString.Contains("first tier"))
             {

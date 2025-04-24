@@ -226,7 +226,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var tableDataLocator = tableDataLocators[index];
                 playerNumber = await tableDataLocator.InnerTextAsync();
-                return playerNumber;
             }
             catch (Exception ex)
             {
@@ -329,7 +328,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var positionLocator = tableDataLocator.Locator(selector);
                 var positionString = await positionLocator.InnerTextAsync();
                 position = PositionExtensions.ToEnum(positionString);
-                return position;
             }
             catch (Exception ex)
             {
@@ -349,14 +347,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
         private async Task<DateTime?> GetDateOfBirthAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             DateTime? dateOfBirth = null;
-
             try
             {
                 var tableDataLocator = tableDataLocators[index];
                 var text = await tableDataLocator.InnerTextAsync();
                 var dateOfBirthString = Regex.Replace(text, @"\s*\(\d+\)", string.Empty);
                 dateOfBirth = DateUtils.ConvertToDateTime(dateOfBirthString);
-                return dateOfBirth;
             }
             catch (Exception ex)
             {
@@ -492,7 +488,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
 
                 foot = FootExtensions.ToEnum(footString);
-                return foot;
             }
             catch (Exception ex)
             {
@@ -524,7 +519,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
 
                 contractStart = DateUtils.ConvertToDateTime(contractStartString);
-                return contractStart;
             }
             catch (Exception ex)
             {
@@ -556,7 +550,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
 
                 contractEnd = DateUtils.ConvertToDateTime(contractEndString);
-                return contractEnd;
             }
             catch (Exception ex)
             {
@@ -589,7 +582,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var marketValueNumeric = MoneyUtils.ExtractNumericPart(marketValueNumericString);
                 marketValue = MoneyUtils.ConvertToFloat(marketValueNumeric);
-                return marketValue;
             }
             catch (Exception ex)
             {

@@ -185,9 +185,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     }
                     else
                     {
-                        var competitions = country.Competitions.Append(competitionSearchResult.Competition);
+                        country.Competitions.Add(competitionSearchResult.Competition);
 
-                        await _countryRepository.UpdateRangeAsync(country.TransfermarktId, competitions, cancellationToken);
+                        await _countryRepository.UpdateRangeAsync(country.TransfermarktId, country.Competitions, cancellationToken);
                     }
                 }
             }

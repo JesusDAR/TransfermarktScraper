@@ -38,7 +38,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// <returns>The corresponding <see cref="Position"/> enum value.</returns>
         public static Position ToEnum(string positionString)
         {
-            positionString = positionString.ToLower();
+            positionString = positionString.ToLower().Trim();
 
             return positionString switch
             {

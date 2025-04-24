@@ -94,8 +94,14 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// <summary>
         /// Gets or sets a naming for the match.
         /// </summary>
-        [BsonElement("matchday")]
-        required public string Matchday { get; set; }
+        [BsonElement("matchDay")]
+        required public string MatchDay { get; set; }
+
+        /// <summary>
+        /// Gets or sets the link of the match.
+        /// </summary>
+        [BsonElement("link")]
+        required public string Link { get; set; }
 
         /// <summary>
         /// Gets or sets the home club name.
@@ -110,12 +116,6 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         required public string AwayClubName { get; set; }
 
         /// <summary>
-        /// Gets or sets the link of the match.
-        /// </summary>
-        [BsonElement("link")]
-        required public string Link { get; set; }
-
-        /// <summary>
         /// Gets or sets the home club scored goals in the match.
         /// </summary>
         [BsonElement("homeClubGoals")]
@@ -128,10 +128,10 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         public int AwayClubGoals { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the player club won the match.
+        /// Gets or sets the result of the match.
         /// </summary>
-        [BsonElement("isWon")]
-        public bool IsWon { get; set; }
+        [BsonElement("matchResult")]
+        public MatchResult MatchResult { get; set; } = MatchResult.Unknown;
 
         /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the addition time.
@@ -210,5 +210,11 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// </summary>
         [BsonElement("minutesPlayed")]
         public int? MinutesPlayed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reason why the player did not played any minute of the match.
+        /// </summary>
+        [BsonElement("minutesPlayed")]
+        public NotPlayingReason NotPlayingReason { get; set; } = NotPlayingReason.None;
     }
 }

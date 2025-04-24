@@ -30,7 +30,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         /// <returns>The corresponding <see cref="Foot"/> enum value.</returns>
         public static Foot ToEnum(string footString)
         {
-            footString = footString.ToLower();
+            footString = footString.ToLower().Trim();
 
             return footString switch
             {

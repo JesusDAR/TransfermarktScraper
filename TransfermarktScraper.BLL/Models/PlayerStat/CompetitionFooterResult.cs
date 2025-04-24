@@ -39,10 +39,5 @@
         /// Gets or sets the number of matches the player missed because of an injure in the competition for the season.
         /// </summary>
         public int Injured { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of matches the player missed because of an absence in the competition for the season.
-        /// </summary>
-        public int Absence { get; set; }
     }
 }

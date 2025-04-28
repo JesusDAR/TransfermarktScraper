@@ -6,7 +6,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
     /// <summary>
     /// Represents the response DTO for a player season competition match stat.
     /// </summary>
-    public class PlayerSeasonCompetitionMatchStat
+    public class PlayerSeasonCompetitionMatchStatResponse
     {
         /// <summary>
         /// Gets or sets the unique composite identifier.

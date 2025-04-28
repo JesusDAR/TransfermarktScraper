@@ -1,4 +1,6 @@
 ﻿using Mapster;
+using TransfermarktScraper.Domain.DTOs.Response.Stat;
+using TransfermarktScraper.Domain.Entities.Stat;
 
 namespace TransfermarktScraper.BLL.Mappers
 {
@@ -8,13 +10,13 @@ namespace TransfermarktScraper.BLL.Mappers
     public class PlayerStatMapping : IRegister
     {
         /// <summary>
-        /// Configures the bidirectional mapping between <see cref="Domain.Entities.Stat.PlayerStat"/> and <see cref="Domain.DTOs.Response.Stat.PlayerStat"/>.
+        /// Configures the bidirectional mapping between <see cref="PlayerStat"/> and <see cref="PlayerStatResponse"/>.
         /// </summary>
         /// <param name="config">The Mapster configuration instance.</param>
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<Domain.Entities.Stat.PlayerStat, Domain.DTOs.Response.Stat.PlayerStat>();
-            config.NewConfig<Domain.DTOs.Response.Stat.PlayerStat, Domain.Entities.Stat.PlayerStat>();
+            config.NewConfig<PlayerStat, PlayerStatResponse>();
+            config.NewConfig<PlayerStatResponse, PlayerStat>();
         }
     }
 }

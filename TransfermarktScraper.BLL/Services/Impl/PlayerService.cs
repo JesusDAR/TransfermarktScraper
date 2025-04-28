@@ -7,11 +7,11 @@ using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Enums.Extensions;
 using TransfermarktScraper.Domain.Exceptions;
-using Player = TransfermarktScraper.Domain.Entities.Player;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -47,7 +47,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Player>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping players process...");
 
@@ -74,7 +74,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 players = club.Players;
             }
 
-            var playerDtos = players.Adapt<IEnumerable<Domain.DTOs.Response.Player>>();
+            var playerDtos = players.Adapt<IEnumerable<PlayerResponse>>();
 
             return playerDtos;
         }

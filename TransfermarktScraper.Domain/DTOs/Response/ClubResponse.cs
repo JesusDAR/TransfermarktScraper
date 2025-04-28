@@ -6,7 +6,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a club.
     /// </summary>
-    public class Club : Base
+    public class ClubResponse : BaseResponse
     {
         /// <summary>
         /// Gets or sets the average age of the players of the club.
@@ -51,7 +51,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the players of the club.
         /// </summary>
-        public IEnumerable<Player> Players { get; set; } = Enumerable.Empty<Player>();
+        public IEnumerable<PlayerResponse> Players { get; set; } = Enumerable.Empty<PlayerResponse>();
 
         /// <summary>
         /// Gets or sets the number of players of the club.

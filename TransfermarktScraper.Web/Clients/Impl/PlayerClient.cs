@@ -31,13 +31,13 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Player>> GetPlayersAsync(string clubTransfermarktId)
+        public async Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId)
         {
             var uri = QueryHelpers.AddQueryString(_clientSettings.PlayerControllerPath, "clubTransfermarktId", clubTransfermarktId);
 
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Player>>(uri);
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<PlayerResponse>>(uri);
 
-            return result ?? Enumerable.Empty<Player>();
+            return result ?? Enumerable.Empty<PlayerResponse>();
         }
     }
 }

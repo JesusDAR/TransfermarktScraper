@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
-using PlayerStat = TransfermarktScraper.Domain.DTOs.Response.Stat.PlayerStat;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using TransfermarktScraper.Domain.DTOs.Request.Stat;
+using TransfermarktScraper.Domain.DTOs.Response.Stat;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {
@@ -11,10 +13,10 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// <summary>
         /// Retrieves the player stats based on the specified Transfermarkt player ID.
         /// </summary>
-        /// <param name="playerStat">The player stat request.</param>
+        /// <param name="playerStats">The player stat request.</param>
         /// <returns>
-        /// A <see cref="PlayerStat"/> object if found; otherwise, null.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="PlayerStatResponse"/> object if found; otherwise, null.
         /// </returns>
-        Task<PlayerStat?> GetPlayerStatAsync(Domain.DTOs.Request.Stat.PlayerStat playerStat);
+        Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats);
     }
 }

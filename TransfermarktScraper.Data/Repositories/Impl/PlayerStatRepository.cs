@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<PlayerStat?> GetPlayerStatAsync(string playerTransfermarktId, CancellationToken cancellationToken)
+        public async Task<PlayerStat?> GetAsync(string playerTransfermarktId, CancellationToken cancellationToken)
         {
             try
             {
@@ -42,7 +43,29 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             catch (System.Exception)
             {
                 var message = $"Failed to retrieve the player stat with player Transfermarkt ID: {playerTransfermarktId} from the database.";
-                throw DatabaseException.LogError(message, nameof(GetPlayerStatAsync), nameof(PlayerStatRepository), _logger);
+                throw DatabaseException.LogError(message, nameof(GetAsync), nameof(PlayerStatRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<PlayerStat>> GetAllAsync(IEnumerable<string> playerTransfermarktIds, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var transfermarktIds = playerTransfermarktIds
+                    .Select(playerTransfermarktId => EntityUtils.GetHash($"{playerTransfermarktId}|stat"))
+                    .ToHashSet();
+
+                var playerStats = await _playerStats
+                    .Find(playerStat => transfermarktIds.Contains(playerStat.TransfermarktId))
+                    .ToListAsync(cancellationToken);
+
+                return playerStats;
+            }
+            catch (Exception)
+            {
+                var message = $"Failed to retrieve player stats for the provided Transfermarkt IDs: {string.Join(", ", playerTransfermarktIds)} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(PlayerStatRepository), _logger);
             }
         }
 
@@ -53,7 +76,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             {
                 var transfermarktIds = seasonTransfermarktIds
                     .Select(seasonTransfermarktId => EntityUtils.GetHash($"{playerTransfermarktId}|{seasonTransfermarktId}"))
-                    .ToList();
+                    .ToHashSet();
 
                 var projection = Builders<PlayerStat>.Projection
                     .ElemMatch(
@@ -72,7 +95,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 return playerStat.PlayerSeasonStats ?? Enumerable.Empty<PlayerSeasonStat>();
             }
-            catch (System.Exception)
+            catch (Exception)
             {
                 var message = $"Failed to retrieve the player season stats with player Transfermarkt ID: {playerTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetPlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
@@ -80,31 +103,19 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<PlayerStat> InsertAsync(PlayerStat playerStat, CancellationToken cancellationToken)
+        public async Task<PlayerStat> InsertOrUpdateAsync(PlayerStat playerStat, CancellationToken cancellationToken)
         {
             try
             {
-                await _playerStats.InsertOneAsync(playerStat, options: null, cancellationToken);
-                return playerStat;
-            }
-            catch (System.Exception)
-            {
-                var message = $"Failed to insert player stat with {nameof(playerStat.PlayerTransfermarktId)}: {playerStat.PlayerTransfermarktId} into the database.";
-                throw DatabaseException.LogError(message, nameof(InsertAsync), nameof(PlayerStatRepository), _logger);
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<PlayerStat> UpdatePlayerSeasonStatsAsync(PlayerStat playerStat, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var existingPlayerStat = await GetPlayerStatAsync(playerStat.PlayerTransfermarktId, cancellationToken);
+                var existingPlayerStat = await GetAsync(playerStat.PlayerTransfermarktId, cancellationToken);
 
                 if (existingPlayerStat == null)
                 {
-                    var message = $"Player stat with player Transfermarkt ID: {playerStat.PlayerTransfermarktId} not found in the database.";
-                    throw DatabaseException.LogError(message, nameof(UpdatePlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
+                    _logger.LogDebug("Inserting player stat with {PlayerStat.PlayerTransfermarktId} player Transfermarkt ID in the database...", playerStat.PlayerTransfermarktId);
+                    await _playerStats.InsertOneAsync(playerStat, options: null, cancellationToken);
+                    _logger.LogInformation("Successfully inserted player stat with {PlayerStat.PlayerTransfermarktId} player Transfermarkt ID in the database...", playerStat.PlayerTransfermarktId);
+
+                    return playerStat;
                 }
 
                 var transfermarktIds = playerStat.PlayerSeasonStats
@@ -138,10 +149,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 return playerStat;
             }
-            catch (System.Exception)
+            catch (Exception)
             {
                 var message = $"Failed to update season stats for player with {nameof(playerStat.PlayerTransfermarktId)}: {playerStat.PlayerTransfermarktId} into the database.";
-                throw DatabaseException.LogError(message, nameof(UpdatePlayerSeasonStatsAsync), nameof(PlayerStatRepository), _logger);
+                throw DatabaseException.LogError(message, nameof(InsertOrUpdateAsync), nameof(PlayerStatRepository), _logger);
             }
         }
     }

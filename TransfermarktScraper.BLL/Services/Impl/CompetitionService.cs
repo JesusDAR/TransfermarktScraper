@@ -13,8 +13,9 @@ using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
-using Competition = TransfermarktScraper.Domain.Entities.Competition;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -50,7 +51,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Competition>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
             var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
@@ -63,7 +64,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 competitions = await PersistCompetitionsAsync(countryTransfermarktId, competitionsScraped, cancellationToken);
             }
 
-            var competitionDtos = competitions.Adapt<IEnumerable<Domain.DTOs.Response.Competition>>();
+            var competitionDtos = competitions.Adapt<IEnumerable<CompetitionResponse>>();
 
             return competitionDtos;
         }
@@ -509,7 +510,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             foreach (var clubRowLocator in clubRowLocators)
             {
-                Domain.DTOs.Response.Club? club = null;
+                ClubResponse? club = null;
 
                 try
                 {

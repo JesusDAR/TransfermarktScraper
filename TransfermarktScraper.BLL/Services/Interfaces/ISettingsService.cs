@@ -11,7 +11,7 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// Retrieves the current scraping settings.
         /// </summary>
         /// <returns>The current scraping settings.</returns>
-        public Settings GetSettings();
+        public SettingsResponse GetSettings();
 
         /// <summary>
         /// Enables or disables headless mode for the scraper.

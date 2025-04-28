@@ -1,9 +1,9 @@
-﻿namespace TransfermarktScraper.Domain.DTOs.Response
+﻿namespace TransfermarktScraper.Domain.DTOs.Request
 {
     /// <summary>
-    /// Represents the base response DTO.
+    /// Represents the base request DTO.
     /// </summary>
-    public class Base
+    public class BaseRequest
     {
         /// <summary>
         /// Gets or sets the unique Transfermarkt identifier.
@@ -16,22 +16,12 @@
         /// </summary>
         /// <param name="obj">The object to compare with the current object.</param>
         /// <returns>
-        /// true if the specified object has the same reference, is a <see cref="Base"/> or has the same
+        /// true if the specified object is a <see cref="CountryRequest"/> and has the same
         /// <see cref="TransfermarktId"/> as the current object; otherwise, false.
         /// </returns>
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj is not Base other)
-            {
-                return false;
-            }
-
-            return TransfermarktId == other.TransfermarktId;
+            return obj is CountryRequest other && TransfermarktId == other.TransfermarktId;
         }
 
         /// <summary>

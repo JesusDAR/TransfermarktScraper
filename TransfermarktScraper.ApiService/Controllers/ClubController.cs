@@ -33,15 +33,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <param name="competitionTransfermarktId">The Transfermarkt competition ID used to identify the competition.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Club"/> objects,
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="ClubResponse"/> objects,
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of clubs successfully retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<Club>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<ClubResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Club>>> GetClubsAsync(
+        public async Task<ActionResult<IEnumerable<ClubResponse>>> GetClubsAsync(
             [FromQuery] string competitionTransfermarktId,
             CancellationToken cancellationToken)
         {

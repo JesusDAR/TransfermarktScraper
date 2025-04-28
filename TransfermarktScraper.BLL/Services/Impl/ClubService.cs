@@ -6,8 +6,9 @@ using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
-using Club = TransfermarktScraper.Domain.Entities.Club;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -29,7 +30,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Domain.DTOs.Response.Club> GetClubAsync(
+        public async Task<ClubResponse> GetClubAsync(
             string competitionTransfermarktId,
             ILocator tableRowLocator,
             CancellationToken cancellationToken)
@@ -38,19 +39,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             club = await PersistClubAsync(club, cancellationToken);
 
-            var clubDto = club.Adapt<Domain.DTOs.Response.Club>();
+            var clubDto = club.Adapt<ClubResponse>();
 
             return clubDto;
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Club>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ClubResponse>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping clubs process...");
 
             var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
 
-            var clubDtos = clubs.Adapt<IEnumerable<Domain.DTOs.Response.Club>>();
+            var clubDtos = clubs.Adapt<IEnumerable<ClubResponse>>();
 
             return clubDtos;
         }

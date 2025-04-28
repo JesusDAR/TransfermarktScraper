@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
-using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -12,9 +11,10 @@ using TransfermarktScraper.BLL.Models;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Request;
+using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
-using Country = TransfermarktScraper.Domain.Entities.Country;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -58,11 +58,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping countries process...");
 
-            var countryDtos = Enumerable.Empty<Domain.DTOs.Response.Country>();
+            var countryDtos = Enumerable.Empty<CountryResponse>();
 
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
 
@@ -72,7 +72,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                countryDtos = countriesUpdatedOrInserted.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
+                countryDtos = countriesUpdatedOrInserted.Adapt<IEnumerable<CountryResponse>>();
 
                 return countryDtos;
             }
@@ -85,28 +85,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                countryDtos = countriesInserted.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
+                countryDtos = countriesInserted.Adapt<IEnumerable<CountryResponse>>();
 
                 return countryDtos;
             }
 
-            countryDtos = countries.Adapt<IEnumerable<Domain.DTOs.Response.Country>>();
+            countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
 
             return countryDtos;
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Domain.DTOs.Response.Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Starting the scraping competitions process...");
 
-            var countriesDtos = new List<Domain.DTOs.Response.Country>();
+            var countriesDtos = new List<CountryResponse>();
 
             foreach (var country in countries)
             {
                 var competitions = await _competitionService.GetCompetitionsAsync(country.TransfermarktId, forceScraping, cancellationToken);
 
-                var countryDto = new Domain.DTOs.Response.Country
+                var countryDto = new CountryResponse
                 {
                     Name = country.Name,
                     TransfermarktId = country.TransfermarktId,

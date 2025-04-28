@@ -5,7 +5,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a market value.
     /// </summary>
-    public class MarketValue
+    public class MarketValueResponse
     {
         /// <summary>
         /// Gets or sets the age of the player for the date of the market value.

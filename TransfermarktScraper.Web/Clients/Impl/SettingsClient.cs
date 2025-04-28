@@ -28,10 +28,10 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<Settings> GetSettingsAsync()
+        public async Task<SettingsResponse> GetSettingsAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<Settings>(_clientSettings.SettingsControllerPath);
-            return result ?? new Settings();
+            var result = await _httpClient.GetFromJsonAsync<SettingsResponse>(_clientSettings.SettingsControllerPath);
+            return result ?? new SettingsResponse();
         }
 
         /// <inheritdoc/>

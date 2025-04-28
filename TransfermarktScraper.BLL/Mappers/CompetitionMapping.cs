@@ -1,5 +1,7 @@
 ﻿using Mapster;
 using TransfermarktScraper.BLL.Utils;
+using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Enums.Extensions;
 
 namespace TransfermarktScraper.BLL.Mappers
@@ -10,19 +12,19 @@ namespace TransfermarktScraper.BLL.Mappers
     public class CompetitionMapping : IRegister
     {
         /// <summary>
-        /// Registers bidirectional mappings between <see cref="Domain.Entities.Competition"/>
-        /// and <see cref="Domain.DTOs.Response.Competition"/> using Mapster.
+        /// Registers bidirectional mappings between <see cref=Competition"/>
+        /// and <see cref="CompetitionResponse"/> using Mapster.
         /// </summary>
         /// <param name="config">The Mapster configuration instance.</param>
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<Domain.Entities.Competition, Domain.DTOs.Response.Competition>()
+            config.NewConfig<Competition, CompetitionResponse>()
                 .Map(dest => dest.Tier, src => TierExtensions.ToString(src.Tier))
                 .Map(dest => dest.Cup, src => CupExtensions.ToString(src.Cup))
                 .Map(dest => dest.MarketValue, src => MoneyUtils.ConvertToString(src.MarketValue))
                 .Map(dest => dest.MarketValueAverage, src => MoneyUtils.ConvertToString(src.MarketValueAverage));
 
-            config.NewConfig<Domain.DTOs.Response.Competition, Domain.Entities.Competition>()
+            config.NewConfig<CompetitionResponse, Competition>()
                 .Map(dest => dest.Tier, src => TierExtensions.ToEnum(src.Tier))
                 .Map(dest => dest.Cup, src => CupExtensions.ToEnum(src.Cup))
                 .Map(dest => dest.MarketValue, src => MoneyUtils.ConvertToFloat(src.MarketValue))

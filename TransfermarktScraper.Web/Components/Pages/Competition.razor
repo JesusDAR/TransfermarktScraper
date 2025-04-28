@@ -1,6 +1,8 @@
 @page "/competitions"
 
 @using Microsoft.AspNetCore.WebUtilities
+@using TransfermarktScraper.Domain.DTOs.Request
+@using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 @using Mapster
@@ -49,7 +51,7 @@ else
 	</MudGrid>
 
 
-	<MudList Dense="true" Gutters="true" T="Domain.DTOs.Response.Country" Class="mt-6">
+	<MudList Dense="true" Gutters="true" T="CountryResponse" Class="mt-6">
 		@foreach (var country in filteredCountries)
 		{
 			<MudListItem Ripple="false">
@@ -69,7 +71,7 @@ else
 					</MudStack>
 				</MudListSubheader>
 				<MudCollapse Expanded="@selectedCountries.Contains(country)">
-					<MudDataGrid T="Domain.DTOs.Response.Competition"
+					<MudDataGrid T="CompetitionResponse"
 								 Dense="true"
 								 Hover="true"
 								 Filterable="false"
@@ -79,8 +81,8 @@ else
 								 @key="country.TransfermarktId"
 								 Items="@country.Competitions">
 						<Columns>
-							<SelectColumn T="Domain.DTOs.Response.Competition" />
-							<TemplateColumn T="Domain.DTOs.Response.Competition" Title="Logo">
+							<SelectColumn T="CompetitionResponse" />
+							<TemplateColumn T="CompetitionResponse" Title="Logo">
 								<CellTemplate>
 									<MudAvatar>
 										<MudImage Src="@context.Item.Logo" Alt="@context.Item.Name" />
@@ -108,9 +110,9 @@ else
 }
 
 @code {
-	private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
-	private HashSet<Domain.DTOs.Response.Country> selectedCountries = new();
-	private List<Domain.DTOs.Response.Country> filteredCountries = new();
+	private IEnumerable<CountryResponse> countries = null!;
+	private HashSet<CountryResponse> selectedCountries = new();
+	private List<CountryResponse> filteredCountries = new();
 	private string _searchedCountry = string.Empty;
 
 	private string SearchedCountry
@@ -128,14 +130,14 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
-		var countryDtos = ItemSelectionService.SelectedCountries.Adapt<IEnumerable<Domain.DTOs.Request.Country>>();
+		var countryDtos = ItemSelectionService.SelectedCountries.Adapt<IEnumerable<CountryRequest>>();
 
 		countries = await CountryClient.GetCountriesAsync(countryDtos);
 
 		filteredCountries = countries.ToList();
 	}
 
-	private void ToggleCountrySelection(Domain.DTOs.Response.Country country)
+	private void ToggleCountrySelection(CountryResponse country)
 	{
 		if (!selectedCountries.Add(country))
 		{
@@ -147,7 +149,7 @@ else
 	{
 		if (ItemSelectionService.SelectedCompetitions.Count() == ItemSelectionService.SelectedCountries.SelectMany(country => country.Competitions).Count())
 		{
-			ItemSelectionService.SelectedCompetitions = new HashSet<Domain.DTOs.Response.Competition>();
+			ItemSelectionService.SelectedCompetitions = new HashSet<CompetitionResponse>();
 		}
 		else
 		{
@@ -159,7 +161,7 @@ else
 	{
 		filteredCountries = countries?
 			.Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
-			.ToList() ?? new List<Domain.DTOs.Response.Country>();
+			.ToList() ?? new List<CountryResponse>();
 	}
 
 	private void NavigateToClubs()

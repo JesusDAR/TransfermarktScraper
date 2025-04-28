@@ -1,5 +1,6 @@
 ﻿@page "/clubs"
 
+@using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 
@@ -46,7 +47,7 @@ else
 		</MudItem>
 	</MudGrid>
 
-	<MudList Dense="true" Gutters="true" T="Domain.DTOs.Response.Competition" Class="mt-6">
+	<MudList Dense="true" Gutters="true" T="CompetitionResponse" Class="mt-6">
 		@foreach (var competition in filteredCompetitions)
 		{
 			<MudListItem Ripple="false">
@@ -67,7 +68,7 @@ else
 				</MudListSubheader>
 
 				<MudCollapse Expanded="@selectedCompetitions.Contains(competition)">
-					<MudDataGrid T="Domain.DTOs.Response.Club"
+					<MudDataGrid T="ClubResponse"
 								 Dense="true"
 								 Hover="true"
 								 Filterable="false"
@@ -77,8 +78,8 @@ else
 								 @key="competition.TransfermarktId"
 								 Items="@GetClubs(competition)">
 						<Columns>
-							<SelectColumn T="Domain.DTOs.Response.Club" />
-							<TemplateColumn T="Domain.DTOs.Response.Club" Title="Crest">
+							<SelectColumn T="ClubResponse" />
+							<TemplateColumn T="ClubResponse" Title="Crest">
 								<CellTemplate>
 									<MudAvatar>
 										<MudImage Src="@context.Item.Crest" Alt="@context.Item.Name" />
@@ -102,10 +103,10 @@ else
 
 
 @code {
-	private Dictionary<string, IEnumerable<Domain.DTOs.Response.Club>> clubs = null!;
-	private HashSet<Domain.DTOs.Response.Competition> competitions = null!;
-	private HashSet<Domain.DTOs.Response.Competition> selectedCompetitions = new();
-	private HashSet<Domain.DTOs.Response.Competition> filteredCompetitions = new();
+	private Dictionary<string, IEnumerable<ClubResponse>> clubs = null!;
+	private HashSet<CompetitionResponse> competitions = null!;
+	private HashSet<CompetitionResponse> selectedCompetitions = new();
+	private HashSet<CompetitionResponse> filteredCompetitions = new();
 	private string _searchedCompetition = string.Empty;
 
 	private string SearchedCompetition
@@ -131,21 +132,21 @@ else
 		{
 			var clubsList = await ClubClient.GetClubsAsync(competition.TransfermarktId);
 
-			clubs = new Dictionary<string, IEnumerable<Domain.DTOs.Response.Club>>()
+			clubs = new Dictionary<string, IEnumerable<ClubResponse>>()
 			{
 				[competition.TransfermarktId] = clubsList
 			};
 		}
 	}
 
-	private IEnumerable<Domain.DTOs.Response.Club> GetClubs(Domain.DTOs.Response.Competition competition)
+	private IEnumerable<ClubResponse> GetClubs(CompetitionResponse competition)
 	{
 		clubs.TryGetValue(competition.TransfermarktId, out var clubsList);
 
-		return clubsList ?? Enumerable.Empty<Domain.DTOs.Response.Club>();
+		return clubsList ?? Enumerable.Empty<ClubResponse>();
 	}
 
-	private void ToggleCompetitionSelection(Domain.DTOs.Response.Competition competition)
+	private void ToggleCompetitionSelection(CompetitionResponse competition)
 	{
 		if (!selectedCompetitions.Add(competition))
 		{
@@ -157,7 +158,7 @@ else
 	{
 		if (ItemSelectionService.SelectedClubs.Count() == ItemSelectionService.SelectedCompetitions.SelectMany(competition => competition.ClubIds).Count())
 		{
-			ItemSelectionService.SelectedClubs = new HashSet<Domain.DTOs.Response.Club>();
+			ItemSelectionService.SelectedClubs = new HashSet<ClubResponse>();
 		}
 		else
 		{
@@ -169,7 +170,7 @@ else
 	{
 		filteredCompetitions = competitions?
 			.Where(competition => competition.Name.Contains(_searchedCompetition, StringComparison.OrdinalIgnoreCase))
-			.ToHashSet() ?? new HashSet<Domain.DTOs.Response.Competition>();
+			.ToHashSet() ?? new HashSet<CompetitionResponse>();
 	}
 
 	private void NavigateToPlayers()

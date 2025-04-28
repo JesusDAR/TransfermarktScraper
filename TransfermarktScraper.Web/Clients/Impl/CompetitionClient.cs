@@ -31,13 +31,13 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId)
+        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId)
         {
             var uri = QueryHelpers.AddQueryString(_clientSettings.CompetitionControllerPath, "countryTransfermarktId", countryTransfermarktId);
 
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Competition>>(uri);
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<CompetitionResponse>>(uri);
 
-            return result ?? Enumerable.Empty<Competition>();
+            return result ?? Enumerable.Empty<CompetitionResponse>();
         }
     }
 }

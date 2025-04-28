@@ -37,15 +37,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Player"/> objects,
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="PlayerResponse"/> objects,
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of players successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<Player>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<PlayerResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersAsync(
+        public async Task<ActionResult<IEnumerable<PlayerResponse>>> GetPlayersAsync(
             [FromQuery] string clubTransfermarktId,
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)

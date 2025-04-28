@@ -1,0 +1,68 @@
+﻿@page "/players/{playerTransfermarktId}/stats"
+
+@using TransfermarktScraper.Domain.DTOs.Response
+@using TransfermarktScraper.Domain.DTOs.Response.Stat
+@using TransfermarktScraper.Domain.DTOs.Request.Stat
+@using TransfermarktScraper.Web.Clients.Interfaces
+@using TransfermarktScraper.Web.Services.Interfaces
+
+@attribute [StreamRendering(true)]
+
+@inject IPlayerStatClient PlayerStatClient
+@inject IItemSelectionService ItemSelectionService
+
+<PageTitle>Player Stats</PageTitle>
+
+@if (player == null)
+{
+	<MudText HtmlTag="em">Getting player information...</MudText>
+}
+else
+{
+	<MudStack Row="true">
+		<MudImage Src="@player.Portrait" Alt="@player.Name" Width="150" />
+		<MudList Dense="true" T="PlayerResponse">
+			<MudListItem>🏳️ Name: @player.Name</MudListItem>
+			<MudListItem>🏳️ Age: @player.Age</MudListItem>
+		</MudList>
+		<MudList Dense="true" T="PlayerResponse">
+			<MudListItem>🏳️ Nacionalidad: @player.Nationalities.First()</MudListItem>
+			<MudListItem>📍 Posición: @player.Position</MudListItem>
+			<MudListItem>📏 Altura: @player.Height cm</MudListItem>
+			<MudListItem>💰 Valor de mercado: @player.MarketValue €</MudListItem>
+		</MudList>
+	</MudStack>
+
+
+
+}
+
+@if (playerStat == null)
+{
+	<MudText HtmlTag="em">Scraping player stats please wait...</MudText>
+}
+
+@code {
+	[Parameter]
+	public string playerTransfermarktId { get; set; } = default!;
+	private PlayerStatResponse? playerStat = null!;
+	private PlayerResponse player = null!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		player = ItemSelectionService.SelectedPlayers.First();
+
+		var playerStatRequest = new PlayerStatRequest()
+		{
+			PlayerTransfermarktId = playerTransfermarktId,
+			SeasonTransfermarktId = "ges",
+			Position = player.Position,
+		};
+
+		var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
+
+		var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
+
+		playerStat = playerStatResponses?.FirstOrDefault();
+	}
+}

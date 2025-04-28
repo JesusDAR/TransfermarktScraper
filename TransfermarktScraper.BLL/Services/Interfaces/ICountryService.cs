@@ -1,4 +1,5 @@
-﻿using TransfermarktScraper.Domain.DTOs.Response;
+﻿using TransfermarktScraper.Domain.DTOs.Request;
+using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.BLL.Services.Interfaces
 {
@@ -16,8 +17,8 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> DTOs.</returns>
-        public Task<IEnumerable<Country>> GetCountriesAsync(bool forceScraping = false, CancellationToken cancellationToken = default);
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="CountryResponse"/> DTOs.</returns>
+        public Task<IEnumerable<CountryResponse>> GetCountriesAsync(bool forceScraping = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves a list of countries and full competitions list from the database. If the database is empty, it scrapes the competition data from Transfermarkt
@@ -31,8 +32,8 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Country"/> DTOs with the full competitions data.</returns>
-        public Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries, bool forceScraping = false, CancellationToken cancellationToken = default);
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="CountryResponse"/> DTOs with the full competitions data.</returns>
+        public Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Checks if the country and competition exists in the repository and scrapes the country and competition information from Transfermarkt if it does not.

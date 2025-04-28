@@ -1,4 +1,6 @@
-﻿namespace TransfermarktScraper.BLL.Services.Interfaces
+﻿using TransfermarktScraper.Domain.DTOs.Response;
+
+namespace TransfermarktScraper.BLL.Services.Interfaces
 {
     /// <summary>
     /// Defines a service for scraping player data from Transfermarkt.
@@ -15,6 +17,6 @@
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of player response DTOs.</returns>
-        public Task<IEnumerable<Domain.DTOs.Response.Player>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken);
+        public Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken);
     }
 }

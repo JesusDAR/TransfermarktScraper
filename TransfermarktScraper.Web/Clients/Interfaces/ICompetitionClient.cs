@@ -14,8 +14,8 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// </summary>
         /// <param name="countryTransfermarktId">The Transfermarkt country ID used to identify the country.</param>
         /// <returns>
-        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Competition"/>.
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="CompetitionResponse"/>.
         /// </returns>
-        Task<IEnumerable<Competition>> GetCompetitionsAsync(string countryTransfermarktId);
+        Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId);
     }
 }

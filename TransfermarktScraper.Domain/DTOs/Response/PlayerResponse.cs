@@ -6,7 +6,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a player.
     /// </summary>
-    public class Player : Base
+    public class PlayerResponse : BaseResponse
     {
         /// <summary>
         /// Gets or sets the age of the player.
@@ -51,7 +51,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the market valueS of the player.
         /// </summary>
-        public IEnumerable<MarketValue>? MarketValues { get; set; }
+        public IEnumerable<MarketValueResponse>? MarketValues { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the player.

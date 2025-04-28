@@ -1,4 +1,6 @@
 ﻿using Mapster;
+using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.Entities;
 
 namespace TransfermarktScraper.BLL.Mappers
 {
@@ -8,14 +10,14 @@ namespace TransfermarktScraper.BLL.Mappers
     public class MarketValueMapping : IRegister
     {
         /// <summary>
-        /// Registers bidirectional mappings between <see cref="Domain.Entities.MarketValue"/>
-        /// and <see cref="Domain.DTOs.Response.MarketValue"/> using Mapster.
+        /// Registers bidirectional mappings between <see cref="MarketValue"/>
+        /// and <see cref="MarketValueResponse"/> using Mapster.
         /// </summary>
         /// <param name="config">The Mapster configuration instance.</param>
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<Domain.Entities.MarketValue, Domain.DTOs.Response.MarketValue>();
-            config.NewConfig<Domain.DTOs.Response.MarketValue, Domain.Entities.MarketValue>();
+            config.NewConfig<MarketValue, MarketValueResponse>();
+            config.NewConfig<MarketValueResponse, MarketValue>();
         }
     }
 }

@@ -11,21 +11,21 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         /// <summary>
         /// Gets or sets the currently selected countries.
         /// </summary>
-        public HashSet<Country> SelectedCountries { get; set; }
+        public HashSet<CountryResponse> SelectedCountries { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected competitions.
         /// </summary>
-        public HashSet<Competition> SelectedCompetitions { get; set; }
+        public HashSet<CompetitionResponse> SelectedCompetitions { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected clubs.
         /// </summary>
-        public HashSet<Club> SelectedClubs { get; set; }
+        public HashSet<ClubResponse> SelectedClubs { get; set; }
 
         /// <summary>
         /// Gets or sets the currently selected players.
         /// </summary>
-        public HashSet<Player> SelectedPlayers { get; set; }
+        public HashSet<PlayerResponse> SelectedPlayers { get; set; }
     }
 }

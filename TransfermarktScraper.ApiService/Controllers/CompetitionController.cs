@@ -35,15 +35,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <param name="forceScraping"> A boolean flag that determines whether to force scraping of the competitions data, even if it exists in the database. </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Competition"/> objects,
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="CompetitionResponse"/> objects,
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of competitions successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<Competition>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<CompetitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Competition>>> GetCompetitionsAsync(
+        public async Task<ActionResult<IEnumerable<CompetitionResponse>>> GetCompetitionsAsync(
             [FromQuery] string countryTransfermarktId,
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)

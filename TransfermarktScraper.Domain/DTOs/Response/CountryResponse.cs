@@ -6,12 +6,12 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a country.
     /// </summary>
-    public class Country : Base
+    public class CountryResponse : BaseResponse
     {
         /// <summary>
         /// Gets or sets the competitions of the country.
         /// </summary>
-        public IEnumerable<Competition> Competitions { get; set; } = Enumerable.Empty<Competition>();
+        public IEnumerable<CompetitionResponse> Competitions { get; set; } = Enumerable.Empty<CompetitionResponse>();
 
         /// <summary>
         /// Gets or sets the flag of the country.

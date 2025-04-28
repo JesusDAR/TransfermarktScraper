@@ -1,11 +1,14 @@
-﻿@page "/players"
+@page "/players"
 
+@using TransfermarktScraper.Domain.DTOs.Request.Stat
+@using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 
 @attribute [StreamRendering(true)]
 
 @inject IPlayerClient PlayerClient
+@inject IPlayerStatClient PlayerStatClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 
@@ -40,13 +43,13 @@ else
 					   FullWidth="true"
 					   Size="Size.Large"
 					   Variant="Variant.Filled"
-					   OnClick="NavigateToStats">
+					   OnClick="NavigateToPlayerStats">
 				Scrape stats
 			</MudButton>
 		</MudItem>
 	</MudGrid>
 
-	<MudList Dense="true" Gutters="true" T="Domain.DTOs.Response.Club" Class="mt-6">
+	<MudList Dense="true" Gutters="true" T="ClubResponse" Class="mt-6">
 		@foreach (var club in filteredClubs)
 		{
 			<MudListItem Ripple="false">
@@ -60,8 +63,15 @@ else
 						<MudSpacer />
 						<MudButton Variant="Variant.Outlined"
 								   Color="Color.Primary"
+								   OnClick="NavigateToPlayerStats"
 								   Disabled="@(ItemSelectionService.SelectedPlayers.Count != 1)">
 							Check stats
+						</MudButton>
+						<MudButton Variant="Variant.Outlined"
+								   Color="Color.Primary"
+								   OnClick="ScrapePlayerStatAsync"
+								   Disabled="@(ItemSelectionService.SelectedPlayers.Count == 0)">
+							Scrape stats
 						</MudButton>
 						<MudIcon Icon="@(selectedClubs.Contains(club)
 							? Icons.Material.Filled.ArrowDropUp
@@ -101,10 +111,10 @@ else
 
 
 @code {
-	private Dictionary<string, IEnumerable<Domain.DTOs.Response.Player>> players = null!;
-	private HashSet<Domain.DTOs.Response.Club> clubs = null!;
-	private HashSet<Domain.DTOs.Response.Club> selectedClubs = new();
-	private HashSet<Domain.DTOs.Response.Club> filteredClubs = new();
+	private Dictionary<string, IEnumerable<PlayerResponse>> players = null!;
+	private HashSet<ClubResponse> clubs = null!;
+	private HashSet<ClubResponse> selectedClubs = new();
+	private HashSet<ClubResponse> filteredClubs = new();
 	private string _searchedClub = string.Empty;
 
 	private string SearchedClub
@@ -130,21 +140,21 @@ else
 		{
 			var playersList = await PlayerClient.GetPlayersAsync(club.TransfermarktId);
 
-			players = new Dictionary<string, IEnumerable<Domain.DTOs.Response.Player>>()
+			players = new Dictionary<string, IEnumerable<PlayerResponse>>()
 			{
 				[club.TransfermarktId] = playersList
 			};
 		}
 	}
 
-	private IEnumerable<Domain.DTOs.Response.Player> GetPlayers(Domain.DTOs.Response.Club club)
+	private IEnumerable<PlayerResponse> GetPlayers(ClubResponse club)
 	{
 		players.TryGetValue(club.TransfermarktId, out var playersList);
 
-		return playersList ?? Enumerable.Empty<Domain.DTOs.Response.Player>();
+		return playersList ?? Enumerable.Empty<PlayerResponse>();
 	}
 
-	private void ToggleClubSelection(Domain.DTOs.Response.Club club)
+	private void ToggleClubSelection(ClubResponse club)
 	{
 		if (!selectedClubs.Add(club))
 		{
@@ -152,7 +162,7 @@ else
 		}
 	}
 
-	private void TogglePlayerSelection(Domain.DTOs.Response.Player player)
+	private void TogglePlayerSelection(PlayerResponse player)
 	{
 		if (!ItemSelectionService.SelectedPlayers.Add(player))
 		{
@@ -164,7 +174,7 @@ else
 	{
 		if (ItemSelectionService.SelectedPlayers.Count() == ItemSelectionService.SelectedClubs.SelectMany(club => club.Players).Count())
 		{
-			ItemSelectionService.SelectedPlayers = new HashSet<Domain.DTOs.Response.Player>();
+			ItemSelectionService.SelectedPlayers = new HashSet<PlayerResponse>();
 		}
 		else
 		{
@@ -176,11 +186,40 @@ else
 	{
 		filteredClubs = clubs?
 			.Where(club => club.Name.Contains(_searchedClub, StringComparison.OrdinalIgnoreCase))
-			.ToHashSet() ?? new HashSet<Domain.DTOs.Response.Club>();
+			.ToHashSet() ?? new HashSet<ClubResponse>();
 	}
 
-	private void NavigateToStats()
+	private void CheckPlayerStatAsync()
 	{
-		NavigationHistoryService.NavigateTo("/stats");
+
+	}
+
+	private async void ScrapePlayerStatAsync()
+	{
+		var players = ItemSelectionService.SelectedPlayers;
+
+		var playerStatRequests = new List<PlayerStatRequest>();
+
+		foreach (var player in players)
+		{
+			var playerStatRequest = new PlayerStatRequest()
+			{
+				PlayerTransfermarktId = player.TransfermarktId,
+				SeasonTransfermarktId = string.Empty,
+				Position = player.Position,
+				IncludeAllPlayerTransfermarktSeasons = true,
+			};
+
+			playerStatRequests.Add(playerStatRequest);
+		}
+
+		await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
+	}
+
+	private void NavigateToPlayerStats()
+	{
+		var playerTransfermarktId = ItemSelectionService.SelectedPlayers.First().TransfermarktId;
+
+		NavigationHistoryService.NavigateTo($"/players/{playerTransfermarktId}/stats");
 	}
 }

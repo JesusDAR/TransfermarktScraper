@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents scraping configuration settings.
     /// </summary>
-    public class Settings
+    public class SettingsResponse
     {
         /// <summary>
         /// Gets or sets a value indicating whether the scraper should run in headless mode.

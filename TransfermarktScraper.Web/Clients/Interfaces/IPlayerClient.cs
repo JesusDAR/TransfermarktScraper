@@ -14,8 +14,8 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// </summary>
         /// <param name="clubTransfermarktId">The Transfermarkt club ID used to identify the club.</param>
         /// <returns>
-        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Club"/>.
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="ClubResponse"/>.
         /// </returns>
-        Task<IEnumerable<Player>> GetPlayersAsync(string clubTransfermarktId);
+        Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId);
     }
 }

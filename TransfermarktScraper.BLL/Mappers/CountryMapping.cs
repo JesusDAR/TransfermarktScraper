@@ -1,4 +1,6 @@
 ﻿using Mapster;
+using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.Entities;
 
 namespace TransfermarktScraper.BLL.Mappers
 {
@@ -8,14 +10,14 @@ namespace TransfermarktScraper.BLL.Mappers
     public class CountryMapping : IRegister
     {
         /// <summary>
-        /// Registers bidirectional mappings between <see cref="Domain.Entities.Country"/>
-        /// and <see cref="Domain.DTOs.Response.Country"/> using Mapster.
+        /// Registers bidirectional mappings between <see cref="Country"/>
+        /// and <see cref="CountryResponse"/> using Mapster.
         /// </summary>
         /// <param name="config">The Mapster configuration instance.</param>
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<Domain.Entities.Country, Domain.DTOs.Response.Country>();
-            config.NewConfig<Domain.DTOs.Response.Country, Domain.Entities.Country>();
+            config.NewConfig<Country, CountryResponse>();
+            config.NewConfig<CountryResponse, Country>();
         }
     }
 }

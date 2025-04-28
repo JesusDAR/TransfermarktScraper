@@ -5,7 +5,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
     /// <summary>
     /// Represents the response DTO for a player season stat.
     /// </summary>
-    public class PlayerSeasonStat
+    public class PlayerSeasonStatResponse
     {
         /// <summary>
         /// Gets or sets the unique composite identifier.
@@ -85,6 +85,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the competition stats for the player in the season.
         /// </summary>
-        public IEnumerable<PlayerSeasonCompetitionStat>? PlayerSeasonCompetitionStats { get; set; }
+        public IEnumerable<PlayerSeasonCompetitionStatResponse>? PlayerSeasonCompetitionStats { get; set; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace TransfermarktScraper.Domain.DTOs.Request
 {
     /// <summary>
-    /// Represents the request DTO for a country.
+    /// Represents the request DTO to fetch a country.
     /// </summary>
-    public class Country : Base
+    public class CountryRequest : BaseRequest
     {
         /// <summary>
         /// Gets or sets the flag of the country.

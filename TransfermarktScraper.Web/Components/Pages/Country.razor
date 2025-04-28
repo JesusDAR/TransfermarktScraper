@@ -1,6 +1,7 @@
 ﻿@page "/countries"
 
 @using Microsoft.Extensions.Options
+@using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Configuration
 @using TransfermarktScraper.Web.Services;
@@ -76,8 +77,8 @@ else
 }
 
 @code {
-    private IEnumerable<Domain.DTOs.Response.Country> countries = null!;
-    private List<Domain.DTOs.Response.Country> filteredCountries = new();
+    private IEnumerable<CountryResponse> countries = null!;
+    private List<CountryResponse> filteredCountries = new();
     private string _searchedCountry = string.Empty;
 
     private string SearchedCountry
@@ -100,7 +101,7 @@ else
         filteredCountries = countries.ToList();
     }
 
-    private void ToggleCountrySelection(Domain.DTOs.Response.Country country)
+    private void ToggleCountrySelection(CountryResponse country)
     {
         if (!ItemSelectionService.SelectedCountries.Add(country))
         {
@@ -112,14 +113,14 @@ else
     {
         filteredCountries = countries?
             .Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
-            .ToList() ?? new List<Domain.DTOs.Response.Country>();
+            .ToList() ?? new List<CountryResponse>();
     }
 
     private void SelectAllCountries()
     {
         if (ItemSelectionService.SelectedCountries.Count() == countries.Count())
         {
-            ItemSelectionService.SelectedCountries = new HashSet<Domain.DTOs.Response.Country>();
+            ItemSelectionService.SelectedCountries = new HashSet<CountryResponse>();
         }
         else
         {

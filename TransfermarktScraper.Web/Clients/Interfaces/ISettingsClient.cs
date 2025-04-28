@@ -12,9 +12,9 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// Asynchronously retrieves the current settings from the settings API.
         /// </summary>
         /// <returns>
-        /// A task representing the asynchronous operation, with a <see cref="Settings"/> object as the result.
+        /// A task representing the asynchronous operation, with a <see cref="SettingsResponse"/> object as the result.
         /// </returns>
-        Task<Settings> GetSettingsAsync();
+        Task<SettingsResponse> GetSettingsAsync();
 
         /// <summary>
         /// Sets the headless mode for the scraper.

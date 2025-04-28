@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TransfermarktScraper.Domain.DTOs.Request;
 using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
@@ -13,19 +14,19 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// Retrieves a list of countries from the API.
         /// </summary>
         /// <returns>
-        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Country"/>.
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="CountryResponse"/>.
         /// </returns>
-        Task<IEnumerable<Country>> GetCountriesAsync();
+        Task<IEnumerable<CountryResponse>> GetCountriesAsync();
 
         /// <summary>
         /// Retrieves a list of countries with full competition data from the API.
         /// </summary>
         /// <param name="countries">
-        /// A collection of <see cref="Domain.DTOs.Request.Country"/> objects.
+        /// A collection of <see cref="CountryRequest"/> objects.
         /// </param>
         /// <returns>
-        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Country"/> with full <see cref="Competition"/> data.
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="CountryResponse"/> with full <see cref="CompetitionResponse"/> data.
         /// </returns>
-        Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries);
+        Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries);
     }
 }

@@ -14,8 +14,8 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// </summary>
         /// <param name="competitionTransfermarktId">The Transfermarkt competition ID used to identify the competition.</param>
         /// <returns>
-        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="Club"/>.
+        /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="ClubResponse"/>.
         /// </returns>
-        Task<IEnumerable<Club>> GetClubsAsync(string competitionTransfermarktId);
+        Task<IEnumerable<ClubResponse>> GetClubsAsync(string competitionTransfermarktId);
     }
 }

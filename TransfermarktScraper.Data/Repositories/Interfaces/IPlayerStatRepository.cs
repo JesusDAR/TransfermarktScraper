@@ -19,7 +19,18 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         /// A task representing the asynchronous operation, with a result of the matching <see cref="PlayerStat"/>
         /// if found; otherwise, null.
         /// </returns>
-        Task<PlayerStat?> GetPlayerStatAsync(string playerTransfermarktId, CancellationToken cancellationToken);
+        Task<PlayerStat?> GetAsync(string playerTransfermarktId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Retrieves all player stats from the database for the specified Transfermarkt player IDs.
+        /// </summary>
+        /// <param name="playerTransfermarktIds">A list of unique Transfermarkt player IDs.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A collection of <see cref="PlayerStat"/> objects corresponding to the provided Transfermarkt IDs.
+        /// If no matching records are found, an empty collection is returned.
+        /// </returns>
+        Task<IEnumerable<PlayerStat>> GetAllAsync(IEnumerable<string> playerTransfermarktIds, CancellationToken cancellationToken);
 
         /// <summary>
         /// Retrieves a filtered list of <see cref="PlayerSeasonStat"/> objects for a specific player and a set of season Transfermarkt IDs.
@@ -34,20 +45,12 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<IEnumerable<PlayerSeasonStat>> GetPlayerSeasonStatsAsync(string playerTransfermarktId, IEnumerable<string> seasonTransfermarktIds, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Inserts a new <see cref="PlayerStat"/> document into the MongoDB collection.
-        /// </summary>
-        /// <param name="playerStat">The player stat to insert.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A task representing the asynchronous operation with a result of the inserted <see cref="PlayerStat"/> object.</returns>
-        Task<PlayerStat> InsertAsync(PlayerStat playerStat, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Updates the <see cref="PlayerSeasonStat"/> collection of a <see cref="PlayerStat"/> entity in the database.
-        /// Only existing <see cref="PlayerSeasonStat"/> entries are replaced; the rest remain unchanged.
+        /// Inserts ot updates a <see cref="PlayerStat"/> entity in the database.
+        /// For the updating only existing <see cref="PlayerSeasonStat"/> entries are replaced; the rest remain unchanged.
         /// </summary>
         /// <param name="playerStat">The <see cref="PlayerStat"/> object containing the updated season stats.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The updated <see cref="PlayerStat"/> object.</returns>
-        Task<PlayerStat> UpdatePlayerSeasonStatsAsync(PlayerStat playerStat, CancellationToken cancellationToken);
+        Task<PlayerStat> InsertOrUpdateAsync(PlayerStat playerStat, CancellationToken cancellationToken);
     }
 }

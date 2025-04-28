@@ -6,7 +6,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
     /// <summary>
     /// Represents the response DTO for a competition.
     /// </summary>
-    public class Competition : Base
+    public class CompetitionResponse : BaseResponse
     {
         /// <summary>
         /// Gets or sets the average age of the players of the competition.

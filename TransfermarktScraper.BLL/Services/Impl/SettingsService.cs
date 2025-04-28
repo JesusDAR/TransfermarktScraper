@@ -20,9 +20,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public Settings GetSettings()
+        public SettingsResponse GetSettings()
         {
-            var settings = new Settings
+            var settings = new SettingsResponse
             {
                 IsHeadlessMode = _scraperSettings.HeadlessMode,
                 IsForceScraping = _scraperSettings.ForceScraping,

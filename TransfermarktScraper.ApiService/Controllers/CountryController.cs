@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TransfermarktScraper.BLL.Services.Interfaces;
+using TransfermarktScraper.Domain.DTOs.Request;
 using TransfermarktScraper.Domain.DTOs.Response;
 
 namespace TransfermarktScraper.ApiService.Controllers
@@ -36,15 +37,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects,
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="CountryResponse"/> objects,
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of countries successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<CountryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync(
+        public async Task<ActionResult<IEnumerable<CountryResponse>>> GetCountriesAsync(
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
@@ -71,16 +72,16 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="Country"/> objects with the full competitions data,
+        /// An <see cref="ActionResult{T}"/> containing a list of <see cref="CountryResponse"/> objects with the full competitions data,
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of countries with the competitions successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(IEnumerable<Country>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<CountryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountriesAsync(
-            [FromBody] IEnumerable<Domain.DTOs.Request.Country> countries,
+        public async Task<ActionResult<IEnumerable<CountryResponse>>> GetCountriesAsync(
+            [FromBody] IEnumerable<CountryRequest> countries,
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {

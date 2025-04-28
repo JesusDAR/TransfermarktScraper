@@ -33,9 +33,9 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <response code="200">The current settings were successfully retrieved.</response>
         /// <response code="500">An internal server error occurred while retrieving the settings.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(Settings), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SettingsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<Settings> GetSettings()
+        public ActionResult<SettingsResponse> GetSettings()
         {
             try
             {

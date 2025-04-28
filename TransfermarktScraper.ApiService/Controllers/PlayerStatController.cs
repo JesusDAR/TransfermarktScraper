@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TransfermarktScraper.BLL.Services.Interfaces;
-using PlayerStat = TransfermarktScraper.Domain.DTOs.Response.Stat.PlayerStat;
+using TransfermarktScraper.Domain.DTOs.Request.Stat;
+using TransfermarktScraper.Domain.DTOs.Response.Stat;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -28,25 +30,25 @@ namespace TransfermarktScraper.ApiService.Controllers
         }
 
         /// <summary>
-        /// Retrieves the overall stats of a player by scraping TransfermarktId.
+        /// Retrieves the player stats from Transfermarkt or from the database.
         /// </summary>
-        /// <param name="playerStat">The player stat request DTO.</param>
+        /// <param name="playerStatRequests">The list of player stat request DTO.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns> An <see cref="ActionResult{T}"/> containing a <see cref="PlayerStat"/> object.</returns>
+        /// <returns> An <see cref="ActionResult{T}"/> containing a <see cref="PlayerStatResponse"/> object.</returns>
         /// <response code="200">Returns the of player stat successfully scraped.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         /// <response code="503">If there is an error while requesting the Transfermarkt page or if the external resource is unavailable.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(PlayerStat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<PlayerStatResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public async Task<ActionResult<PlayerStat>> GetPlayerStatAsync(
-            [FromBody] Domain.DTOs.Request.Stat.PlayerStat playerStat,
+        public async Task<ActionResult<IEnumerable<PlayerStatResponse>>> GetPlayerStatsAsync(
+            [FromBody] IEnumerable<PlayerStatRequest> playerStatRequests,
             CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _playerStatService.GetPlayerStatAsync(playerStat, cancellationToken);
+                var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, cancellationToken);
                 return Ok(result);
             }
             catch (HttpRequestException e)

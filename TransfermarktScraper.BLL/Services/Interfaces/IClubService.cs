@@ -9,7 +9,7 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
     public interface IClubService
     {
         /// <summary>
-        /// Asynchronously scrapes, persists, and maps a club's data into a <see cref="Club"/>.
+        /// Asynchronously scrapes, persists, and maps a club's data into a <see cref="ClubResponse"/>.
         /// </summary>
         /// <remarks>
         /// This method is only to be used by the competition service.
@@ -18,18 +18,18 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// <param name="clubRowLocator">The locator for the club row element, used to find and extract data from the HTML grid table row.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// A <see cref="Task"/> representing the asynchronous operation, containing a <see cref="Club"/> DTO.
+        /// A <see cref="Task"/> representing the asynchronous operation, containing a <see cref="ClubResponse"/> DTO.
         /// </returns>
-        public Task<Club> GetClubAsync(string competitionTransfermarktId, ILocator clubRowLocator, CancellationToken cancellationToken);
+        public Task<ClubResponse> GetClubAsync(string competitionTransfermarktId, ILocator clubRowLocator, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Asynchronously retrieves from database a list of <see cref="Club"/> belonging to a <see cref="Competition"/>.
+        /// Asynchronously retrieves from database a list of <see cref="ClubResponse"/> belonging to a <see cref="CompetitionResponse"/>.
         /// </summary>
         /// <param name="competitionTransfermarktId">The unique identifier of the competition on Transfermarkt.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// A <see cref="Task"/> representing the asynchronous operation, containing a list of <see cref="Club"/> DTOs.
+        /// A <see cref="Task"/> representing the asynchronous operation, containing a list of <see cref="ClubResponse"/> DTOs.
         /// </returns>
-        public Task<IEnumerable<Club>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken);
+        public Task<IEnumerable<ClubResponse>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken);
     }
 }

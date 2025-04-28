@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using TransfermarktScraper.Domain.DTOs.Request;
 using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Web.Clients.Interfaces;
 using TransfermarktScraper.Web.Configuration;
@@ -30,26 +31,26 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetCountriesAsync()
+        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<Country>>(_clientSettings.CountryControllerPath);
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<CountryResponse>>(_clientSettings.CountryControllerPath);
 
-            return result ?? Enumerable.Empty<Country>();
+            return result ?? Enumerable.Empty<CountryResponse>();
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Country>> GetCountriesAsync(IEnumerable<Domain.DTOs.Request.Country> countries)
+        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries)
         {
             var result = await _httpClient.PostAsJsonAsync(_clientSettings.CountryControllerPath, countries);
 
             if (result != null && result.IsSuccessStatusCode)
             {
-                var content = await result.Content.ReadFromJsonAsync<IEnumerable<Country>>();
+                var content = await result.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
 
-                return content ?? Enumerable.Empty<Country>();
+                return content ?? Enumerable.Empty<CountryResponse>();
             }
 
-            return Enumerable.Empty<Country>();
+            return Enumerable.Empty<CountryResponse>();
         }
     }
 }

@@ -14,7 +14,7 @@
 
 <PageTitle>Players</PageTitle>
 
-@if (players == null)
+@if (playersDict == null)
 {
 	<MudText HtmlTag="em">Scraping players please wait...</MudText>
 }
@@ -111,7 +111,7 @@ else
 
 
 @code {
-	private Dictionary<string, IEnumerable<PlayerResponse>> players = null!;
+	private Dictionary<string, IEnumerable<PlayerResponse>> playersDict = null!;
 	private HashSet<ClubResponse> clubs = null!;
 	private HashSet<ClubResponse> selectedClubs = new();
 	private HashSet<ClubResponse> filteredClubs = new();
@@ -136,20 +136,19 @@ else
 
 		filteredClubs = clubs;
 
+		playersDict = new Dictionary<string, IEnumerable<PlayerResponse>>();
+
 		foreach (var club in ItemSelectionService.SelectedClubs)
 		{
 			var playersList = await PlayerClient.GetPlayersAsync(club.TransfermarktId);
 
-			players = new Dictionary<string, IEnumerable<PlayerResponse>>()
-			{
-				[club.TransfermarktId] = playersList
-			};
+			playersDict[club.TransfermarktId] = playersList;
 		}
 	}
 
 	private IEnumerable<PlayerResponse> GetPlayers(ClubResponse club)
 	{
-		players.TryGetValue(club.TransfermarktId, out var playersList);
+		playersDict.TryGetValue(club.TransfermarktId, out var playersList);
 
 		return playersList ?? Enumerable.Empty<PlayerResponse>();
 	}
@@ -178,7 +177,7 @@ else
 		}
 		else
 		{
-			ItemSelectionService.SelectedPlayers = players.SelectMany(kvp => kvp.Value).ToHashSet();
+			ItemSelectionService.SelectedPlayers = playersDict.SelectMany(kvp => kvp.Value).ToHashSet();
 		}
 	}
 

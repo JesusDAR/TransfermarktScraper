@@ -53,6 +53,6 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the player season stats.
         /// </summary>
         [BsonElement("playerSeasonStats")]
-        required public IEnumerable<PlayerSeasonStat> PlayerSeasonStats { get; set; }
+        required public IList<PlayerSeasonStat> PlayerSeasonStats { get; set; }
     }
 }

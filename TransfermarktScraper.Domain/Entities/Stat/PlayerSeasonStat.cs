@@ -64,6 +64,12 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         public DateTime UpdateDate { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the season stat has been scraped or not.
+        /// </summary>
+        [BsonElement("isScraped")]
+        public bool IsScraped { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the number of appearances in all competitions of the season.
         /// </summary>
         [BsonElement("appearances")]

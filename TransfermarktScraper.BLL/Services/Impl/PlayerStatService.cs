@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -67,20 +68,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var existingPlayerStat = existingPlayerStats.FirstOrDefault(existingPlayerStat => existingPlayerStat.PlayerTransfermarktId == playerStatRequest.PlayerTransfermarktId);
 
-                if (existingPlayerStat == null)
-                {
-                    await ScrapePlayerStatAsync(playerStatRequest, existingPlayerStat, cancellationToken);
+                var playerStat = await ScrapePlayerStatAsync(playerStatRequest, existingPlayerStat, cancellationToken);
 
-                    ArgumentNullException.ThrowIfNull(existingPlayerStat);
+                var updatedPlayerStat = await _playerStatRepository.InsertOrUpdateAsync(playerStat, cancellationToken);
 
-                    var updatedPlayerStat = await _playerStatRepository.InsertOrUpdateAsync(existingPlayerStat, cancellationToken);
-
-                    playerStatResponse = updatedPlayerStat.Adapt<PlayerStatResponse>();
-                }
-                else
-                {
-                    playerStatResponse = existingPlayerStat.Adapt<PlayerStatResponse>();
-                }
+                playerStatResponse = updatedPlayerStat.Adapt<PlayerStatResponse>();
 
                 playerStatResponses.Add(playerStatResponse);
             }
@@ -96,7 +88,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>
         /// A <see cref="PlayerStat"/> entity containing the player's stat.
         /// </returns>
-        private async Task ScrapePlayerStatAsync(PlayerStatRequest playerStatRequest, PlayerStat? playerStat, CancellationToken cancellationToken)
+        private async Task<PlayerStat> ScrapePlayerStatAsync(PlayerStatRequest playerStatRequest, PlayerStat? playerStat, CancellationToken cancellationToken)
         {
             var uri = string.Empty;
 
@@ -104,15 +96,26 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", "ges");
 
-                await _page.GotoAsync(uri);
+                var response = await _page.GotoAsync(uri, new PageGotoOptions
+                {
+                    WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                });
+
+                if (response == null || response.Status != (int)HttpStatusCode.OK)
+                {
+                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                    throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                }
 
                 var playerSeasonIds = await GetPlayerSeasonIds();
 
                 playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
                 {
-                    PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)),
+                    PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)).ToList(),
                 };
             }
+
+            var playerSeasonStats = new List<PlayerSeasonStat>();
 
             if (playerStatRequest.IncludeAllPlayerTransfermarktSeasons)
             {
@@ -120,21 +123,50 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 foreach (var seasonTransfermarktId in seasonTransfermarktIds)
                 {
-                    uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", seasonTransfermarktId);
+                    var existingPlayerSeasonStat = playerStat.PlayerSeasonStats.First(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId == seasonTransfermarktId);
 
-                    var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
+                    if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
+                    {
+                        uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", seasonTransfermarktId);
 
-                    playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
+                        var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
+
+                        if (seasonTransfermarktId != "ges")
+                        {
+                            playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
+                        }
+
+                        playerSeasonStat.IsScraped = true;
+                        playerSeasonStats.Add(playerSeasonStat);
+                    }
                 }
             }
             else
             {
-                uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
+                var existingPlayerSeasonStat = playerStat.PlayerSeasonStats.First(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId == playerStatRequest.SeasonTransfermarktId);
 
-                var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
+                if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
+                {
+                    uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
 
-                playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
+                    var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
+
+                    if (playerStatRequest.SeasonTransfermarktId != "ges")
+                    {
+                        playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
+                    }
+
+                    playerSeasonStat.IsScraped = true;
+                    playerSeasonStats.Add(playerSeasonStat);
+                }
             }
+
+            playerStat.PlayerSeasonStats = playerStat.PlayerSeasonStats
+                .Select(playerSeasonStat => playerSeasonStats
+                    .FirstOrDefault(playerSeasonStatToAdd => playerSeasonStat.SeasonTransfermarktId == playerSeasonStatToAdd.SeasonTransfermarktId) ?? playerSeasonStat)
+                .ToList();
+
+            return playerStat;
         }
 
         /// <summary>
@@ -148,7 +180,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var selector = "select[name='saison']";
             try
             {
-                await _page.WaitForSelectorAsync(selector);
                 var seasonSelectorLocator = _page.Locator(selector);
 
                 selector = "option";
@@ -161,7 +192,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     selector = "value";
                     var seasonTransfermarktId = await seasonSelectorOptionLocator.GetAttributeAsync(selector);
 
-                    if (seasonTransfermarktId != null && seasonTransfermarktId != "ges")
+                    if (seasonTransfermarktId != null)
                     {
                         playerSeasonTransfermarkIds.Add(seasonTransfermarktId);
                     }
@@ -255,10 +286,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Retrieves the player's season stats per competition from Transfermarkt.
         /// </summary>
         /// <param name="playerStatRequest">The player stat request DTO.</param>
-        /// <param name="playerTransfermarktSeasonId">The Transfermarkt season unique ID.</param>
+        /// <param name="seasonTransfermarktId">The Transfermarkt season unique ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <see cref="PlayerSeasonCompetitionStat"/> entities.</returns>
-        private async Task<IEnumerable<PlayerSeasonCompetitionStat>> GetPlayerSeasonCompetitionStatsAsync(PlayerStatRequest playerStatRequest, string playerTransfermarktSeasonId, CancellationToken cancellationToken)
+        private async Task<IEnumerable<PlayerSeasonCompetitionStat>> GetPlayerSeasonCompetitionStatsAsync(PlayerStatRequest playerStatRequest, string seasonTransfermarktId, CancellationToken cancellationToken)
         {
             var playerPosition = PositionExtensions.ToEnum(playerStatRequest.Position);
 
@@ -323,7 +354,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var competitionFooterResult = await GetCompetitionFooterResultAsync(competitionTransfermarktId);
 
-                var playerSeasonCompetitionStat = new PlayerSeasonCompetitionStat(playerStatRequest.PlayerTransfermarktId, competitionTransfermarktId, playerTransfermarktSeasonId)
+                var playerSeasonCompetitionStat = new PlayerSeasonCompetitionStat(playerStatRequest.PlayerTransfermarktId, competitionTransfermarktId, seasonTransfermarktId)
                 {
                     CompetitionName = competitionName,
                     Appearances = appearances,
@@ -453,7 +484,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 await _page.WaitForSelectorAsync(selector);
                 var tableFooterLocator = _page.Locator(selector);
 
-                selector = "tr";
+                selector = "tr > td";
                 var tableDataLocators = await tableFooterLocator.Locator(selector).AllAsync();
 
                 return tableDataLocators;
@@ -752,7 +783,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return assists;
                 }
 
-                if (!!int.TryParse(assistsString, out assists))
+                if (!int.TryParse(assistsString, out assists))
                 {
                     throw new Exception($"Failed to parse {nameof(assistsString)}: {assistsString}.");
                 }
@@ -1103,6 +1134,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return minutesPerGoal;
                 }
 
+                minutesPerGoalString = minutesPerGoalString
+                    .Replace("'", string.Empty)
+                    .Replace(".", string.Empty)
+                    .Trim();
+
                 if (!int.TryParse(minutesPerGoalString, out minutesPerGoal))
                 {
                     throw new Exception($"Failed to parse {nameof(minutesPerGoalString)}: {minutesPerGoalString}.");
@@ -1135,6 +1171,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     return minutesPlayed;
                 }
+
+                minutesPlayedString = minutesPlayedString
+                    .Replace("'", string.Empty)
+                    .Replace(".", string.Empty)
+                    .Trim();
 
                 if (!TableUtils.IsTableDataCellEmpty(minutesPlayedString) && !int.TryParse(minutesPlayedString, out minutesPlayed))
                 {

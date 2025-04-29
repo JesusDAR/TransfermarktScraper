@@ -20,6 +20,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the player season stats.
         /// </summary>
-        required public IEnumerable<PlayerSeasonStatResponse> PlayerSeasonStats { get; set; }
+        required public IList<PlayerSeasonStatResponse> PlayerSeasonStats { get; set; }
     }
 }

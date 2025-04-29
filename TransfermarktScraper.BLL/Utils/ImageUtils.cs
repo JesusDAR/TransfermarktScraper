@@ -19,7 +19,7 @@ namespace TransfermarktScraper.BLL.Utils
 
             foreach (var countryTransfermarktId in countryTransfermarktIds)
             {
-                var imageUrl = tinyFlagUrl + countryTransfermarktId + ".png";
+                var imageUrl = tinyFlagUrl + "/" + countryTransfermarktId + ".png";
 
                 imageUrls.Add(imageUrl);
             }

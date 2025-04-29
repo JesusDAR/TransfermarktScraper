@@ -13,56 +13,71 @@
 
 <PageTitle>Player Stats</PageTitle>
 
-@if (player == null)
+@if (player == null || playerStat == null)
 {
-	<MudText HtmlTag="em">Getting player information...</MudText>
+    <MudText HtmlTag="em">Scraping player stats please wait...</MudText>
 }
 else
 {
-	<MudStack Row="true">
-		<MudImage Src="@player.Portrait" Alt="@player.Name" Width="150" />
-		<MudList Dense="true" T="PlayerResponse">
-			<MudListItem>🏳️ Name: @player.Name</MudListItem>
-			<MudListItem>🏳️ Age: @player.Age</MudListItem>
-		</MudList>
-		<MudList Dense="true" T="PlayerResponse">
-			<MudListItem>🏳️ Nacionalidad: @player.Nationalities.First()</MudListItem>
-			<MudListItem>📍 Posición: @player.Position</MudListItem>
-			<MudListItem>📏 Altura: @player.Height cm</MudListItem>
-			<MudListItem>💰 Valor de mercado: @player.MarketValue €</MudListItem>
-		</MudList>
-	</MudStack>
+    <MudStack Row="true">
+        <MudImage Src="@player.Portrait" Alt="@player.Name" Width="150" />
+        <MudList Dense="true" T="PlayerResponse">
+            <MudListItem>🏳️ Name: @player.Name</MudListItem>
+            <MudListItem>🏳️ Age: @player.Age</MudListItem>
+        </MudList>
+        <MudList Dense="true" T="PlayerResponse">
+            <MudListItem>🏳️ Nacionalidad: @player.Nationalities.First()</MudListItem>
+            <MudListItem>📍 Posición: @player.Position</MudListItem>
+            <MudListItem>📏 Altura: @player.Height cm</MudListItem>
+            <MudListItem>💰 Valor de mercado: @player.MarketValue €</MudListItem>
+        </MudList>
+    </MudStack>
 
+    <MudSelect Label="Select Season"
+               T="PlayerSeasonStatResponse"
+               Value="_selectedPlayerSeasonStat"
+               ValueChanged="OnSelectedPlayerSeasonStat">
+        @foreach (var season in playerStat.PlayerSeasonStats)
+        {
+            <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
+                @season.SeasonTransfermarktId
+            </MudSelectItem>
+        }
+    </MudSelect>
 
+    @if (_selectedPlayerSeasonStat != null)
+    {
 
-}
-
-@if (playerStat == null)
-{
-	<MudText HtmlTag="em">Scraping player stats please wait...</MudText>
+    }
 }
 
 @code {
-	[Parameter]
-	public string playerTransfermarktId { get; set; } = default!;
-	private PlayerStatResponse? playerStat = null!;
-	private PlayerResponse player = null!;
+    [Parameter]
+    public string playerTransfermarktId { get; set; } = default!;
+    private PlayerStatResponse playerStat = null!;
+    private PlayerResponse player = null!;
+    private PlayerSeasonStatResponse? _selectedPlayerSeasonStat;
 
-	protected override async Task OnInitializedAsync()
-	{
-		player = ItemSelectionService.SelectedPlayers.First();
+    protected override async Task OnInitializedAsync()
+    {
+        player = ItemSelectionService.SelectedPlayers.First();
 
-		var playerStatRequest = new PlayerStatRequest()
-		{
-			PlayerTransfermarktId = playerTransfermarktId,
-			SeasonTransfermarktId = "ges",
-			Position = player.Position,
-		};
+        var playerStatRequest = new PlayerStatRequest()
+        {
+            PlayerTransfermarktId = playerTransfermarktId,
+            SeasonTransfermarktId = "ges",
+            Position = player.Position,
+        };
 
-		var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
+        var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
 
-		var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
+        var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
 
-		playerStat = playerStatResponses?.FirstOrDefault();
-	}
+        playerStat = playerStatResponses?.FirstOrDefault();
+    }
+
+    private void OnSelectedPlayerSeasonStat(PlayerSeasonStatResponse playerSeasonStat)
+    {
+        _selectedPlayerSeasonStat = playerSeasonStat;
+    }
 }

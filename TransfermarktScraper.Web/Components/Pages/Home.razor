@@ -68,7 +68,7 @@
         var settings = await SettingsClient.GetSettingsAsync();
         _selectedCountriesCountToScrape = settings.CountriesCountToScrape;
         _selectedForceScrapingMode = settings.IsForceScraping;
-        _selectedHeadlessMode = settings.IsForceScraping;
+        _selectedHeadlessMode = settings.IsHeadlessMode;
     }
 
     private async Task OnSelectedHeadlessModeChanged(bool selectedHeadlessMode)

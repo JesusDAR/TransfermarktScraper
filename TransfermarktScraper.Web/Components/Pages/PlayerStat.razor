@@ -19,59 +19,92 @@
 }
 else
 {
-    <MudStack Row="true" StretchItems="StretchItems.Middle">
-        <MudImage Src="@player.Portrait" Alt="@player.Name" Width="250" />
-        <MudList Dense="true" T="PlayerResponse">
-            <MudListItem>Name: @player.Name</MudListItem>
-            <MudListItem>Age: @player.Age</MudListItem>
-            <MudListItem>Date of birth: @player.DateOfBirth</MudListItem>
-            <MudListItem>
-                <MudStack Row="true">
-                    Nationalities:
-                    <MudAvatarGroup Spacing="0">
-                        @foreach (var nationality in player.Nationalities)
+    <MudStack Row="true">
+        <MudGrid Justify="Justify.FlexStart">
+            <MudItem xs="2">
+                <MudContainer>
+                    <MudBadge Content="@player.Number" Origin="Origin.BottomRight" Color="Color.Tertiary" Overlap="true">
+                        <MudImage Src="@player.Portrait" Alt="@player.Name" Width="200">
+                        </MudImage>
+                    </MudBadge>
+
+                </MudContainer>
+            </MudItem>
+            <MudItem xs="2" Class="mt-5">
+                <MudList Dense="true" T="PlayerResponse">
+
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-2" />Name: @player.Name</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Small" Class="mr-2" />Age: @player.Age</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />Date of birth: @player.DateOfBirth</MudListItem>
+                    <MudListItem>
+                        <MudStack Row="true">
+                            <MudIcon Icon="@Icons.Material.Filled.SouthAmerica" Size="Size.Small"/>
+                            Nationalities:
+                            <MudAvatarGroup Spacing="0">
+                                @foreach (var nationality in player.Nationalities)
+                                {
+                                    <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
+                                        <MudImage Src=@nationality></MudImage>
+                                    </MudAvatar>
+                                }
+                            </MudAvatarGroup>
+                        </MudStack>
+                    </MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.Height" Size="Size.Small" Class="mr-2" />Height: @(player.Height.HasValue && player.Height.Value != 0 ? $"{player.Height} cm" : "-")</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.SportsSoccer" Size="Size.Small" Class="mr-2" />Preferred Foot: @(player.Foot != string.Empty ? player.Foot : "-")</MudListItem>
+                </MudList>
+            </MudItem>
+            <MudItem xs="2" Class="mt-5">
+                <MudList Dense="true" T="PlayerResponse">
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-2" />Position: @(player.Position != string.Empty ? player.Position : "-")</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.FlightLand" Size="Size.Small" Class="mr-2" />Start Contract: @player.ContractStart</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.FlightTakeoff" Size="Size.Small" Class="mr-2" />End Contract: @(player.ContractEnd ?? "-")</MudListItem>
+                    <MudListItem><MudIcon Icon="@Icons.Material.Filled.EuroSymbol" Size="Size.Small" Class="mr-2"/>Market value: @player.MarketValue €</MudListItem>
+                    <MudListItem>
+                    <MudSelect Label="Select Season"
+                               T="PlayerSeasonStatResponse"
+                               Value="selectedPlayerSeasonStat"
+                               ValueChanged="OnSelectedPlayerSeasonStat">
+                        @foreach (var season in playerStat.PlayerSeasonStats)
                         {
-                            <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
-                                <MudImage Src=@nationality></MudImage>
-                            </MudAvatar>
+                            <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
+                                @season.SeasonTransfermarktId
+                            </MudSelectItem>
                         }
-                    </MudAvatarGroup>
-                </MudStack>
-            </MudListItem>
-            <MudListItem>Height: @(player.Height.HasValue && player.Height.Value != 0 ? $"{player.Height} cm" : "-")</MudListItem>
-            <MudListItem>Preferred Foot: @(player.Foot != string.Empty ? player.Foot : "-")</MudListItem>
-            <MudListItem>Player Number: @player.Number</MudListItem>
-            <MudListItem>Position: @(player.Position != string.Empty ? player.Position : "-")</MudListItem>
-            <MudListItem>Start Contract: @player.ContractStart</MudListItem>
-            <MudListItem>End Contract: @(player.ContractEnd ?? "-")</MudListItem>
-            <MudListItem>Market value: @player.MarketValue €</MudListItem>
-        </MudList>
+                    </MudSelect>
+                    </MudListItem>
+                </MudList>
+            </MudItem>
+            <MudItem xs="6">
+                @if (player.MarketValues != null && player.MarketValues.Any())
+                {
+                    <MudChart ChartType="ChartType.Line"
+                              XAxisLabels="@XAxisLabels"
+                              ChartSeries="@Series"
+                              ChartOptions="@Options"
+                              AxisChartOptions="@AxisOptions"
+                              LegendPosition="Position.Bottom"
+                              Width="100%"
+                              Height="450px" />
+                }
+            </MudItem>
+        </MudGrid>
     </MudStack>
-
-    <MudSelect Label="Select Season"
-    T="PlayerSeasonStatResponse"
-    Value="selectedPlayerSeasonStat"
-    ValueChanged="OnSelectedPlayerSeasonStat">
-        @foreach (var season in playerStat.PlayerSeasonStats)
-        {
-            <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
-                @season.SeasonTransfermarktId
-            </MudSelectItem>
-        }
-    </MudSelect>
-
-    @if (selectedPlayerSeasonStat != null)
-    {
-
-    }
 }
 
 @code {
     [Parameter]
     public string playerTransfermarktId { get; set; } = default!;
+
     private PlayerStatResponse playerStat = null!;
     private PlayerResponse player = null!;
     private PlayerSeasonStatResponse? selectedPlayerSeasonStat;
+
+    public string[] XAxisLabels { get; set; } = Array.Empty<string>();
+    private List<ChartSeries> Series = new();
+    private ChartOptions Options = new();
+    private AxisChartOptions AxisOptions = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -99,5 +132,42 @@ else
     private void OnSelectedPlayerSeasonStat(PlayerSeasonStatResponse playerSeasonStat)
     {
         selectedPlayerSeasonStat = playerSeasonStat;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (player.MarketValues != null && player.MarketValues.Any())
+        {
+            var dates = player.MarketValues.Select(mv => mv.Date);
+            var yearsMonths = dates.Select(date => string.Concat(date.Month, "/", date.Year.ToString())).ToList();
+            XAxisLabels = yearsMonths.ToArray();
+
+            var seriesData = player.MarketValues.Select(mv => (double)mv.Value).ToArray();
+
+            Series = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    DataMarkerTooltipYValueFormat = String.Format("C2"),
+                    DataMarkerTooltipSubtitleFormat = "{{X_VALUE}}",
+                    Name = "Market Value (€)",
+                    Data = seriesData,
+                    ShowDataMarkers = true,        
+                }
+            };
+
+            AxisOptions = new AxisChartOptions
+            {
+                XAxisLabelRotation = 20
+            };
+
+            Options = new ChartOptions
+            {
+                YAxisRequireZeroPoint = true,
+                YAxisTicks = 10000,
+                YAxisFormat = "N0",
+            };
+        }
+
     }
 }

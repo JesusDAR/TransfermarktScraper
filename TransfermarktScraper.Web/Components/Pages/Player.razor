@@ -14,7 +14,7 @@
 
 <PageTitle>Players</PageTitle>
 
-@if (playersDict == null)
+@if (playersDict == null || !playersDict.Any())
 {
 	<MudText HtmlTag="em">Scraping players please wait...</MudText>
 }

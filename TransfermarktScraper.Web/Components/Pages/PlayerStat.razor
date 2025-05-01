@@ -19,24 +19,39 @@
 }
 else
 {
-    <MudStack Row="true">
-        <MudImage Src="@player.Portrait" Alt="@player.Name" Width="150" />
+    <MudStack Row="true" StretchItems="StretchItems.Middle">
+        <MudImage Src="@player.Portrait" Alt="@player.Name" Width="250" />
         <MudList Dense="true" T="PlayerResponse">
-            <MudListItem>🏳️ Name: @player.Name</MudListItem>
-            <MudListItem>🏳️ Age: @player.Age</MudListItem>
-        </MudList>
-        <MudList Dense="true" T="PlayerResponse">
-            <MudListItem>🏳️ Nacionalidad: @player.Nationalities.First()</MudListItem>
-            <MudListItem>📍 Posición: @player.Position</MudListItem>
-            <MudListItem>📏 Altura: @player.Height cm</MudListItem>
-            <MudListItem>💰 Valor de mercado: @player.MarketValue €</MudListItem>
+            <MudListItem>Name: @player.Name</MudListItem>
+            <MudListItem>Age: @player.Age</MudListItem>
+            <MudListItem>Date of birth: @player.DateOfBirth</MudListItem>
+            <MudListItem>
+                <MudStack Row="true">
+                    Nationalities:
+                    <MudAvatarGroup Spacing="0">
+                        @foreach (var nationality in player.Nationalities)
+                        {
+                            <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
+                                <MudImage Src=@nationality></MudImage>
+                            </MudAvatar>
+                        }
+                    </MudAvatarGroup>
+                </MudStack>
+            </MudListItem>
+            <MudListItem>Height: @(player.Height.HasValue && player.Height.Value != 0 ? $"{player.Height} cm" : "-")</MudListItem>
+            <MudListItem>Preferred Foot: @(player.Foot != string.Empty ? player.Foot : "-")</MudListItem>
+            <MudListItem>Player Number: @player.Number</MudListItem>
+            <MudListItem>Position: @(player.Position != string.Empty ? player.Position : "-")</MudListItem>
+            <MudListItem>Start Contract: @player.ContractStart</MudListItem>
+            <MudListItem>End Contract: @(player.ContractEnd ?? "-")</MudListItem>
+            <MudListItem>Market value: @player.MarketValue €</MudListItem>
         </MudList>
     </MudStack>
 
     <MudSelect Label="Select Season"
-               T="PlayerSeasonStatResponse"
-               Value="_selectedPlayerSeasonStat"
-               ValueChanged="OnSelectedPlayerSeasonStat">
+    T="PlayerSeasonStatResponse"
+    Value="selectedPlayerSeasonStat"
+    ValueChanged="OnSelectedPlayerSeasonStat">
         @foreach (var season in playerStat.PlayerSeasonStats)
         {
             <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
@@ -45,7 +60,7 @@ else
         }
     </MudSelect>
 
-    @if (_selectedPlayerSeasonStat != null)
+    @if (selectedPlayerSeasonStat != null)
     {
 
     }
@@ -56,7 +71,7 @@ else
     public string playerTransfermarktId { get; set; } = default!;
     private PlayerStatResponse playerStat = null!;
     private PlayerResponse player = null!;
-    private PlayerSeasonStatResponse? _selectedPlayerSeasonStat;
+    private PlayerSeasonStatResponse? selectedPlayerSeasonStat;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,11 +88,16 @@ else
 
         var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
 
-        playerStat = playerStatResponses?.FirstOrDefault();
+        if (playerStatResponses == null || !playerStatResponses.Any())
+        {
+            return;
+        }
+
+        playerStat = playerStatResponses.First();
     }
 
     private void OnSelectedPlayerSeasonStat(PlayerSeasonStatResponse playerSeasonStat)
     {
-        _selectedPlayerSeasonStat = playerSeasonStat;
+        selectedPlayerSeasonStat = playerSeasonStat;
     }
 }

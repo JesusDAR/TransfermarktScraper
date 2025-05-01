@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.BLL.Configuration;
@@ -7,7 +8,6 @@ using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
 
 namespace TransfermarktScraper.BLL.Services.Impl
 {
@@ -42,30 +42,30 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<MarketValue>> GetMarketValuesAsync(string playerTransfermarktId, CancellationToken cancellationToken)
         {
-            var url = string.Concat("/", playerTransfermarktId);
+            var uri = string.Concat(_scraperSettings.MarketValuePath, "/", playerTransfermarktId);
 
             HttpResponseMessage? response = null;
             int maxRetries = 3;
 
-            _logger.LogInformation($"Getting market value from page: {_httpClient.BaseAddress + url}.");
+            _logger.LogInformation($"Getting market value from page: {_httpClient.BaseAddress + uri}.");
             for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
                 try
                 {
-                    response = await _httpClient.GetAsync(url, cancellationToken);
+                    response = await _httpClient.GetAsync(uri, cancellationToken);
 
                     if (response.IsSuccessStatusCode)
                     {
                         break;
                     }
 
-                    var message = $"Attempt {attempt}: Getting page: {_httpClient.BaseAddress + url} failed. Status code: {response.StatusCode}";
-                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                    var message = $"Attempt {attempt}: Getting page: {_httpClient.BaseAddress + uri} failed. Status code: {response.StatusCode}";
+                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + uri, _logger);
                 }
                 catch (Exception ex)
                 {
-                    var message = $"Attempt {attempt}: Exception while calling {_httpClient.BaseAddress + url}";
-                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger, ex);
+                    var message = $"Attempt {attempt}: Exception while calling {_httpClient.BaseAddress + uri}";
+                    ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + uri, _logger, ex);
                 }
 
                 if (attempt < maxRetries)
@@ -77,8 +77,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             if (response == null || !response.IsSuccessStatusCode)
             {
-                var message = $"Getting page: {_httpClient.BaseAddress + url} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
-                ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                var message = $"Getting page: {_httpClient.BaseAddress + uri} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
+                ScrapingException.LogError(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + uri, _logger);
                 return Enumerable.Empty<MarketValue>();
             }
 
@@ -89,11 +89,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
             if (marketValueResult == null || marketValueResult?.MarketValueItemResults == null)
             {
                 var message = $"No market value data found for {nameof(Player)}: {playerTransfermarktId}";
-                ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger);
+                ScrapingException.LogWarning(nameof(GetMarketValuesAsync), nameof(MarketValueService), message, _httpClient.BaseAddress + uri, _logger);
                 return Enumerable.Empty<MarketValue>();
             }
 
-            var marketValues = GetMarketValues(marketValueResult.MarketValueItemResults, url);
+            var marketValues = GetMarketValues(marketValueResult.MarketValueItemResults, uri);
 
             return marketValues;
         }
@@ -113,7 +113,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     var clubCrest = marketValueItemResult.Wappen;
 
                     var dateString = marketValueItemResult.DatumMw;
-                    var date = DateUtils.ConvertToDateTime(dateString);
+                    var date = DateUtils.ConvertToDateTime(dateString) ?? throw new Exception($"Failed to convert the {nameof(dateString)}: {dateString}.");
 
                     var clubTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(clubCrest);
 
@@ -134,7 +134,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
                 catch (Exception ex)
                 {
-                    ScrapingException.LogError(nameof(GetMarketValues), nameof(MarketValueService), ex.Message, _httpClient.BaseAddress + url, _logger);
+                    var message = $"Failed while processing the {nameof(marketValueItemResult)}: Age={marketValueItemResult.Age}, Verein={marketValueItemResult.Verein}, Mw={marketValueItemResult.Mw}, DatumMw={marketValueItemResult.DatumMw}.";
+                    ScrapingException.LogError(nameof(GetMarketValues), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger, ex);
                 }
             }
 

@@ -16,9 +16,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         {
             return foot switch
             {
-                Foot.Right => "right",
-                Foot.Left => "left",
-                Foot.Unknown => "unknown",
+                Foot.Right => "Right",
+                Foot.Left => "Left",
+                Foot.Unknown => "Unknown",
                 _ => HandleUnsupportedEnum(foot),
             };
         }

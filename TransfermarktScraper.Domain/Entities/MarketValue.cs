@@ -36,6 +36,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the date of the market value of the player.
         /// </summary>
         [BsonElement("date")]
+        [BsonDateTimeOptions(DateOnly = true)]
         required public DateTime Date { get; set; }
 
         /// <summary>

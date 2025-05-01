@@ -36,18 +36,21 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the ending date of the contract of the player with the club.
         /// </summary>
         [BsonElement("contractEnd")]
+        [BsonDateTimeOptions(DateOnly = true)]
         public DateTime? ContractEnd { get; set; }
 
         /// <summary>
         /// Gets or sets the starting date of the contract of the player with the club.
         /// </summary>
         [BsonElement("contractStart")]
+        [BsonDateTimeOptions(DateOnly = true)]
         public DateTime? ContractStart { get; set; }
 
         /// <summary>
         /// Gets or sets the date of birth of the player.
         /// </summary>
         [BsonElement("dateOfBirth")]
+        [BsonDateTimeOptions(DateOnly = true)]
         public DateTime? DateOfBirth { get; set; }
 
         /// <summary>

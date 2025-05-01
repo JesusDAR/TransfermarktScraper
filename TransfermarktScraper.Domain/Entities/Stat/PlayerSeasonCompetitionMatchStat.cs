@@ -82,6 +82,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// </summary>
         [BsonRequired]
         [BsonElement("date")]
+        [BsonDateTimeOptions(DateOnly = true)]
         public DateTime Date { get; private set; }
 
         /// <summary>

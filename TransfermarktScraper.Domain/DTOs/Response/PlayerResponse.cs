@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
@@ -16,17 +16,17 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the ending date of the contract of the player with the club.
         /// </summary>
-        public DateTime? ContractEnd { get; set; }
+        public string? ContractEnd { get; set; }
 
         /// <summary>
         /// Gets or sets the starting date of the contract of the player with the club.
         /// </summary>
-        public DateTime? ContractStart { get; set; }
+        public string? ContractStart { get; set; }
 
         /// <summary>
         /// Gets or sets the date of birth of the player.
         /// </summary>
-        public DateTime? DateOfBirth { get; set; }
+        public string? DateOfBirth { get; set; }
 
         /// <summary>
         /// Gets or sets the preferred foot of the player.

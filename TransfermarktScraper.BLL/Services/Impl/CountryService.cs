@@ -127,7 +127,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             if (competition == null)
             {
-                var response = await _httpClient.GetAsync(competitionName);
+                var response = await _httpClient.GetAsync(competitionName, cancellationToken);
 
                 if (response == null || !response.IsSuccessStatusCode)
                 {

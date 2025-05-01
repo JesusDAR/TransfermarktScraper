@@ -34,13 +34,19 @@ namespace TransfermarktScraper.BLL.Mappers
                 .Map(dest => dest.Foot, src => FootExtensions.ToString(src.Foot))
                 .Map(dest => dest.Position, src => PositionExtensions.ToString(src.Position))
                 .Map(dest => dest.MarketValue, src => MoneyUtils.ConvertToString(src.MarketValue))
-                .Map(dest => dest.Nationalities, src => ImageUtils.ConvertCountryTransfermarktIdsToImageUrls(src.Nationalities, _scraperSettings.TinyFlagUrl));
+                .Map(dest => dest.Nationalities, src => ImageUtils.ConvertCountryTransfermarktIdsToImageUrls(src.Nationalities, _scraperSettings.FlagUrl))
+                .Map(dest => dest.ContractEnd, src => DateUtils.ConvertToString(src.ContractEnd))
+                .Map(dest => dest.ContractStart, src => DateUtils.ConvertToString(src.ContractStart))
+                .Map(dest => dest.DateOfBirth, src => DateUtils.ConvertToString(src.DateOfBirth));
 
             config.NewConfig<PlayerResponse, Player>()
                 .Map(dest => dest.Foot, src => TierExtensions.ToEnum(src.Foot))
                 .Map(dest => dest.Position, src => CupExtensions.ToEnum(src.Position))
                 .Map(dest => dest.MarketValue, src => MoneyUtils.ConvertToFloat(src.MarketValue))
-                .Map(dest => dest.Nationalities, src => ImageUtils.ConvertImageUrlsToCountryTransfermarktIds(src.Nationalities));
+                .Map(dest => dest.Nationalities, src => ImageUtils.ConvertImageUrlsToCountryTransfermarktIds(src.Nationalities))
+                .Map(dest => dest.ContractEnd, src => DateUtils.ConvertToDateTime(src.ContractEnd))
+                .Map(dest => dest.ContractStart, src => DateUtils.ConvertToDateTime(src.ContractStart))
+                .Map(dest => dest.DateOfBirth, src => DateUtils.ConvertToDateTime(src.DateOfBirth));
         }
     }
 }

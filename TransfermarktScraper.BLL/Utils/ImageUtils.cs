@@ -11,15 +11,15 @@ namespace TransfermarktScraper.BLL.Utils
         /// Converts a collection of Transfermarkt country IDs into corresponding image URLs using the provided base URL.
         /// </summary>
         /// <param name="countryTransfermarktIds">The list of country Transfermarkt IDs.</param>
-        /// <param name="tinyFlagUrl">The base Transfermarkt URL where the flag images are hosted.</param>
+        /// <param name="flagUrl">The base Transfermarkt URL where the flag images are hosted.</param>
         /// <returns>A collection of image URLs corresponding to the given country IDs.</returns>
-        public static IEnumerable<string> ConvertCountryTransfermarktIdsToImageUrls(IEnumerable<string> countryTransfermarktIds, string tinyFlagUrl)
+        public static IEnumerable<string> ConvertCountryTransfermarktIdsToImageUrls(IEnumerable<string> countryTransfermarktIds, string flagUrl)
         {
             var imageUrls = new List<string>();
 
             foreach (var countryTransfermarktId in countryTransfermarktIds)
             {
-                var imageUrl = tinyFlagUrl + "/" + countryTransfermarktId + ".png";
+                var imageUrl = flagUrl + "/" + countryTransfermarktId + ".png";
 
                 imageUrls.Add(imageUrl);
             }

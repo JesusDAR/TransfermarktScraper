@@ -1238,7 +1238,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var tableDataLocator = tableDataLocators[index];
                 var text = await tableDataLocator.InnerTextAsync();
                 var dateString = Regex.Replace(text, @"\s*\(\d+\)", string.Empty);
-                date = DateUtils.ConvertToDateTime(dateString);
+                date = DateUtils.ConvertToDateTime(dateString) ?? throw new Exception($"Failed to convert the {nameof(dateString)}: {dateString}.");
                 return date;
             }
             catch (Exception ex)

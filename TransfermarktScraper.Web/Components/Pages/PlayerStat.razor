@@ -61,17 +61,17 @@ else
                     <MudListItem><MudIcon Icon="@Icons.Material.Filled.FlightTakeoff" Size="Size.Small" Class="mr-2" />End Contract: @(player.ContractEnd ?? "-")</MudListItem>
                     <MudListItem><MudIcon Icon="@Icons.Material.Filled.EuroSymbol" Size="Size.Small" Class="mr-2"/>Market value: @player.MarketValue €</MudListItem>
                     <MudListItem>
-                    <MudSelect Label="Select Season"
-                               T="PlayerSeasonStatResponse"
-                               Value="selectedPlayerSeasonStat"
-                               ValueChanged="OnSelectedPlayerSeasonStat">
-                        @foreach (var season in playerStat.PlayerSeasonStats)
-                        {
-                            <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
-                                @season.SeasonTransfermarktId
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
+                        <MudSelect Label="Select Season"
+                                   T="PlayerSeasonStatResponse"
+                                   Value="selectedPlayerSeasonStat"
+                                   ValueChanged="OnSelectedPlayerSeasonStat">
+                            @foreach (var season in playerStat.PlayerSeasonStats)
+                            {
+                                <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
+                                    @(season.SeasonTransfermarktId == "ges" ? "Overall Career" : season.SeasonTransfermarktId)
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
                     </MudListItem>
                 </MudList>
             </MudItem>

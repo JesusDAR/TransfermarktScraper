@@ -84,6 +84,18 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         required public string CompetitionName { get; set; }
 
         /// <summary>
+        /// Gets or sets the competition link.
+        /// </summary>
+        [BsonElement("competitionLink")]
+        required public string CompetitionLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the competition logo.
+        /// </summary>
+        [BsonElement("competitionLogo")]
+        required public string CompetitionLogo { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of appearances in the competition for the season.
         /// </summary>
         [BsonElement("appearances")]

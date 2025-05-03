@@ -301,6 +301,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
 
+                var competitionLogo = await GetCompetitionLogoAsync(tableDataLocators, 0);
+                
                 var competitionLink = await GetCompetitionLinkAsync(tableDataLocators, 1);
 
                 var competitionName = await GetCompetitionNameAsync(tableDataLocators, 1);
@@ -357,6 +359,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var playerSeasonCompetitionStat = new PlayerSeasonCompetitionStat(playerStatRequest.PlayerTransfermarktId, competitionTransfermarktId, seasonTransfermarktId)
                 {
                     CompetitionName = competitionName,
+                    CompetitionLink = competitionLink,
+                    CompetitionLogo = competitionLogo,
                     Appearances = appearances,
                     Goals = goals,
                     Assists = assists,
@@ -664,6 +668,35 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 competitionLink = competitionLink.Replace(_scraperSettings.BaseUrl, string.Empty);
 
                 return competitionLink;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
+                throw ScrapingException.LogError(nameof(GetCompetitionLinkAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
+        }
+
+        /// <summary>
+        /// Extracts the competition logo from the provided locators.
+        /// </summary>
+        /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
+        /// <param name="index">The table data index.</param>
+        /// <returns>The competition logo.</returns>
+        private async Task<string> GetCompetitionLogoAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        {
+            string competitionLogo = string.Empty;
+            var selector = "img";
+            try
+            {
+                var tableDataLocator = tableDataLocators[index];
+                var competitionLinkLocator = tableDataLocator.Locator(selector);
+
+                selector = "src";
+                competitionLogo = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLogo)} from the '{selector}' attribute.");
+
+                competitionLogo = competitionLogo.Replace("tiny", "header");
+
+                return competitionLogo;
             }
             catch (Exception ex)
             {

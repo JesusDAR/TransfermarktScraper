@@ -34,6 +34,16 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         required public string CompetitionName { get; set; }
 
         /// <summary>
+        /// Gets or sets the competition link.
+        /// </summary>
+        required public string CompetitionLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the competition logo.
+        /// </summary>
+        required public string CompetitionLogo { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of appearances in the competition for the season.
         /// </summary>
         public int Appearances { get; set; }

@@ -188,12 +188,7 @@ else
 			.ToHashSet() ?? new HashSet<ClubResponse>();
 	}
 
-	private void CheckPlayerStatAsync()
-	{
-
-	}
-
-	private async void ScrapePlayerStatAsync()
+	private async Task ScrapePlayerStatAsync()
 	{
 		var players = ItemSelectionService.SelectedPlayers;
 

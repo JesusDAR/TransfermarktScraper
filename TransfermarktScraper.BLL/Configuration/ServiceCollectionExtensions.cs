@@ -83,7 +83,7 @@ namespace TransfermarktScraper.BLL.Configuration
                 .ConfigureHttpClient((provider, client) =>
                 {
                     var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-                    client.BaseAddress = new Uri(scraperSettings.BaseUrl + scraperSettings.SearchPath);
+                    client.BaseAddress = new Uri(scraperSettings.BaseUrl);
                     client.Timeout = TimeSpan.FromSeconds(10);
                 });
 

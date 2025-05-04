@@ -36,7 +36,7 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         public Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if the country and competition exists in the repository and scrapes the country and competition information from Transfermarkt if it does not.
+        /// Checks if the country and competition exists in the repository and scrapes the country and competition information from Transfermarkt by performing a search on the competition if it does not.
         /// </summary>
         /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
         /// <param name="competitionLink">The original link to the competition page.</param>

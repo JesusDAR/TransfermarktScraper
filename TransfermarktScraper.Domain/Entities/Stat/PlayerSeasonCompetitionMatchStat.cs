@@ -215,7 +215,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// <summary>
         /// Gets or sets the reason why the player did not played any minute of the match.
         /// </summary>
-        [BsonElement("minutesPlayed")]
+        [BsonElement("notPlayingReason")]
         public NotPlayingReason NotPlayingReason { get; set; } = NotPlayingReason.None;
     }
 }

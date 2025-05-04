@@ -183,31 +183,31 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the number of times the player was in the squad in the competition for the season.
         /// </summary>
         [BsonElement("squad")]
-        public int Squad { get; set; } = 0;
+        public int? Squad { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was in the starting eleven in the competition for the season.
         /// </summary>
         [BsonElement("startingEleven")]
-        public int StartingEleven { get; set; } = 0;
+        public int? StartingEleven { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was on the bench the whole match in the competition for the season.
         /// </summary>
         [BsonElement("onTheBench")]
-        public int OnTheBench { get; set; } = 0;
+        public int? OnTheBench { get; set; }
 
         /// <summary>
         /// Gets or sets the number of matches the player missed because of a suspension in the competition for the season.
         /// </summary>
         [BsonElement("suspended")]
-        public int Suspended { get; set; } = 0;
+        public int? Suspended { get; set; }
 
         /// <summary>
         /// Gets or sets the number of matches the player missed because of an injure in the competition for the season.
         /// </summary>
         [BsonElement("injured")]
-        public int Injured { get; set; } = 0;
+        public int? Injured { get; set; }
 
         /// <summary>
         /// Gets or sets the player match stats in the competition for the season.

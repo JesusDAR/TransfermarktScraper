@@ -131,10 +131,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                         var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
 
-                        if (seasonTransfermarktId != "ges")
-                        {
-                            playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
-                        }
+                        playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
 
                         playerSeasonStat.IsScraped = true;
                         playerSeasonStats.Add(playerSeasonStat);
@@ -151,10 +148,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
 
-                    if (playerStatRequest.SeasonTransfermarktId != "ges")
-                    {
-                        playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
-                    }
+                    playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
 
                     playerSeasonStat.IsScraped = true;
                     playerSeasonStats.Add(playerSeasonStat);
@@ -302,7 +296,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
 
                 var competitionLogo = await GetCompetitionLogoAsync(tableDataLocators, 0);
-                
+
                 var competitionLink = await GetCompetitionLinkAsync(tableDataLocators, 1);
 
                 var competitionName = await GetCompetitionNameAsync(tableDataLocators, 1);
@@ -354,8 +348,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 await CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, cancellationToken);
 
-                var competitionFooterResult = await GetCompetitionFooterResultAsync(competitionTransfermarktId);
-
                 var playerSeasonCompetitionStat = new PlayerSeasonCompetitionStat(playerStatRequest.PlayerTransfermarktId, competitionTransfermarktId, seasonTransfermarktId)
                 {
                     CompetitionName = competitionName,
@@ -375,14 +367,25 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     MinutesPlayed = minutesPlayed,
                     CleanSheets = cleanSheets,
                     GoalsConceded = goalsConceded,
-                    Squad = competitionFooterResult.Squad,
-                    StartingEleven = competitionFooterResult.StartingEleven,
-                    OnTheBench = competitionFooterResult.OnTheBench,
-                    Suspended = competitionFooterResult.Suspended,
-                    Injured = competitionFooterResult.Injured,
                 };
 
+                if (playerStatRequest.SeasonTransfermarktId != "ges")
+                {
+                    var competitionFooterResult = await GetCompetitionFooterResultAsync(competitionTransfermarktId);
+
+                    playerSeasonCompetitionStat.Squad = competitionFooterResult.Squad;
+                    playerSeasonCompetitionStat.StartingEleven = competitionFooterResult.StartingEleven;
+                    playerSeasonCompetitionStat.OnTheBench = competitionFooterResult.OnTheBench;
+                    playerSeasonCompetitionStat.Suspended = competitionFooterResult.Suspended;
+                    playerSeasonCompetitionStat.Injured = competitionFooterResult.Injured;
+                }
+
                 playerSeasonCompetitionStats.Add(playerSeasonCompetitionStat);
+            }
+
+            if (playerStatRequest.SeasonTransfermarktId == "ges")
+            {
+                return playerSeasonCompetitionStats;
             }
 
             foreach (var playerSeasonCompetitionStat in playerSeasonCompetitionStats)
@@ -464,7 +467,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Delegates the check of the scraping status for a given competition and its associated country to the <see cref="_countryService"/>.
+        /// Delegates the check of the scraping status for a given competition and its associated country to the <see cref="ICountryService"/>.
         /// </summary>
         /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
         /// <param name="competitionLink">The URL of the competition's page.</param>
@@ -572,7 +575,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A <see cref="CompetitionFooterResult"/> object containing parsed data.</returns>
         private async Task<CompetitionFooterResult> GetCompetitionFooterResultAsync(string competitionTransfermarktId)
         {
-            var selector = $"a[name='{competitionTransfermarktId}'] >> .. >> table >> tfoot";
+            var selector = $"a[name='{competitionTransfermarktId}'] > .. > table > tfoot";
             try
             {
                 var tableFooterLocator = _page.Locator(selector);
@@ -663,7 +666,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var competitionLinkLocator = tableDataLocator.Locator(selector);
 
                 selector = "href";
-                competitionLink = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLink)} from the '{selector}' attribute.");
+                competitionLink = await competitionLinkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLink)} from the '{selector}' attribute.");
 
                 competitionLink = competitionLink.Replace(_scraperSettings.BaseUrl, string.Empty);
 
@@ -689,10 +692,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var competitionLinkLocator = tableDataLocator.Locator(selector);
+                var competitionLogoLocator = tableDataLocator.Locator(selector);
 
                 selector = "src";
-                competitionLogo = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLogo)} from the '{selector}' attribute.");
+                competitionLogo = await competitionLogoLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLogo)} from the '{selector}' attribute.");
 
                 competitionLogo = competitionLogo.Replace("tiny", "header");
 
@@ -718,9 +721,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var linkLocator = tableDataLocator.Locator(selector);
+                var competitionLinkLocator = tableDataLocator.Locator(selector);
 
-                competitionName = await linkLocator.InnerTextAsync();
+                competitionName = await competitionLinkLocator.InnerTextAsync();
             }
             catch (Exception ex)
             {

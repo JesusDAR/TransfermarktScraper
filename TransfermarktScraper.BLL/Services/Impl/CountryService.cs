@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Models;
+using TransfermarktScraper.BLL.Models.Competition;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
@@ -127,69 +129,31 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             if (competition == null)
             {
-                var response = await _httpClient.GetAsync(competitionName, cancellationToken);
+                var competitionNameToSearch = Regex.Replace(competitionName, @"\s*\(.*?\)", string.Empty);
+
+                var competitionNameSearchPath = string.Concat(_scraperSettings.SearchPath, "?query=", Uri.EscapeDataString(competitionNameToSearch));
+
+                var url = string.Concat(_httpClient.BaseAddress + competitionNameSearchPath);
+
+                _logger.LogInformation($"Starting searching competition {competitionName} on URL {url} ...");
+
+                var response = await _httpClient.GetAsync(competitionNameSearchPath, cancellationToken);
 
                 if (response == null || !response.IsSuccessStatusCode)
                 {
-                    var message = $"Getting page: {_httpClient.BaseAddress + competitionName} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
-                    throw ScrapingException.LogError(nameof(CheckCountryAndCompetitionScrapingStatus), nameof(MarketValueService), message, _httpClient.BaseAddress + competitionName, _logger);
+                    var message = $"Getting page: {url} failed. status code: {response?.StatusCode.ToString() ?? "null"}";
+                    throw ScrapingException.LogError(nameof(CheckCountryAndCompetitionScrapingStatus), nameof(MarketValueService), message, url, _logger);
                 }
 
                 var html = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 var document = await _htmlParser.ParseDocumentAsync(html);
 
-                var competitionSearchResult = _competitionService.ScrapeCompetitionFromSearchResults(document, competitionTransfermarktId, competitionName, competitionLink, _httpClient.BaseAddress + competitionName);
+                var competitionSearchResult = _competitionService.ScrapeCompetitionFromSearchResults(document, competitionTransfermarktId, competitionName, competitionLink, url);
 
-                if (competitionSearchResult.CountryTableData != null)
-                {
-                    string countryTransfermarktId = string.Empty;
-                    string countryFlag = string.Empty;
-                    string countryName = string.Empty;
-                    var selector = "img";
-                    try
-                    {
-                        var imgElement = competitionSearchResult.CountryTableData.QuerySelector(selector) ?? throw new Exception();
+                var countrySearchResult = ScrapeCountryFromSearchResult(competitionSearchResult, url, cancellationToken);
 
-                        selector = "src";
-                        countryFlag = imgElement?.GetAttribute(selector) ?? throw new Exception();
-
-                        selector = "title";
-                        countryName = imgElement?.GetAttribute(selector) ?? throw new Exception();
-
-                        countryTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
-                    }
-                    catch (Exception ex)
-                    {
-                        var message = $"Using selector: '{selector}' failed.";
-                        throw ScrapingException.LogError(nameof(CheckCountryAndCompetitionScrapingStatus), nameof(CountryService), message, _httpClient.BaseAddress + competitionName, _logger, ex);
-                    }
-
-                    var country = await _countryRepository.GetAsync(countryTransfermarktId, cancellationToken);
-
-                    if (country == null)
-                    {
-                        var countries = new List<Country>();
-
-                        country = new Country
-                        {
-                            TransfermarktId = countryTransfermarktId,
-                            Flag = countryFlag,
-                            Name = countryName,
-                            Competitions = [competitionSearchResult.Competition],
-                        };
-
-                        countries.Add(country);
-
-                        await _countryRepository.AddRangeAsync(countries, cancellationToken);
-                    }
-                    else
-                    {
-                        country.Competitions.Add(competitionSearchResult.Competition);
-
-                        await _countryRepository.UpdateRangeAsync(country.TransfermarktId, country.Competitions, cancellationToken);
-                    }
-                }
+                await PersistCountryAndCompetitionSearchResultsAsync(countrySearchResult, cancellationToken);
             }
 
             return;
@@ -205,6 +169,40 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countries, cancellationToken);
 
             return countries;
+        }
+
+        /// <summary>
+        /// Persists a <see cref="CountrySearchResult"/> by saving or updating the related <see cref="Country"/> and its associated <see cref="Competition"/>.
+        /// </summary>
+        /// <param name="countrySearchResult">The search result containing country and competition data to persist.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        private async Task PersistCountryAndCompetitionSearchResultsAsync(CountrySearchResult countrySearchResult, CancellationToken cancellationToken)
+        {
+            var country = await _countryRepository.GetAsync(countrySearchResult.TransfermarktId, cancellationToken);
+
+            if (country == null)
+            {
+                var countries = new List<Country>();
+
+                country = new Country
+                {
+                    TransfermarktId = countrySearchResult.TransfermarktId,
+                    Flag = countrySearchResult.Flag,
+                    Name = countrySearchResult.Name,
+                    Competitions = [countrySearchResult.Competition],
+                };
+
+                countries.Add(country);
+
+                await _countryRepository.AddRangeAsync(countries, cancellationToken);
+            }
+            else
+            {
+                country.Competitions.Add(countrySearchResult.Competition);
+
+                await _countryRepository.UpdateRangeAsync(country.TransfermarktId, country.Competitions, cancellationToken);
+            }
         }
 
         /// <summary>
@@ -495,6 +493,58 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     "Intercepted country:\n      " +
                     "{Country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
             }
+        }
+
+        /// <summary>
+        /// Extracts country information related to a competition from the given <see cref="CompetitionSearchResult"/>.
+        /// If no country data is available, it defaults to "International".
+        /// </summary>
+        /// <param name="competitionSearchResult">The result object containing the competition search data.</param>
+        /// <param name="url">The URL from which the data was scraped (used for logging in case of error).</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A <see cref="CountrySearchResult"/> object containing the country details related to the competition.</returns>
+        private CountrySearchResult ScrapeCountryFromSearchResult(CompetitionSearchResult competitionSearchResult, string url, CancellationToken cancellationToken)
+        {
+            string countryTransfermarktId = string.Empty;
+            string countryFlag = string.Empty;
+            string countryName = string.Empty;
+
+            if (competitionSearchResult.CountryTableData != null && competitionSearchResult.Competition.Cup != Domain.Enums.Cup.International)
+            {
+                var selector = "img";
+                try
+                {
+                    var imgElement = competitionSearchResult.CountryTableData.QuerySelector(selector) ?? throw new Exception();
+
+                    selector = "src";
+                    countryFlag = imgElement?.GetAttribute(selector) ?? throw new Exception();
+
+                    selector = "title";
+                    countryName = imgElement?.GetAttribute(selector) ?? throw new Exception();
+
+                    countryTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
+                }
+                catch (Exception ex)
+                {
+                    var message = $"Using selector: '{selector}' failed.";
+                    throw ScrapingException.LogError(nameof(ScrapeCountryFromSearchResult), nameof(CountryService), message, url, _logger, ex);
+                }
+            }
+            else
+            {
+                countryTransfermarktId = "international";
+                countryName = "International";
+            }
+
+            var countrySearchResult = new CountrySearchResult
+            {
+                Flag = countryFlag,
+                Name = countryName,
+                TransfermarktId = countryTransfermarktId,
+                Competition = competitionSearchResult.Competition,
+            };
+
+            return countrySearchResult;
         }
     }
 }

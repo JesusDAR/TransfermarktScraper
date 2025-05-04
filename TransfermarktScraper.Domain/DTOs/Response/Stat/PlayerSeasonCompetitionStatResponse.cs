@@ -64,6 +64,16 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         public int OwnGoals { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of times the player was substituted on in the competition for the season.
+        /// </summary>
+        public int SubstitutionsOn { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of times the player was substituted off in the competition for the season.
+        /// </summary>
+        public int SubstitutionsOff { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of yellow cards received in the competition for the season.
         /// </summary>
         public int YellowCards { get; set; }
@@ -106,37 +116,27 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the number of times the player was in the squad in the competition for the season.
         /// </summary>
-        public int Squad { get; set; }
+        public int? Squad { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was in the starting eleven in the competition for the season.
         /// </summary>
-        public int StartingEleven { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of times the player was substituted on in the competition for the season.
-        /// </summary>
-        public int SubstitutionsOn { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of times the player was substituted off in the competition for the season.
-        /// </summary>
-        public int SubstitutionsOff { get; set; }
+        public int? StartingEleven { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was on the bench the whole match in the competition for the season.
         /// </summary>
-        public int OnTheBench { get; set; }
+        public int? OnTheBench { get; set; }
 
         /// <summary>
         /// Gets or sets the number of matches the player missed because of a suspension in the competition for the season.
         /// </summary>
-        public int Suspended { get; set; }
+        public int? Suspended { get; set; }
 
         /// <summary>
         /// Gets or sets the number of matches the player missed because of an injure in the competition for the season.
         /// </summary>
-        public int Injured { get; set; }
+        public int? Injured { get; set; }
 
         /// <summary>
         /// Gets or sets the player match stats in the competition for the season.

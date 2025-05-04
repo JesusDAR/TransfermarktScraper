@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Text.RegularExpressions;
 using AngleSharp.Dom;
@@ -15,6 +16,7 @@ using TransfermarktScraper.BLL.Utils;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 using TransfermarktScraper.Domain.Entities;
+using TransfermarktScraper.Domain.Enums;
 using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.BLL.Services.Impl
@@ -72,66 +74,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url)
         {
-            IElement countryTableData;
-            CompetitionSearchResult competitionSearchResult;
-            var selector = "h2.content-box-headline";
-            try
-            {
-                var competitionHeaders = document.QuerySelectorAll(selector) ?? throw new Exception();
+            var competitionTableDatas = GetCompetitionTableDatasFromSearchResults(document, url, competitionTransfermarktId);
 
-                selector = "competitions";
-                var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.TextContent.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
-
-                selector = "table.items";
-                var competitionTable = competitionHeader?.ParentElement?.QuerySelector(selector) ?? throw new Exception();
-
-                selector = "tbody tr";
-                var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception();
-
-                selector = $"a[title='{competitionName}']";
-                var competitionTableRow = competitionTableRows.First(competitionTableRow => competitionTableRow.QuerySelector(selector) != null) ?? throw new Exception();
-
-                selector = "td";
-                var competitionTableDatas = competitionTableRow?.QuerySelectorAll(selector) ?? throw new Exception();
-
-                countryTableData = competitionTableDatas[2];
-
-                var clubsCountString = competitionTableDatas[3].TextContent.Trim();
-                var clubsCount = int.Parse(clubsCountString);
-
-                var playersCountString = competitionTableDatas[4].TextContent.Trim();
-                var playersCount = int.Parse(playersCountString);
-
-                var marketValueNumericString = competitionTableDatas[5].TextContent.Trim();
-                var marketValueString = MoneyUtils.ExtractNumericPart(marketValueNumericString);
-                var marketValue = MoneyUtils.ConvertToFloat(marketValueString);
-
-                var marketValueAverageNumericString = competitionTableDatas[6].TextContent.Trim();
-                var marketValueAverageString = MoneyUtils.ExtractNumericPart(marketValueAverageNumericString);
-                var marketValueAverage = MoneyUtils.ConvertToFloat(marketValueAverageString);
-
-                var competition = new Competition
-                {
-                    Name = competitionName,
-                    Link = competitionLink,
-                    TransfermarktId = competitionTransfermarktId,
-                    ClubsCount = clubsCount,
-                    PlayersCount = playersCount,
-                    MarketValue = marketValue,
-                    MarketValueAverage = marketValueAverage,
-                };
-
-                competitionSearchResult = new CompetitionSearchResult
-                {
-                    Competition = competition,
-                    CountryTableData = countryTableData,
-                };
-            }
-            catch (Exception ex)
-            {
-                var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(ScrapeCompetitionFromSearchResults), nameof(CompetitionService), message, url, _logger, ex);
-            }
+            var competitionSearchResult = GetCompetitionSearchResultFromCompetitionTableDatas(competitionTableDatas, url, competitionName, competitionLink, competitionTransfermarktId);
 
             return competitionSearchResult;
         }
@@ -511,6 +456,150 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
+        /// Extracts the collection of HTML table data cells (<td> elements) for a specific competition from the Transfermarkt search results HTML document.
+        /// </summary>
+        /// <param name="document">The parsed HTML document representing the Transfermarkt search results page.</param>
+        /// <param name="url">The source URL of the page being scraped. Used for logging in case of an error.</param>
+        /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier for the competition.</param>
+        /// <returns>A collection of <see cref="IElement"/> objects representing the <td> elements in the table row corresponding to the competition.</returns>
+        private IHtmlCollection<IElement> GetCompetitionTableDatasFromSearchResults(IHtmlDocument document, string url, string competitionTransfermarktId)
+        {
+            var selector = "h2.content-box-headline";
+            try
+            {
+                var competitionHeaders = document.QuerySelectorAll(selector) ?? throw new Exception();
+
+                selector = "competitions";
+                var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.InnerHtml.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
+
+                var competitionTable = competitionHeader?.ParentElement ?? throw new Exception();
+
+                selector = "table.items tbody tr";
+                var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception();
+
+                var competitionTableRow = competitionTableRows.FirstOrDefault(competitionTableRow =>
+                {
+                    selector = "td:nth-child(2) a";
+                    var competitionLinkElement = competitionTableRow.QuerySelector(selector) ?? throw new Exception();
+
+                    selector = "href";
+                    var competitionLink = competitionLinkElement.GetAttribute(selector) ?? throw new Exception();
+
+                    var competitionId = ExtractCompetitionTransfermarktId(competitionLink);
+
+                    return competitionId.Equals(competitionTransfermarktId);
+                });
+
+                selector = "td";
+                var competitionTableDatas = competitionTableRow?.QuerySelectorAll(selector) ?? throw new Exception();
+
+                return competitionTableDatas;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed.";
+                throw ScrapingException.LogError(nameof(GetCompetitionTableDatasFromSearchResults), nameof(CompetitionService), message, url, _logger, ex);
+            }
+        }
+
+        /// <summary>
+        /// Extracts competition details from a collection of HTML table cells representing a single competition row.
+        /// </summary>
+        /// <param name="competitionTableDatas">A collection of HTML table data cells corresponding to one competition row.</param>
+        /// <param name="url">The source URL of the page being scraped. Used for logging in case of an error.</param>
+        /// <param name="competitionName">The name of the competition.</param>
+        /// <param name="competitionLink">The absolute URL to the competition page on Transfermarkt.</param>
+        /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier for the competition.</param>
+        /// <returns>A <see cref="CompetitionSearchResult"/> containing both the <see cref="Competition"/> entity and the HTML element for the country column.</returns>
+        private CompetitionSearchResult GetCompetitionSearchResultFromCompetitionTableDatas(IHtmlCollection<IElement> competitionTableDatas, string url, string competitionName, string competitionLink, string competitionTransfermarktId)
+        {
+            int index = 0;
+            try
+            {
+                var logo = GetCompetitionLogo(competitionTableDatas, index, url);
+
+                index = 2;
+                var countryTableData = competitionTableDatas[index];
+                Cup cup = default;
+                if (countryTableData.ChildNodes.Count() == 0)
+                {
+                    cup = Cup.International;
+                }
+
+                index = 3;
+                var clubsCountString = competitionTableDatas[index].TextContent.Trim();
+                var clubsCount = string.IsNullOrEmpty(clubsCountString) ? default : int.Parse(clubsCountString);
+
+                index = 4;
+                var playersCountString = competitionTableDatas[index].TextContent.Trim();
+                var playersCount = string.IsNullOrEmpty(playersCountString) ? default : int.Parse(playersCountString);
+
+                index = 5;
+                var marketValueNumericString = competitionTableDatas[index].TextContent.Trim();
+                var marketValueString = string.IsNullOrEmpty(marketValueNumericString) ? default : MoneyUtils.ExtractNumericPart(marketValueNumericString);
+                var marketValue = string.IsNullOrEmpty(marketValueString) ? default : MoneyUtils.ConvertToFloat(marketValueString);
+
+                index = 6;
+                var marketValueAverageNumericString = competitionTableDatas[index].TextContent.Trim();
+                var marketValueAverageString = string.IsNullOrEmpty(marketValueAverageNumericString) ? default : MoneyUtils.ExtractNumericPart(marketValueAverageNumericString);
+                var marketValueAverage = string.IsNullOrEmpty(marketValueAverageString) ? default : MoneyUtils.ConvertToFloat(marketValueAverageString);
+
+                var competition = new Competition
+                {
+                    Name = competitionName,
+                    Link = competitionLink,
+                    Logo = logo,
+                    TransfermarktId = competitionTransfermarktId,
+                    ClubsCount = clubsCount,
+                    PlayersCount = playersCount,
+                    MarketValue = marketValue,
+                    MarketValueAverage = marketValueAverage,
+                    Cup = cup,
+                };
+
+                var competitionSearchResult = new CompetitionSearchResult
+                {
+                    Competition = competition,
+                    CountryTableData = countryTableData,
+                };
+
+                return competitionSearchResult;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Failed extracting {nameof(CompetitionSearchResult)} from {nameof(competitionTableDatas)}. Table data index: {index}.";
+                throw ScrapingException.LogError(nameof(GetCompetitionSearchResultFromCompetitionTableDatas), nameof(CompetitionService), message, url, _logger, ex);
+            }
+        }
+
+        /// <summary>
+        /// Extracts the competition logo URL from the specified table data.
+        /// </summary>
+        /// <param name="competitionTableDatas">A collection of HTML elements representing the competition's table row data.</param>
+        /// <param name="index">The index of the table data cell that contains the logo image.</param>
+        /// <param name="url">The URL being scraped, used for logging purposes in case of an error.</param>
+        /// <returns>The URL string of the competition logo.</returns>
+        private string GetCompetitionLogo(IHtmlCollection<IElement> competitionTableDatas, int index, string url)
+        {
+            var selector = "img";
+            try
+            {
+                var logoElement = competitionTableDatas[index].QuerySelector(selector) ?? throw new Exception($"Failed to obtain the competition logo using the selector {selector}");
+
+                selector = "src";
+                var logoString = logoElement.GetAttribute(selector) ?? throw new Exception($"Failed to obtain the competition logo using the attribute {selector}");
+                var logo = logoString.Replace("mediumsmall", "header");
+
+                return logo;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
+                throw ScrapingException.LogError(nameof(GetCompetitionLogo), nameof(CompetitionService), message, url, _logger, ex);
+            }
+        }
+
+        /// <summary>
         /// Extracts the country Transfermarkt ID from a given URL.
         /// </summary>
         /// <param name="url">The competition link in Transfermarkt.</param>
@@ -523,6 +612,18 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var match = Regex.Match(url, pattern);
             string countryTransfermarktId = match.Groups[1].Value;
             return countryTransfermarktId;
+        }
+
+        /// <summary>
+        /// Extracts the Transfermarkt competition identifier from the provided locators.
+        /// </summary>
+        /// <param name="link">The competition link in Transfermarkt.</param>
+        /// <returns>The Transfermarkt competition identifier.</returns>
+        private string ExtractCompetitionTransfermarktId(string link)
+        {
+            var index = link.LastIndexOf('/');
+            string competitionTransfermarktId = link.Substring(index + 1);
+            return competitionTransfermarktId;
         }
     }
 }

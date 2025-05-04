@@ -17,7 +17,7 @@ namespace TransfermarktScraper.BLL.Utils
             var cleaned = money.Replace("€", string.Empty).Replace("$", string.Empty).Trim();
 
             var result = new string(cleaned.Where(c =>
-                char.IsDigit(c) || c == '.' || c == ',' || c == 'm' || c == 'k' || c == 'b').ToArray());
+                char.IsDigit(c) || c == '.' || c == ',' || c == 'm' || c == 'k' || c == 'b' || c == 'n').ToArray());
 
             return result.Replace(",", ".");
         }
@@ -57,7 +57,8 @@ namespace TransfermarktScraper.BLL.Utils
                         return result * 1_000_000;
                     }
                 }
-                else if (money.EndsWith("bn", StringComparison.OrdinalIgnoreCase))
+                else if (money.EndsWith("bn", StringComparison.OrdinalIgnoreCase)
+                    || money.EndsWith("b", StringComparison.OrdinalIgnoreCase))
                 {
                     string numericPart = money.Substring(0, money.Length - 2);
 

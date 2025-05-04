@@ -23,6 +23,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         required public string SeasonTransfermarktId { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the season stat has been scraped or not.
+        /// </summary>
+        public bool IsScraped { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the number of appearances in all competitions of the season.
         /// </summary>
         public int Appearances { get; set; }

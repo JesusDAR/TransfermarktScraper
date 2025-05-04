@@ -8,10 +8,10 @@ namespace TransfermarktScraper.BLL.Models.MarketValue
     public class MarketValueItemResult
     {
         /// <summary>
-        /// Gets or sets the market value with currency formatting (e.g., "€1.00m", "€500k").
+        /// Gets or sets the market value in euros.
         /// </summary>
-        [JsonPropertyName("mw")]
-        public string Mw { get; set; } = string.Empty;
+        [JsonPropertyName("y")]
+        public float Y { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets the formatted date when this market value was recorded (e.g., "Jun 20, 2007").

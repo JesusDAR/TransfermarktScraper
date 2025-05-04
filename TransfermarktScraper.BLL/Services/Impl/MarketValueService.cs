@@ -117,15 +117,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     var clubTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(clubCrest);
 
-                    var valueNumeric = MoneyUtils.ExtractNumericPart(marketValueItemResult.Mw);
-                    var value = MoneyUtils.ConvertToFloat(valueNumeric);
-
                     var marketValue = new MarketValue
                     {
                         Age = age,
                         ClubName = clubName,
                         ClubTransfermarktId = clubTransfermarktId,
-                        Value = value,
+                        Value = marketValueItemResult.Y,
                         ClubCrest = clubCrest,
                         Date = date,
                     };
@@ -134,7 +131,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
                 catch (Exception ex)
                 {
-                    var message = $"Failed while processing the {nameof(marketValueItemResult)}: Age={marketValueItemResult.Age}, Verein={marketValueItemResult.Verein}, Mw={marketValueItemResult.Mw}, DatumMw={marketValueItemResult.DatumMw}.";
+                    var message = $"Failed while processing the {nameof(marketValueItemResult)}: Age={marketValueItemResult.Age}, Verein={marketValueItemResult.Verein}, Y={marketValueItemResult.Y}, DatumMw={marketValueItemResult.DatumMw}.";
                     ScrapingException.LogError(nameof(GetMarketValues), nameof(MarketValueService), message, _httpClient.BaseAddress + url, _logger, ex);
                 }
             }

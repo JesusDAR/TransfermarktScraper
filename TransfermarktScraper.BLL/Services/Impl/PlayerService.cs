@@ -450,13 +450,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return height;
                 }
 
-                Match match = Regex.Match(text, @"\((\d+)\)");
-                if (match.Success)
-                {
-                    var heightString = match.Groups[1].Value;
-                    height = HeightUtils.ConvertToInt(heightString);
-                    return height;
-                }
+                height = HeightUtils.ConvertToInt(text);
+                return height;
             }
             catch (Exception ex)
             {

@@ -439,7 +439,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                         MatchDay = matchDayTableDataResult.MatchDay,
                         Link = matchDayTableDataResult.MatchDayLink,
                         HomeClubName = homeClubTableDataResult.ClubName,
+                        HomeClubLogo = homeClubTableDataResult.ClubLogo,
                         AwayClubName = awayClubTableDataResult.ClubName,
+                        AwayClubLogo = awayClubTableDataResult.ClubLogo,
                         HomeClubGoals = resultTableDataResult.HomeClubGoals,
                         AwayClubGoals = resultTableDataResult.AwayClubGoals,
                         MatchResult = resultTableDataResult.MatchResult,
@@ -1300,12 +1302,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var selector = "a";
                 var linkLocator = tableDataLocator.Locator(selector);
                 selector = "title";
-                var clubName = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubName)} from the '{selector}' attribute.");
+                var clubName = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubName)} from the '{selector}' attribute.");
+
+                selector = "img";
+                var clubLogoImg = linkLocator.Locator(selector);
+                selector = "src";
+                var clubLogo = await clubLogoImg.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club logo from the '{selector}' attribute.");
+
                 selector = "href";
                 var clubLink = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club link from the '{selector}' attribute.");
                 var clubTransfermarktId = ExtractClubTransfermarktId(clubLink);
 
                 clubTableDataResult.ClubName = clubName;
+                clubTableDataResult.ClubLogo = clubName;
                 clubTableDataResult.ClubTransfermarktId = clubTransfermarktId;
                 return clubTableDataResult;
             }

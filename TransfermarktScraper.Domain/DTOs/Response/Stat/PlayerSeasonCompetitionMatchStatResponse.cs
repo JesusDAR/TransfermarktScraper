@@ -49,9 +49,19 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         required public string HomeClubName { get; set; }
 
         /// <summary>
+        /// Gets or sets the home club logo.
+        /// </summary>
+        required public string HomeClubLogo { get; set; }
+
+        /// <summary>
         /// Gets or sets the away club name.
         /// </summary>
         required public string AwayClubName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the away club logo.
+        /// </summary>
+        required public string AwayClubLogo { get; set; }
 
         /// <summary>
         /// Gets or sets the home club scored goals in the match.

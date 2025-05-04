@@ -111,10 +111,22 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         required public string HomeClubName { get; set; }
 
         /// <summary>
+        /// Gets or sets the home club logo.
+        /// </summary>
+        [BsonElement("homeClubLogo")]
+        required public string HomeClubLogo { get; set; }
+
+        /// <summary>
         /// Gets or sets the away club name.
         /// </summary>
         [BsonElement("awayClubName")]
         required public string AwayClubName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the away club logo.
+        /// </summary>
+        [BsonElement("awayClubLogo")]
+        required public string AwayClubLogo { get; set; }
 
         /// <summary>
         /// Gets or sets the home club scored goals in the match.

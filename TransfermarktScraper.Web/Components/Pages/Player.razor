@@ -73,9 +73,7 @@ else
 								   Disabled="@(ItemSelectionService.SelectedPlayers.Count == 0)">
 							Scrape stats
 						</MudButton>
-						<MudIcon Icon="@(selectedClubs.Contains(club)
-							? Icons.Material.Filled.ArrowDropUp
-							: Icons.Material.Filled.ArrowDropDown)"
+						<MudIcon Icon="@(selectedClubs.Contains(club) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
 								 Color="Color.Primary"
 								 Size="Size.Large" />
 					</MudStack>

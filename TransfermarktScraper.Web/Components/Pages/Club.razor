@@ -59,9 +59,7 @@ else
 						<MudSpacer />
 						<MudText Typo="Typo.h6">@competition.Name</MudText>
 						<MudSpacer />
-						<MudIcon Icon="@(selectedCompetitions.Contains(competition)
-							? Icons.Material.Filled.ArrowDropUp
-							: Icons.Material.Filled.ArrowDropDown)"
+						<MudIcon Icon="@(selectedCompetitions.Contains(competition) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
 								 Color="Color.Primary"
 								 Size="Size.Large" />
 					</MudStack>

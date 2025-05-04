@@ -63,9 +63,7 @@ else
 						<MudSpacer />
 						<MudText Typo="Typo.h6">@country.Name</MudText>
 						<MudSpacer />
-						<MudIcon Icon="@(selectedCountries.Contains(country)
-							? Icons.Material.Filled.ArrowDropUp
-							: Icons.Material.Filled.ArrowDropDown)"
+						<MudIcon Icon="@(selectedCountries.Contains(country) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
 								 Color="Color.Primary"
 								 Size="Size.Large" />
 					</MudStack>

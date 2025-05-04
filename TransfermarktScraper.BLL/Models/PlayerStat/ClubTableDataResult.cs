@@ -11,6 +11,11 @@
         public string ClubName { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the logo of the club.
+        /// </summary>
+        public string ClubLogo { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the unique Transfermarkt identifier for the club.
         /// </summary>
         public string ClubTransfermarktId { get; set; } = string.Empty;

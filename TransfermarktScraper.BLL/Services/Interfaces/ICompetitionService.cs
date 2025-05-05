@@ -31,10 +31,12 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// <param name="competitionName">The competition name used to search.</param>
         /// <param name="competitionLink">The URL link to the competition page.</param>
         /// <param name="url">The URL of the page being scraped (used for logging errors).</param>
+        /// <param name="page">The page to search for the competitions in case the results are paginated.</param>
+        /// <param name="competitionsSearched">The number of competitions already searched.</param>
         /// <returns>
         /// A <see cref="CompetitionSearchResult"/> that containes a <see cref="Domain.Entities.Competition"/> and the HTML element (`td`) containing the country name associated with the competition.
         /// </returns>
-        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url);
+        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url, int page, int competitionsSearched);
 
         /// <summary>
         /// Sets up an interceptor to capture and extract the Transfermarkt ID of the country and competition data from the URL intercepted.

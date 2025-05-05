@@ -478,7 +478,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A task representing the asynchronous operation.</returns>
         private async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken)
         {
-            await _countryService.CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, cancellationToken);
+            await _countryService.CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, 1, 0, cancellationToken);
         }
 
         /// <summary>

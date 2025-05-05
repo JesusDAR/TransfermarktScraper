@@ -41,8 +41,10 @@ namespace TransfermarktScraper.BLL.Services.Interfaces
         /// <param name="competitionTransfermarktId">The Transfermarkt ID of the competition.</param>
         /// <param name="competitionLink">The original link to the competition page.</param>
         /// <param name="competitionName">The name of the competition, used to construct the search URL.</param>
+        /// <param name="page">The page to search for the competitions in case the results are paginated.</param>
+        /// <param name="competitionsSearched">The number of competitions already searched.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken);
+        public Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, int page, int competitionsSearched, CancellationToken cancellationToken);
     }
 }

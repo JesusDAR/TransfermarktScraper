@@ -123,7 +123,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, CancellationToken cancellationToken)
+        public async Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, int page, int competitionsSearched, CancellationToken cancellationToken)
         {
             var competition = await _countryRepository.GetCompetitionAsync(competitionTransfermarktId, cancellationToken);
 
@@ -131,7 +131,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var competitionNameToSearch = Regex.Replace(competitionName, @"\s*\(.*?\)", string.Empty);
 
-                var competitionNameSearchPath = string.Concat(_scraperSettings.SearchPath, "?query=", Uri.EscapeDataString(competitionNameToSearch));
+                string competitionNameSearchPath = string.Empty;
+                if (page == 1)
+                {
+                    competitionNameSearchPath = string.Concat(_scraperSettings.SearchPath, "?query=", Uri.EscapeDataString(competitionNameToSearch));
+
+                }
+                else
+                {
+                    competitionNameSearchPath = string.Concat(_scraperSettings.SearchPath, "?Wettbewerb_page=", page, "&query=", Uri.EscapeDataString(competitionNameToSearch));
+                }
 
                 var url = string.Concat(_httpClient.BaseAddress + competitionNameSearchPath);
 
@@ -149,7 +158,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var document = await _htmlParser.ParseDocumentAsync(html);
 
-                var competitionSearchResult = _competitionService.ScrapeCompetitionFromSearchResults(document, competitionTransfermarktId, competitionName, competitionLink, url);
+                var competitionSearchResult = _competitionService.ScrapeCompetitionFromSearchResults(document, competitionTransfermarktId, competitionName, competitionLink, url, page, competitionsSearched);
+
+                if (competitionSearchResult.IsNextPageSearchNeeded)
+                {
+                    await CheckCountryAndCompetitionScrapingStatus(competitionTransfermarktId, competitionLink, competitionName, competitionSearchResult.Page, competitionSearchResult.CompetitionsSearched, cancellationToken);
+                }
 
                 var countrySearchResult = ScrapeCountryFromSearchResult(competitionSearchResult, url, cancellationToken);
 

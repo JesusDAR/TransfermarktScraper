@@ -72,11 +72,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url)
+        public CompetitionSearchResult ScrapeCompetitionFromSearchResults(IHtmlDocument document, string competitionTransfermarktId, string competitionName, string competitionLink, string url, int page, int competitionsSearched)
         {
-            var competitionTableDatas = GetCompetitionTableDatasFromSearchResults(document, url, competitionTransfermarktId);
+            var competitionSearchResult = GetCompetitionTableDatasFromSearchResults(document, url, competitionTransfermarktId, page, competitionsSearched);
 
-            var competitionSearchResult = GetCompetitionSearchResultFromCompetitionTableDatas(competitionTableDatas, url, competitionName, competitionLink, competitionTransfermarktId);
+            if (competitionSearchResult.IsNextPageSearchNeeded || competitionSearchResult.CompetitionTableDatas == null)
+            {
+                return competitionSearchResult;
+            }
+
+            competitionSearchResult = GetCompetitionSearchResultFromCompetitionTableDatas(competitionSearchResult.CompetitionTableDatas, url, competitionName, competitionLink, competitionTransfermarktId);
 
             return competitionSearchResult;
         }
@@ -461,8 +466,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <param name="document">The parsed HTML document representing the Transfermarkt search results page.</param>
         /// <param name="url">The source URL of the page being scraped. Used for logging in case of an error.</param>
         /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier for the competition.</param>
-        /// <returns>A collection of <see cref="IElement"/> objects representing the <td> elements in the table row corresponding to the competition.</returns>
-        private IHtmlCollection<IElement> GetCompetitionTableDatasFromSearchResults(IHtmlDocument document, string url, string competitionTransfermarktId)
+        /// <param name="page">The page to search for the competitions in case the results are paginated.</param>
+        /// <param name="competitionsSearched">The number of competitions already searched.</param>
+        /// <returns>A <see cref="CompetitionSearchResult"/> containing both the <see cref="Competition"/> entity and the HTML element for the country column.
+        /// Or in case the competition has not been found it contains the information needed to perform the search in the next page.</returns>
+        private CompetitionSearchResult GetCompetitionTableDatasFromSearchResults(IHtmlDocument document, string url, string competitionTransfermarktId, int page, int competitionsSearched)
         {
             var selector = "h2.content-box-headline";
             try
@@ -472,28 +480,59 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 selector = "competitions";
                 var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.InnerHtml.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
 
-                var competitionTable = competitionHeader?.ParentElement ?? throw new Exception();
+                var competitionsHeaderString = competitionHeader.TextContent;
+
+                if (!int.TryParse(Regex.Match(competitionsHeaderString, @"\d+").Value, out var competitionsTotal))
+                {
+                    throw new Exception("Failed to obtain the competitionsTotal.");
+                }
+
+                var competitionTable = competitionHeader?.ParentElement ?? throw new Exception("Failed to obtain the competitionTable.");
 
                 selector = "table.items tbody tr";
-                var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception();
+                var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception("Failed to obtain the competitionTableRows.");
 
                 var competitionTableRow = competitionTableRows.FirstOrDefault(competitionTableRow =>
                 {
                     selector = "td:nth-child(2) a";
-                    var competitionLinkElement = competitionTableRow.QuerySelector(selector) ?? throw new Exception();
+                    var competitionLinkElement = competitionTableRow.QuerySelector(selector) ?? throw new Exception("Failed to obtain the competitionLinkElement.");
 
                     selector = "href";
-                    var competitionLink = competitionLinkElement.GetAttribute(selector) ?? throw new Exception();
+                    var competitionLink = competitionLinkElement.GetAttribute(selector) ?? throw new Exception("Failed to obtain the competitionLink.");
 
                     var competitionId = ExtractCompetitionTransfermarktId(competitionLink);
 
                     return competitionId.Equals(competitionTransfermarktId);
                 });
 
-                selector = "td";
-                var competitionTableDatas = competitionTableRow?.QuerySelectorAll(selector) ?? throw new Exception();
+                if (competitionTableRow == null)
+                {
+                    competitionsSearched = competitionsSearched + competitionTableRows.Count();
 
-                return competitionTableDatas;
+                    if (competitionsSearched >= competitionsTotal)
+                    {
+                        var message = $"Failed to find {nameof(Competition)} for the search input and {nameof(competitionTransfermarktId)} {competitionTransfermarktId}.";
+                        throw ScrapingException.LogError(nameof(GetCompetitionTableDatasFromSearchResults), nameof(CompetitionService), message, url, _logger);
+                    }
+
+                    page = page + 1;
+
+                    return new CompetitionSearchResult
+                    {
+                        CompetitionsSearched = competitionsSearched,
+                        IsNextPageSearchNeeded = true,
+                        Page = page,
+                    };
+                }
+
+                selector = "td";
+                var competitionTableDatas = competitionTableRow?.QuerySelectorAll(selector) ?? throw new Exception("Failed to obtain the competitionTableDatas.");
+
+                return new CompetitionSearchResult
+                {
+                    CompetitionTableDatas = competitionTableDatas,
+                    IsNextPageSearchNeeded = false,
+                };
             }
             catch (Exception ex)
             {

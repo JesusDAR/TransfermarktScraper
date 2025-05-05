@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using Mapster;
@@ -129,6 +129,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     {
                         uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", seasonTransfermarktId);
 
+                        var response = await _page.GotoAsync(uri, new PageGotoOptions
+                        {
+                            WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                        });
+
                         var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
 
                         playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
@@ -145,6 +150,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
                 {
                     uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
+
+                    var response = await _page.GotoAsync(uri, new PageGotoOptions
+                    {
+                        WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                    });
 
                     var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
 

@@ -528,13 +528,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var selector = "img";
                 try
                 {
-                    var imgElement = competitionSearchResult.CountryTableData.QuerySelector(selector) ?? throw new Exception();
+                    var imgElement = competitionSearchResult.CountryTableData.QuerySelector(selector) ?? throw new Exception("Failed to obtain the imgElement");
 
                     selector = "src";
-                    countryFlag = imgElement?.GetAttribute(selector) ?? throw new Exception();
+                    countryFlag = imgElement.GetAttribute(selector) ?? throw new Exception("Failed to obtain the countryFlag");
 
                     selector = "title";
-                    countryName = imgElement?.GetAttribute(selector) ?? throw new Exception();
+                    countryName = imgElement.GetAttribute(selector) ?? throw new Exception("Failed to obtaing the countryName");
+                    countryName = countryName
+                        .Replace("verysmall", "head")
+                        .Split("?")[0];
 
                     countryTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
                 }

@@ -475,10 +475,10 @@ namespace TransfermarktScraper.BLL.Services.Impl
             var selector = "h2.content-box-headline";
             try
             {
-                var competitionHeaders = document.QuerySelectorAll(selector) ?? throw new Exception();
+                var competitionHeaders = document.QuerySelectorAll(selector) ?? throw new Exception("Failed to obtain the competitionHeaders");
 
                 selector = "competitions";
-                var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.InnerHtml.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception();
+                var competitionHeader = competitionHeaders.FirstOrDefault(competitionHeader => competitionHeader.InnerHtml.Contains(selector, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception("Failed to obtain the competitionHeader");
 
                 var competitionsHeaderString = competitionHeader.TextContent;
 
@@ -487,7 +487,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     throw new Exception("Failed to obtain the competitionsTotal.");
                 }
 
-                var competitionTable = competitionHeader?.ParentElement ?? throw new Exception("Failed to obtain the competitionTable.");
+                var competitionTable = competitionHeader.ParentElement ?? throw new Exception("Failed to obtain the competitionTable.");
 
                 selector = "table.items tbody tr";
                 var competitionTableRows = competitionTable.QuerySelectorAll(selector) ?? throw new Exception("Failed to obtain the competitionTableRows.");

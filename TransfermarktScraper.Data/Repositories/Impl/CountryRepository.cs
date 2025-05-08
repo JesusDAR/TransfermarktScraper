@@ -54,7 +54,7 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                     .Find(country => country.Competitions.Any(competition => competition.TransfermarktId == competitionTransfermarktId))
                     .FirstOrDefaultAsync(cancellationToken);
 
-                var competition = country?.Competitions.FirstOrDefault(c => c.TransfermarktId == competitionTransfermarktId);
+                var competition = country?.Competitions.FirstOrDefault(competition => competition.TransfermarktId == competitionTransfermarktId);
 
                 return competition;
             }
@@ -150,17 +150,17 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 else
                 {
                     var existingCountryTransfermarktIds = (await _countries
-                        .Find(c => countryTransfermarktIds.Contains(c.TransfermarktId))
-                        .Project(c => c.TransfermarktId)
+                        .Find(country => countryTransfermarktIds.Contains(country.TransfermarktId))
+                        .Project(country => country.TransfermarktId)
                         .ToListAsync(cancellationToken))
                         .ToHashSet();
 
                     var countriesToInsert = countries
-                        .Where(c => !existingCountryTransfermarktIds.Contains(c.TransfermarktId))
+                        .Where(country => !existingCountryTransfermarktIds.Contains(country.TransfermarktId))
                         .ToList();
 
                     var countriesToUpdate = countries
-                        .Where(c => existingCountryTransfermarktIds.Contains(c.TransfermarktId))
+                        .Where(country => existingCountryTransfermarktIds.Contains(country.TransfermarktId))
                         .ToList();
 
                     if (countriesToInsert.Any())
@@ -250,7 +250,10 @@ namespace TransfermarktScraper.Data.Repositories.Impl
 
                 foreach (var competition in country.Competitions)
                 {
-                    competition.UpdateDate = time;
+                    if (competition != null)
+                    {
+                        competition.UpdateDate = time;
+                    }
                 }
             }
         }

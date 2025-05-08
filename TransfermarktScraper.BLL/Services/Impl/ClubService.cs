@@ -39,9 +39,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             club = await PersistClubAsync(club, cancellationToken);
 
-            var clubDto = club.Adapt<ClubResponse>();
+            var clubResponse = club.Adapt<ClubResponse>();
 
-            return clubDto;
+            return clubResponse;
         }
 
         /// <inheritdoc/>
@@ -51,9 +51,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
             var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
 
-            var clubDtos = clubs.Adapt<IEnumerable<ClubResponse>>();
+            var clubResponses = clubs.Adapt<IEnumerable<ClubResponse>>();
 
-            return clubDtos;
+            return clubResponses;
         }
 
         /// <summary>

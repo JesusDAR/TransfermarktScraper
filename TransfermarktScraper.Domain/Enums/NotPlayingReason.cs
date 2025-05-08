@@ -26,8 +26,13 @@
         Injured = 3,
 
         /// <summary>
+        /// The player did not participate due to being suspended with red card.
+        /// </summary>
+        RedCardSuspension = 4,
+
+        /// <summary>
         /// Other reason.
         /// </summary>
-        Other = 4,
+        Other = 5,
     }
 }

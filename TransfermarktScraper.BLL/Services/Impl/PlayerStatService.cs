@@ -246,9 +246,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 ownGoals = await GetOwnGoalsAsync(tableDataLocators, 4);
                 substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 5);
                 substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 6);
-                yellowCards = await GetYellowCardsAsync(tableDataLocators, 7);
-                secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 8);
-                redCards = await GetRedCardsAsync(tableDataLocators, 9);
+                yellowCards = await GetYellowCardAsync(tableDataLocators, 7);
+                secondYellowCards = await GetSecondYellowCardAsync(tableDataLocators, 8);
+                redCards = await GetRedCardAsync(tableDataLocators, 9);
                 goalsConceded = await GetGoalsConcededAsync(tableDataLocators, 10);
                 cleanSheets = await GetCleanSheetsAsync(tableDataLocators, 11);
                 minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 12);
@@ -259,9 +259,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
                 substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
                 substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
-                yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
-                secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
-                redCards = await GetRedCardsAsync(tableDataLocators, 10);
+                yellowCards = await GetYellowCardAsync(tableDataLocators, 8);
+                secondYellowCards = await GetSecondYellowCardAsync(tableDataLocators, 9);
+                redCards = await GetRedCardAsync(tableDataLocators, 10);
                 penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
                 minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
                 minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
@@ -333,9 +333,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     ownGoals = await GetOwnGoalsAsync(tableDataLocators, 4);
                     substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 5);
                     substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 6);
-                    yellowCards = await GetYellowCardsAsync(tableDataLocators, 7);
-                    secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 8);
-                    redCards = await GetRedCardsAsync(tableDataLocators, 9);
+                    yellowCards = await GetYellowCardAsync(tableDataLocators, 7);
+                    secondYellowCards = await GetSecondYellowCardAsync(tableDataLocators, 8);
+                    redCards = await GetRedCardAsync(tableDataLocators, 9);
                     goalsConceded = await GetGoalsConcededAsync(tableDataLocators, 10);
                     cleanSheets = await GetCleanSheetsAsync(tableDataLocators, 11);
                     minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 12);
@@ -346,9 +346,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     ownGoals = await GetOwnGoalsAsync(tableDataLocators, 5);
                     substitutionsOn = await GetSubstitutionsOnAsync(tableDataLocators, 6);
                     substitutionsOff = await GetSubstitutionsOffAsync(tableDataLocators, 7);
-                    yellowCards = await GetYellowCardsAsync(tableDataLocators, 8);
-                    secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 9);
-                    redCards = await GetRedCardsAsync(tableDataLocators, 10);
+                    yellowCards = await GetYellowCardAsync(tableDataLocators, 8);
+                    secondYellowCards = await GetSecondYellowCardAsync(tableDataLocators, 9);
+                    redCards = await GetRedCardAsync(tableDataLocators, 10);
                     penaltyGoals = await GetPenaltyGoalsAsync(tableDataLocators, 11);
                     minutesPerGoal = await GetMinutesPerGoalAsync(tableDataLocators, 12);
                     minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 13);
@@ -409,16 +409,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     var matchDayTableDataResult = await GetMatchDayTableDataResultAsync(tableDataLocators, 0);
                     var date = await GetDateAsync(tableDataLocators, 1);
                     var homeClubTableDataResult = await GetClubTableDataResultAsync(tableDataLocators, 2);
-                    var awayClubTableDataResult = await GetClubTableDataResultAsync(tableDataLocators, 3);
-                    var resultTableDataResult = await GetResultTableDataResultAsync(tableDataLocators, 4);
+                    var awayClubTableDataResult = await GetClubTableDataResultAsync(tableDataLocators, 4);
+                    var resultTableDataResult = await GetResultTableDataResultAsync(tableDataLocators, 6);
 
                     PositionTableDataResult positionTableDataResult = new ();
                     int goals = default;
                     int assists = default;
                     int ownGoals = default;
-                    int yellowCards = default;
-                    int secondYellowCards = default;
-                    int redCards = default;
+                    int yellowCard = default;
+                    int secondYellowCard = default;
+                    int redCard = default;
                     int substitutedOn = default;
                     int substitutedOff = default;
                     int minutesPlayed = default;
@@ -428,20 +428,20 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     if (hasPlayedInTheMatch)
                     {
-                        positionTableDataResult = await GetPositionTableDataResultAsync(tableDataLocators, 5);
-                        goals = await GetGoalsAsync(tableDataLocators, 6);
-                        assists = await GetAssistsAsync(tableDataLocators, 7);
-                        ownGoals = await GetOwnGoalsAsync(tableDataLocators, 8);
-                        yellowCards = await GetYellowCardsAsync(tableDataLocators, 9);
-                        secondYellowCards = await GetSecondYellowCardsAsync(tableDataLocators, 10);
-                        redCards = await GetRedCardsAsync(tableDataLocators, 11);
-                        substitutedOn = await GetSubstitutedOnAsync(tableDataLocators, 12);
-                        substitutedOff = await GetSubstitutedOffAsync(tableDataLocators, 13);
-                        minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 14);
+                        positionTableDataResult = await GetPositionTableDataResultAsync(tableDataLocators, 7);
+                        goals = await GetGoalsAsync(tableDataLocators, 8);
+                        assists = await GetAssistsAsync(tableDataLocators, 9);
+                        ownGoals = await GetOwnGoalsAsync(tableDataLocators, 10);
+                        yellowCard = await GetYellowCardAsync(tableDataLocators, 11);
+                        secondYellowCard = await GetSecondYellowCardAsync(tableDataLocators, 12);
+                        redCard = await GetRedCardAsync(tableDataLocators, 13);
+                        substitutedOn = await GetSubstitutedOnAsync(tableDataLocators, 14);
+                        substitutedOff = await GetSubstitutedOffAsync(tableDataLocators, 15);
+                        minutesPlayed = await GetMinutesPlayedAsync(tableDataLocators, 16);
                     }
                     else
                     {
-                        notPlayingReason = await GetNotPlayingReasonAsync(tableDataLocators, 5);
+                        notPlayingReason = await GetNotPlayingReasonAsync(tableDataLocators, 7);
                     }
 
                     var playerSeasonCompetitionMatchStat = new PlayerSeasonCompetitionMatchStat(playerStatRequest.PlayerTransfermarktId, homeClubTableDataResult.ClubTransfermarktId, awayClubTableDataResult.ClubTransfermarktId, date)
@@ -462,9 +462,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
                         Goals = goals,
                         Assists = assists,
                         OwnGoals = ownGoals,
-                        YellowCards = yellowCards,
-                        SecondYellowCards = secondYellowCards,
-                        RedCards = redCards,
+                        YellowCard = yellowCard,
+                        SecondYellowCard = secondYellowCard,
+                        RedCard = redCard,
                         SubstitutedOn = substitutedOn,
                         SubstitutedOff = substitutedOff,
                         MinutesPlayed = minutesPlayed,
@@ -544,10 +544,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A read-only list of <see cref="ILocator"/> objects corresponding to each match row in the competition table.</returns>
         private async Task<IReadOnlyList<ILocator>> GetMatchTableRowLocatorsAsync(string competitionTransfermarktId)
         {
-            var selector = $"a[name='{competitionTransfermarktId}'] > .. > .. >> table > tbody";
+            var selector = $"a[name='{competitionTransfermarktId}']";
             try
             {
-                var tableBodyLocator = _page.Locator(selector);
+                var headerLocator = _page.Locator(selector);
+
+                selector = "..";
+                var boxLocator = headerLocator.Locator(selector).Locator(selector);
+
+                selector = "div.responsive-table > table > tbody";
+                var tableBodyLocator = boxLocator.Locator(selector);
 
                 selector = "tr";
                 var tableRowLocators = await tableBodyLocator.Locator(selector).AllAsync();
@@ -587,10 +593,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <returns>A <see cref="CompetitionFooterResult"/> object containing parsed data.</returns>
         private async Task<CompetitionFooterResult> GetCompetitionFooterResultAsync(string competitionTransfermarktId)
         {
-            var selector = $"a[name='{competitionTransfermarktId}'] > .. > table > tfoot";
+            var selector = $"a[name='{competitionTransfermarktId}']";
             try
             {
-                var tableFooterLocator = _page.Locator(selector);
+                var headerLocator = _page.Locator(selector);
+
+                selector = "..";
+                var boxLocator = headerLocator.Locator(selector).Locator(selector);
+
+                selector = "div.responsive-table > table > tfoot";
+                var tableFooterLocator = boxLocator.Locator(selector);
                 var tableFooterText = await tableFooterLocator.InnerTextAsync();
                 var competitionFooterResult = ParseCompetitionFooterText(tableFooterText);
                 return competitionFooterResult;
@@ -945,123 +957,162 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the player yellow cards from the provided locators.
+        /// Extracts the player when the player received a yellow card from the provided locators.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
         /// <param name="index">The table data index.</param>
         /// <returns>The player yellow cards.</returns>
-        private async Task<int> GetYellowCardsAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        private async Task<int> GetYellowCardAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
-            int yellowCards = default;
+            int yellowCard = default;
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var yellowCardsString = await tableDataLocator.InnerTextAsync();
+                var yellowCardString = await tableDataLocator.InnerTextAsync();
 
-                if (TableUtils.IsTableDataCellEmpty(yellowCardsString))
+                if (TableUtils.IsTableDataCellEmpty(yellowCardString))
                 {
-                    return yellowCards;
+                    return yellowCard;
                 }
 
-                if (yellowCardsString.Contains('+'))
+                yellowCardString = yellowCardString.Replace("'", string.Empty).Trim();
+
+                if (yellowCardString.Contains('+'))
                 {
-                    var parts = yellowCardsString.Split("+");
-                    yellowCards = int.Parse(parts[0].Trim()) + int.Parse(parts[1].Trim());
-                    return yellowCards;
+                    var parts = yellowCardString.Split("+");
+
+                    if (!int.TryParse(parts[0].Trim(), out var part0))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part0)}: {parts[0].Trim()}");
+                    }
+
+                    if (!int.TryParse(parts[1].Trim(), out var part1))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part1)}: {parts[1].Trim()}");
+                    }
+
+                    yellowCard = part0 + part1;
+                    return yellowCard;
                 }
 
-                if (!int.TryParse(yellowCardsString, out yellowCards))
+                if (!int.TryParse(yellowCardString, out yellowCard))
                 {
-                    throw new Exception($"Failed to parse {nameof(yellowCardsString)}: {yellowCardsString}.");
+                    throw new Exception($"Failed to parse {nameof(yellowCardString)}: {yellowCardString}.");
                 }
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(yellowCards)} failed. Table data index: {index}.";
-                ScrapingException.LogWarning(nameof(GetYellowCardsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                var message = $"Getting {nameof(yellowCard)} failed. Table data index: {index}.";
+                ScrapingException.LogWarning(nameof(GetYellowCardAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
 
-            return yellowCards;
+            return yellowCard;
         }
 
         /// <summary>
-        /// Extracts the player seconds yellow cards from the provided locators.
+        /// Extracts the player when the player received a second yellow card from the provided locators.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
         /// <param name="index">The table data index.</param>
         /// <returns>The player seconds yellow cards.</returns>
-        private async Task<int> GetSecondYellowCardsAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        private async Task<int> GetSecondYellowCardAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
-            int secondYellowCards = default;
+            int secondYellowCard = default;
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var secondYellowCardsString = await tableDataLocator.InnerTextAsync();
+                var secondYellowCardString = await tableDataLocator.InnerTextAsync();
 
-                if (TableUtils.IsTableDataCellEmpty(secondYellowCardsString))
+                if (TableUtils.IsTableDataCellEmpty(secondYellowCardString))
                 {
-                    return secondYellowCards;
+                    return secondYellowCard;
                 }
 
-                if (secondYellowCardsString.Contains('+'))
+                secondYellowCardString = secondYellowCardString.Replace("'", string.Empty).Trim();
+
+                if (secondYellowCardString.Contains('+'))
                 {
-                    var parts = secondYellowCardsString.Split("+");
-                    secondYellowCards = int.Parse(parts[0].Trim()) + int.Parse(parts[1].Trim());
-                    return secondYellowCards;
+                    var parts = secondYellowCardString.Split("+");
+
+                    if (!int.TryParse(parts[0].Trim(), out var part0))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part0)}: {parts[0].Trim()}");
+                    }
+
+                    if (!int.TryParse(parts[1].Trim(), out var part1))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part1)}: {parts[1].Trim()}");
+                    }
+
+                    secondYellowCard = part0 + part1;
+                    return secondYellowCard;
                 }
 
-                if (!int.TryParse(secondYellowCardsString, out secondYellowCards))
+                if (!int.TryParse(secondYellowCardString, out secondYellowCard))
                 {
-                    throw new Exception($"Failed to parse {nameof(secondYellowCardsString)}: {secondYellowCardsString}.");
+                    throw new Exception($"Failed to parse {nameof(secondYellowCardString)}: {secondYellowCardString}.");
                 }
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(secondYellowCards)} failed. Table data index: {index}.";
-                ScrapingException.LogWarning(nameof(GetSecondYellowCardsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                var message = $"Getting {nameof(secondYellowCard)} failed. Table data index: {index}.";
+                ScrapingException.LogWarning(nameof(GetSecondYellowCardAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
 
-            return secondYellowCards;
+            return secondYellowCard;
         }
 
         /// <summary>
-        /// Extracts the player red cards from the provided locators.
+        /// Extracts the player when the player received a red card from the provided locators.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing player stat information.</param>
         /// <param name="index">The table data index.</param>
         /// <returns>The player red cards.</returns>
-        private async Task<int> GetRedCardsAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
+        private async Task<int> GetRedCardAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
-            int redCards = default;
+            int redCard = default;
             try
             {
                 var tableDataLocator = tableDataLocators[index];
-                var redCardsString = await tableDataLocator.InnerTextAsync();
+                var redCardString = await tableDataLocator.InnerTextAsync();
 
-                if (TableUtils.IsTableDataCellEmpty(redCardsString))
+                if (TableUtils.IsTableDataCellEmpty(redCardString))
                 {
-                    return redCards;
+                    return redCard;
                 }
 
-                if (redCardsString.Contains('+'))
+                redCardString = redCardString.Replace("'", string.Empty).Trim();
+
+                if (redCardString.Contains('+'))
                 {
-                    var parts = redCardsString.Split("+");
-                    redCards = int.Parse(parts[0].Trim()) + int.Parse(parts[1].Trim());
-                    return redCards;
+                    var parts = redCardString.Split("+");
+
+                    if (!int.TryParse(parts[0].Trim(), out var part0))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part0)}: {parts[0].Trim()}");
+                    }
+
+                    if (!int.TryParse(parts[1].Trim(), out var part1))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part1)}: {parts[1].Trim()}");
+                    }
+
+                    redCard = part0 + part1;
+                    return redCard;
                 }
 
-                if (!int.TryParse(redCardsString, out redCards))
+                if (!int.TryParse(redCardString, out redCard))
                 {
-                    throw new Exception($"Failed to parse {nameof(redCardsString)}: {redCardsString}.");
+                    throw new Exception($"Failed to parse {nameof(redCardString)}: {redCardString}.");
                 }
             }
             catch (Exception ex)
             {
-                var message = $"Getting {nameof(redCards)} failed. Table data index: {index}.";
-                ScrapingException.LogWarning(nameof(GetRedCardsAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                var message = $"Getting {nameof(redCard)} failed. Table data index: {index}.";
+                ScrapingException.LogWarning(nameof(GetRedCardAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
 
-            return redCards;
+            return redCard;
         }
 
         /// <summary>
@@ -1256,7 +1307,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var selector = "a";
                 var matchDayLinkLocator = tableDataLocator.Locator(selector);
                 selector = "href";
-                var matchDayLink = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(matchDayTableDataResult.MatchDayLink)} from the '{selector}' attribute.");
+                var matchDayLink = await matchDayLinkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(matchDayTableDataResult.MatchDayLink)} from the '{selector}' attribute.");
 
                 matchDayLink = matchDayLink.Replace(_scraperSettings.BaseUrl, string.Empty);
 
@@ -1266,7 +1317,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Getting {nameof(matchDayTableDataResult)} failed. Table data index: {index}.";
-                ScrapingException.LogError(nameof(GetMatchDayTableDataResultAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetMatchDayTableDataResultAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
 
             return matchDayTableDataResult;
@@ -1301,7 +1352,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The club data table data.</returns>
+        /// <returns>A <see cref="ClubTableDataResult"/> object with the info about the club.</returns>
         private async Task<ClubTableDataResult> GetClubTableDataResultAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             ClubTableDataResult clubTableDataResult = new ();
@@ -1311,20 +1362,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 var selector = "a";
                 var linkLocator = tableDataLocator.Locator(selector);
+
+                selector = "href";
+                var clubLink = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club link from the '{selector}' attribute.");
+                var clubTransfermarktId = ExtractClubTransfermarktId(clubLink);
+
                 selector = "title";
                 var clubName = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubName)} from the '{selector}' attribute.");
 
                 selector = "img";
-                var clubLogoImg = linkLocator.Locator(selector);
+                var clubLogoLocator = linkLocator.Locator(selector);
                 selector = "src";
-                var clubLogo = await clubLogoImg.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club logo from the '{selector}' attribute.");
-
-                selector = "href";
-                var clubLink = await tableDataLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club link from the '{selector}' attribute.");
-                var clubTransfermarktId = ExtractClubTransfermarktId(clubLink);
+                var clubLogo = await clubLogoLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubLogo)} from the '{selector}' attribute.");
 
                 clubTableDataResult.ClubName = clubName;
-                clubTableDataResult.ClubLogo = clubName;
+                clubTableDataResult.ClubLogo = clubLogo;
                 clubTableDataResult.ClubTransfermarktId = clubTransfermarktId;
                 return clubTableDataResult;
             }
@@ -1340,7 +1392,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The result data table data.</returns>
+        /// <returns>A <see cref="ResultTableDataResult"/> object with the info about the result of the match.</returns>
         private async Task<ResultTableDataResult> GetResultTableDataResultAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             ResultTableDataResult resultTableDataResult = new ();
@@ -1351,15 +1403,15 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var selector = "a > span";
                 var resultLocator = tableDataLocator.Locator(selector);
                 var resultText = await resultLocator.InnerTextAsync();
-                var results = resultText.Split(":");
+                var resultsString = resultText.Split(" ")[0].Split(":");
 
-                var homeClubGoalsString = results[0];
+                var homeClubGoalsString = resultsString[0];
                 if (!int.TryParse(homeClubGoalsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int homeClubGoals))
                 {
                     throw new Exception($"Failed to parse {nameof(homeClubGoalsString)}: {homeClubGoalsString}.");
                 }
 
-                var awayClubGoalsString = results[1];
+                var awayClubGoalsString = resultsString[1];
                 if (!int.TryParse(awayClubGoalsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int awayClubGoals))
                 {
                     throw new Exception($"Failed to parse {nameof(awayClubGoalsString)}: {awayClubGoalsString}.");
@@ -1416,15 +1468,16 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Determines whether the player has participated in the match or not based on the presence of a td element with colspan="11"in the row.
         /// </summary>
         /// <param name="tableRowLocator">The locator for the table row representing a match.</param>
-        /// <returns> The result whether the player played in the match or not.</returns>
+        /// <returns>A boolean indicating whether the player played in the match or not.</returns>
         private async Task<bool> HasPlayedInTheMatchAsync(ILocator tableRowLocator)
         {
             bool hasPlayedInTheMatch;
-            var selector = "td[colspan='11']";
+            var selector = "td[colspan]";
             try
             {
                 var tableDataLocator = tableRowLocator.Locator(selector);
-                hasPlayedInTheMatch = await tableDataLocator.CountAsync() > 0;
+                var colspanAttributeCount = await tableDataLocator.CountAsync();
+                hasPlayedInTheMatch = colspanAttributeCount == 0;
                 return hasPlayedInTheMatch;
             }
             catch (Exception ex)
@@ -1439,7 +1492,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The player reason of not playing.</returns>
+        /// <returns>The player reason of not playing in the match.</returns>
         private async Task<NotPlayingReason> GetNotPlayingReasonAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             NotPlayingReason notPlayingReason;
@@ -1462,7 +1515,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The position data table data.</returns>
+        /// <returns>A <see cref="PositionTableDataResult"/> object with information about the position the player carried out during the match.</returns>
         private async Task<PositionTableDataResult> GetPositionTableDataResultAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             PositionTableDataResult positionTableDataResult = new ();
@@ -1503,11 +1556,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the substituted on times during a match.
+        /// Extracts the substituted on time in minutes during the match.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The substituted on times during a match.</returns>
+        /// <returns>The substituted on time in minutes during the match.</returns>
         private async Task<int> GetSubstitutedOnAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             int substitutedOn = default;
@@ -1521,8 +1574,27 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     return substitutedOn;
                 }
 
-                substitutedOnString.Replace("'", string.Empty);
-                if (int.TryParse(substitutedOnString, out substitutedOn))
+                substitutedOnString = substitutedOnString.Replace("'", string.Empty).Trim();
+
+                if (substitutedOnString.Contains('+'))
+                {
+                    var parts = substitutedOnString.Split("+");
+
+                    if (!int.TryParse(parts[0].Trim(), out var part0))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part0)}: {parts[0].Trim()}");
+                    }
+
+                    if (!int.TryParse(parts[1].Trim(), out var part1))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part1)}: {parts[1].Trim()}");
+                    }
+
+                    substitutedOn = part0 + part1;
+                    return substitutedOn;
+                }
+
+                if (!int.TryParse(substitutedOnString, out substitutedOn))
                 {
                     throw new Exception($"Failed to parse {nameof(substitutedOnString)}: {substitutedOnString}");
                 }
@@ -1537,11 +1609,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the substituted off times during a match.
+        /// Extracts the substituted off time in minutes during the match.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <param name="index">The table data index.</param>
-        /// <returns>The substituted off times during a match.</returns>
+        /// <returns>The substituted off time in minutes during the match.</returns>
         private async Task<int> GetSubstitutedOffAsync(IReadOnlyList<ILocator> tableDataLocators, int index)
         {
             int substitutedOff = default;
@@ -1560,11 +1632,22 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 if (substitutedOffString.Contains('+'))
                 {
                     var parts = substitutedOffString.Split("+");
-                    substitutedOff = int.Parse(parts[0].Trim()) + int.Parse(parts[1].Trim());
+
+                    if (!int.TryParse(parts[0].Trim(), out var part0))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part0)}: {parts[0].Trim()}");
+                    }
+
+                    if (!int.TryParse(parts[1].Trim(), out var part1))
+                    {
+                        throw new Exception($"Failed to parse {nameof(part1)}: {parts[1].Trim()}");
+                    }
+
+                    substitutedOff = part0 + part1;
                     return substitutedOff;
                 }
 
-                if (int.TryParse(substitutedOffString, out substitutedOff))
+                if (!int.TryParse(substitutedOffString, out substitutedOff))
                 {
                     throw new Exception($"Failed to parse {nameof(substitutedOffString)}: {substitutedOffString}");
                 }

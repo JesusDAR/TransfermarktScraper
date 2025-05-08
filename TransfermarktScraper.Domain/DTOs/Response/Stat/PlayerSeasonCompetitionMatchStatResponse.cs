@@ -114,19 +114,19 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         public int OwnGoals { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of yellow cards the player received.
+        /// Gets or sets the time in minutes when the player received a yellow card during the match.
         /// </summary>
-        public int YellowCards { get; set; }
+        public int YellowCard { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of second yellow cards the player received.
+        /// Gets or sets the time in minutes when the player received a second yellow card during the match.
         /// </summary>
-        public int SecondYellowCards { get; set; }
+        public int SecondYellowCard { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of red cards the player received.
+        /// Gets or sets the time in minutes when the player received a red card during the match.
         /// </summary>
-        public int RedCards { get; set; }
+        public int RedCard { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted on.

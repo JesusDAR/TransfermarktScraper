@@ -186,25 +186,25 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the number of own goals the player scored.
         /// </summary>
         [BsonElement("ownGoals")]
-        public int OwnGoals { get; set; } = 0;
+        public int OwnGoals { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of yellow cards the player received.
+        /// Gets or sets the time in minutes when the player received a yellow card during the match.
         /// </summary>
-        [BsonElement("yellowCards")]
-        public int YellowCards { get; set; } = 0;
+        [BsonElement("yellowCard")]
+        public int YellowCard { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of second yellow cards the player received.
+        /// Gets or sets the time in minutes when the player received a second yellow card during the match.
         /// </summary>
-        [BsonElement("secondYellowCards")]
-        public int SecondYellowCards { get; set; } = 0;
+        [BsonElement("secondYellowCard")]
+        public int SecondYellowCard { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of red cards the player received.
+        /// Gets or sets the time in minutes when the player received a red card during the match.
         /// </summary>
-        [BsonElement("redCards")]
-        public int RedCards { get; set; } = 0;
+        [BsonElement("redCard")]
+        public int RedCard { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted on.

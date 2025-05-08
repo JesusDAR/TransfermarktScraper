@@ -209,7 +209,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 }
 
                 // Competition Clubs
-                if (competition.Cup == Domain.Enums.Cup.None)
+                if (competition.Cup == Cup.None)
                 {
                     var clubIds = await GetClubsAsync(competition.TransfermarktId, cancellationToken);
                     competition.ClubIds = clubIds;

@@ -1,4 +1,4 @@
-﻿@page "/players/{playerTransfermarktId}/stats"
+@page "/players/{playerTransfermarktId}/stats"
 
 @using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Domain.DTOs.Response.Stat
@@ -65,10 +65,10 @@ else
                                    T="PlayerSeasonStatResponse"
                                    Value="selectedPlayerSeasonStat"
                                    ValueChanged="OnSelectedPlayerSeasonStatAsync">
-                            @foreach (var season in playerStat.PlayerSeasonStats)
+                            @foreach (var playerSeasonStat in playerStat.PlayerSeasonStats)
                             {
-                                <MudSelectItem T="PlayerSeasonStatResponse" Value="season">
-                                    @(season.SeasonTransfermarktId == "ges" ? "Overall Career" : season.SeasonTransfermarktId)
+                                <MudSelectItem T="PlayerSeasonStatResponse" Value="playerSeasonStat">
+                                    @(playerSeasonStat.SeasonTransfermarktId == "ges" ? "Overall Career" : playerSeasonStat.SeasonTransfermarktId)
                                 </MudSelectItem>
                             }
                         </MudSelect>
@@ -92,25 +92,17 @@ else
     </MudStack>
     @if (selectedPlayerSeasonStat != null && selectedPlayerSeasonStat.IsScraped)
     {
-        @if (selectedPlayerSeasonStat.PlayerSeasonCompetitionStats == null)
-        {
-            <p>Stats list is null</p>
-        }
-        else if (!selectedPlayerSeasonStat.PlayerSeasonCompetitionStats.Any())
-        {
-            <p>Stats list is empty</p>
-        }
         <MudList Dense="true" Gutters="true" T="PlayerSeasonStatResponse" Class="mt-6">
             <MudListItem Ripple="false">
                 <MudListSubheader @onclick="() => IsPlayerSeasonOverallStatSelected = !IsPlayerSeasonOverallStatSelected">
                     <MudStack Row="true" AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6">
-                            @(
-                        selectedPlayerSeasonStat.SeasonTransfermarktId == "ges"
-                        ? "Overall Career Stats"
-                        : $"Stats Season ({selectedPlayerSeasonStat.SeasonTransfermarktId})"
-                        )
+                            @(selectedPlayerSeasonStat.SeasonTransfermarktId == "ges" ? "Overall Career Stats" : $"Stats Season ({selectedPlayerSeasonStat.SeasonTransfermarktId})")
                         </MudText>
+                        <MudSpacer />
+                        <MudIcon Icon="@(IsPlayerSeasonOverallStatSelected ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
+                                 Color="Color.Primary"
+                                 Size="Size.Large" />
                     </MudStack>
                 </MudListSubheader>
                 <MudCollapse Expanded="@IsPlayerSeasonOverallStatSelected">
@@ -183,6 +175,114 @@ else
                 </MudCollapse>
             </MudListItem>
         </MudList>
+
+        @if (
+  selectedPlayerSeasonStat.SeasonTransfermarktId != "ges" &&
+   playerStat.PlayerSeasonStats.Any(
+   playerSeasonStat => playerSeasonStat.IsScraped && playerSeasonStat.SeasonTransfermarktId.Equals(selectedPlayerSeasonStat.SeasonTransfermarktId)))
+        {
+            @foreach (var playerSeasonCompetitionStat in GetPlayerSeasonCompetitionStats(selectedPlayerSeasonStat))
+            {
+                <MudList Dense="true" Gutters="true" T="PlayerSeasonCompetitionStatResponse">
+                    <MudListItem Ripple="false">
+                        <MudListSubheader @onclick="() => TogglePlayerSeasonCompetitionStatSelection(playerSeasonCompetitionStat)">
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudAvatar Size="Size.Large">
+                                    <MudImage Src="@playerSeasonCompetitionStat.CompetitionLogo" Alt="@playerSeasonCompetitionStat.CompetitionName" />
+                                </MudAvatar>
+                                <MudSpacer />
+                                <MudText Typo="Typo.h6">@playerSeasonCompetitionStat.CompetitionName</MudText>
+                                <MudSpacer />
+                                <MudIcon Icon="@(selectedPlayerSeasonCompetitionStats.Contains(playerSeasonCompetitionStat) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
+                                         Color="Color.Primary"
+                                         Size="Size.Large" />
+                            </MudStack>
+                        </MudListSubheader>
+                        <MudCollapse Expanded="@selectedPlayerSeasonCompetitionStats.Contains(playerSeasonCompetitionStat)">
+                            <MudTable Items="@playerSeasonCompetitionStat.PlayerSeasonCompetitionMatchStats"
+                                      T="PlayerSeasonCompetitionMatchStatResponse"
+                                      Dense="true">
+                                <HeaderContent>
+                                    <MudTh>MatchDay</MudTh>
+                                    <MudTh>Date</MudTh>
+                                    <MudTh>Home Team</MudTh>
+                                    <MudTh>Away Team</MudTh>
+                                    <MudTh>Result</MudTh>
+                                    <MudTh>Position</MudTh>
+                                    <MudTh>Goals</MudTh>
+                                    <MudTh>Assists</MudTh>
+                                    <MudTh>Own Goals</MudTh>
+                                    <MudTh>Yellow Cards</MudTh>
+                                    <MudTh>Second Yellow Cards</MudTh>
+                                    <MudTh>Substituted On</MudTh>
+                                    <MudTh>Substituted Off</MudTh>
+                                    <MudTh>Minutes Played</MudTh>
+                                </HeaderContent>
+                                <RowTemplate Context="playerSeasonCompetitionMatchStat">
+                                    <MudTd>@playerSeasonCompetitionMatchStat.MatchDay</MudTd>
+                                    <MudTd>@playerSeasonCompetitionMatchStat.Date</MudTd>
+                                    <MudTd>
+                                        <MudAvatar Size="Size.Small">
+                                            <MudImage Src="@playerSeasonCompetitionMatchStat.HomeClubLogo" Alt="@playerSeasonCompetitionMatchStat.HomeClubName" />
+                                        </MudAvatar>
+                                        @playerSeasonCompetitionMatchStat.HomeClubName
+                                    </MudTd>
+                                    <MudTd>
+                                        <MudAvatar Size="Size.Small">
+                                            <MudImage Src="@playerSeasonCompetitionMatchStat.AwayClubLogo" Alt="@playerSeasonCompetitionMatchStat.AwayClubName" />
+                                        </MudAvatar>
+                                        @playerSeasonCompetitionMatchStat.AwayClubName
+                                    </MudTd>
+                                    <MudTd>
+                                        @{
+                                            var result = $"{playerSeasonCompetitionMatchStat.HomeClubGoals} : {playerSeasonCompetitionMatchStat.AwayClubGoals}";
+                                            Color resultTextColor = playerSeasonCompetitionMatchStat.MatchResult switch
+                                            {
+                                                Domain.Enums.MatchResult.Win => Color.Success,
+                                                Domain.Enums.MatchResult.Draw => Color.Primary,
+                                                Domain.Enums.MatchResult.Loss => Color.Error,
+                                                _ => Color.Default
+                                            };
+                                        }
+
+                                        <MudText Color="@resultTextColor">@result</MudText>
+
+                                        @if (playerSeasonCompetitionMatchStat.IsResultAddition)
+                                        {
+                                            <MudText>AET</MudText>
+                                        }
+                                        @if (playerSeasonCompetitionMatchStat.IsResultPenalties)
+                                        {
+                                            <MudText>on pens</MudText>
+                                        }
+                                    </MudTd>
+                                    @if (playerSeasonCompetitionMatchStat.NotPlayingReason == Domain.Enums.NotPlayingReason.None)
+                                    {
+                                        <MudTd>@playerSeasonCompetitionMatchStat.Position</MudTd>
+                                        <MudTd>@playerSeasonCompetitionMatchStat.Goals</MudTd>
+                                        <MudTd>@playerSeasonCompetitionMatchStat.Assists</MudTd>
+                                        <MudTd>@playerSeasonCompetitionMatchStat.OwnGoals</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.YellowCard}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SecondYellowCard}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.RedCard}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOn}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOff}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.MinutesPlayed}'")</MudTd>
+                                    }
+                                    else
+                                    {
+                                        <MudTd>
+                                            @(Domain.Enums.Extensions.NotPlayingReasonExtension.ToString(playerSeasonCompetitionMatchStat.NotPlayingReason))
+                                        </MudTd>
+                                    }
+                                </RowTemplate>
+                            </MudTable>
+                        </MudCollapse>
+                    </MudListItem>
+                </MudList>
+            }
+
+        }
     }
 }
 
@@ -190,11 +290,10 @@ else
     [Parameter]
     public string playerTransfermarktId { get; set; } = default!;
 
-    private PlayerStatResponse playerStat = null!;
     private PlayerResponse player = null!;
+    private PlayerStatResponse playerStat = null!;
     private PlayerSeasonStatResponse? selectedPlayerSeasonStat;
 
-    private PlayerSeasonCompetitionStatResponse? selectedPlayerSeasonCompetitionStat;
     private HashSet<PlayerSeasonCompetitionStatResponse> selectedPlayerSeasonCompetitionStats = new();
 
     private bool IsPlayerSeasonOverallStatSelected = true;
@@ -208,14 +307,58 @@ else
     {
         player = ItemSelectionService.SelectedPlayers.First(player => player.TransfermarktId == playerTransfermarktId);
 
-        await ScrapePlayerStatAsync("ges");
+        var seasonTransfermarktId = "ges";
+
+        var scrapedPlayerSeasonStat = await ScrapePlayerStatsAsync(seasonTransfermarktId);
+
+        if (scrapedPlayerSeasonStat == null)
+        {
+            return;
+        }
+
+        if (playerStat == null)
+        {
+            playerStat = scrapedPlayerSeasonStat.First(); 
+        }
+        else
+        {
+            var existingPlayerSeasonStatIndex = playerStat.PlayerSeasonStats
+                .FindIndex(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(seasonTransfermarktId));
+
+            if (existingPlayerSeasonStatIndex >= 0)
+            {
+                selectedPlayerSeasonStat = scrapedPlayerSeasonStat.First().PlayerSeasonStats.First(
+                    playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(seasonTransfermarktId));
+
+                playerStat.PlayerSeasonStats[existingPlayerSeasonStatIndex] = selectedPlayerSeasonStat;
+            }
+        }
     }
 
-    private async Task OnSelectedPlayerSeasonStatAsync(PlayerSeasonStatResponse playerSeasonStat)
+    private async Task OnSelectedPlayerSeasonStatAsync(PlayerSeasonStatResponse? playerSeasonStat)
     {
-        selectedPlayerSeasonStat = playerSeasonStat;
+        if (playerSeasonStat != null)
+        {
+            var seasonTransfermarktId = playerSeasonStat.SeasonTransfermarktId;
 
-        await ScrapePlayerStatAsync(playerSeasonStat.SeasonTransfermarktId);
+            var scrapedPlayerSeasonStat = await ScrapePlayerStatsAsync(seasonTransfermarktId);
+
+            if (scrapedPlayerSeasonStat == null)
+            {
+                return;
+            }
+
+            var existingPlayerSeasonStatIndex = playerStat.PlayerSeasonStats
+                .FindIndex(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(seasonTransfermarktId));
+
+            if (existingPlayerSeasonStatIndex >= 0)
+            {
+                selectedPlayerSeasonStat = scrapedPlayerSeasonStat.First().PlayerSeasonStats.First(
+                    playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(seasonTransfermarktId));
+
+                playerStat.PlayerSeasonStats[existingPlayerSeasonStatIndex] = selectedPlayerSeasonStat;
+            }
+        }
     }
 
     private void TogglePlayerSeasonCompetitionStatSelection(PlayerSeasonCompetitionStatResponse playerSeasonCompetitionStat)
@@ -262,7 +405,15 @@ else
         }
     }
 
-    private async Task ScrapePlayerStatAsync(string seasonTransfermarktId)
+    private IEnumerable<PlayerSeasonCompetitionStatResponse> GetPlayerSeasonCompetitionStats(PlayerSeasonStatResponse playerSeasonStatResponse)
+    {
+        var playerSeasonStat = playerStat.PlayerSeasonStats.First(
+            playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(playerSeasonStatResponse.SeasonTransfermarktId));
+
+        return playerSeasonStat.PlayerSeasonCompetitionStats;
+    }
+
+    private async Task<IEnumerable<PlayerStatResponse>?> ScrapePlayerStatsAsync(string seasonTransfermarktId)
     {
         var playerStatRequest = new PlayerStatRequest()
         {
@@ -273,14 +424,9 @@ else
         };
 
         var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
-        
+
         var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
 
-        if (playerStatResponses == null || !playerStatResponses.Any())
-        {
-            return;
-        }
-
-        playerStat = playerStatResponses.First();
+        return playerStatResponses;        
     }
 }

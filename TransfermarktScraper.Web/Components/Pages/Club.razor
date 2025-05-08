@@ -7,6 +7,7 @@
 @attribute [StreamRendering(true)]
 
 @inject IClubClient ClubClient
+@inject ICompetitionClient CompetititonClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 
@@ -129,6 +130,13 @@ else
 		foreach(var competition in ItemSelectionService.SelectedCompetitions)
 		{
 			var clubsList = await ClubClient.GetClubsAsync(competition.TransfermarktId);
+
+			if (!clubsList.Any())
+			{
+				var country = ItemSelectionService.SelectedCountries.FirstOrDefault(country => country.Competitions.Contains(competition));
+
+				await CompetititonClient.GetCompetitionsAsync(country.TransfermarktId, true);
+			}
 
 			clubs = new Dictionary<string, IEnumerable<ClubResponse>>()
 			{

@@ -3,6 +3,7 @@
 @using TransfermarktScraper.Web.Services.Interfaces
 
 @inject INavigationHistoryService NavigationHistoryService
+@inject IPageReferenceService PageReferenceService
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -27,8 +28,15 @@
             </MudTooltip>
         </MudContainer>
         <MudSpacer />
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.Help" Color="Color.Inherit" Edge="Edge.End" />
+        <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                       Color="Color.Inherit"
+                       OnClick="ForcePageRefresh" />
+        <MudIconButton Icon="@(DarkLightModeButtonIcon)"
+                       Color="Color.Inherit"
+                       OnClick="@DarkModeToggle" />
+        <MudIconButton Icon="@Icons.Material.Filled.Help"
+                       Color="Color.Inherit"
+                       Edge="Edge.End" />
     </MudAppBar>
     <MudMainContent Class="mt-16 pa-4">
         @Body
@@ -55,6 +63,14 @@
                 PaletteDark = _darkPalette,
                 LayoutProperties = new LayoutProperties()
             };
+    }
+
+    private async Task ForcePageRefresh()
+    {
+        if (PageReferenceService.CurrentPage is not null)
+        {
+            await PageReferenceService.CurrentPage.ForceOnInitializedAsync();
+        }
     }
 
     private void NavigateBack()

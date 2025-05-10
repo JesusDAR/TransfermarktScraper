@@ -6,10 +6,14 @@
 
 @attribute [StreamRendering(true)]
 
+@implements IRefreshablePage
+
 @inject IClubClient ClubClient
 @inject ICompetitionClient CompetititonClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
+@inject IPageReferenceService PageReferenceService
+
 
 <PageTitle>Clubs</PageTitle>
 
@@ -42,6 +46,7 @@ else
 					   FullWidth="true"
 					   Size="Size.Large"
 					   Variant="Variant.Filled"
+					   Disabled="!selectedClubs.Any()"
 					   OnClick="NavigateToPlayers">
 				Scrape players
 			</MudButton>
@@ -52,7 +57,7 @@ else
 		@foreach (var competition in filteredCompetitions)
 		{
 			<MudListItem Ripple="false">
-				<MudListSubheader @onclick="() => ToggleCompetitionSelection(competition)">
+				<MudListSubheader @onclick="() => ToggleCompetitionExpansion(competition)">
 					<MudStack Row="true" AlignItems="AlignItems.Center">
 						<MudAvatar Size="Size.Large">
 							<MudImage Src="@competition.Logo" Alt="@competition.Name" />
@@ -60,7 +65,7 @@ else
 						<MudSpacer />
 						<MudText Typo="Typo.h6">@competition.Name</MudText>
 						<MudSpacer />
-						<MudIcon Icon="@(selectedCompetitions.Contains(competition) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
+						<MudIcon Icon="@(expandedCompetitions.Contains(competition) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
 								 Color="Color.Primary"
 								 Size="Size.Large" />
 					</MudStack>
@@ -73,24 +78,25 @@ else
 								 Filterable="false"
 								 MultiSelection="true"
 								 ColumnResizeMode="ResizeMode.None"
-								 SelectedItems="@ItemSelectionService.SelectedClubs"
+								 @bind-SelectedItems="@selectedClubs"
 								 @key="competition.TransfermarktId"
+								 SelectOnRowClick="true"
 								 Items="@GetClubs(competition)">
 						<Columns>
 							<SelectColumn T="ClubResponse" />
-							<TemplateColumn T="ClubResponse" Title="Crest">
+							<TemplateColumn T="ClubResponse" Context="club" Title="Crest">
 								<CellTemplate>
 									<MudAvatar>
-										<MudImage Src="@context.Item.Crest" Alt="@context.Item.Name" />
+										<MudImage Src="@club.Item.Crest" Alt="@club.Item.Name" />
 									</MudAvatar>
 								</CellTemplate>
 							</TemplateColumn>
-							<PropertyColumn Property="x => x.Name" Sortable="false" />
-							<PropertyColumn Property="x => x.MarketValue" Title="Market value" Sortable="false" />
-							<PropertyColumn Property="x => x.PlayersCount" Title="Number of players" Sortable="false" />
-							<PropertyColumn Property="x => x.AgeAverage" Title="Age average" Sortable="false" />
-							<PropertyColumn Property="x => x.ForeignersCount" Title="Number of foreigners" Sortable="false" />
-							<PropertyColumn Property="x => x.MarketValueAverage" Title="Average market value (€)" Sortable="false" />
+							<PropertyColumn Property="club => club.Name" Sortable="false" />
+							<PropertyColumn Property="club => club.MarketValue" Title="Market value (€)" Sortable="false" />
+							<PropertyColumn Property="club => club.PlayersCount" Title="Number of players" Sortable="false" />
+							<PropertyColumn Property="club => club.AgeAverage" Title="Age average" Sortable="false" />
+							<PropertyColumn Property="club => club.ForeignersCount" Title="Number of foreigners" Sortable="false" />
+							<PropertyColumn Property="club => club.MarketValueAverage" Title="Average market value (€)" Sortable="false" />
 						</Columns>
 					</MudDataGrid>
 				</MudCollapse>
@@ -102,9 +108,11 @@ else
 
 
 @code {
-	private Dictionary<string, IEnumerable<ClubResponse>> clubs = null!;
-	private HashSet<CompetitionResponse> competitions = null!;
+	private Dictionary<string, IEnumerable<ClubResponse>> clubs = null!;	
+	private HashSet<ClubResponse> selectedClubs = new();
 	private HashSet<CompetitionResponse> selectedCompetitions = new();
+	private HashSet<CompetitionResponse> expandedCompetitions = new();
+	private HashSet<CountryResponse> selectedCountries = new();
 	private HashSet<CompetitionResponse> filteredCompetitions = new();
 	private string _searchedCompetition = string.Empty;
 
@@ -121,66 +129,85 @@ else
 		}
 	}
 
+	public async Task ForceOnInitializedAsync()
+	{
+		selectedClubs = new();
+		selectedCompetitions = new();
+		expandedCompetitions = new();
+		selectedCountries = new();
+		filteredCompetitions = new();
+		_searchedCompetition = string.Empty;
+
+		await OnInitializedAsync();
+		StateHasChanged();
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
-		competitions = ItemSelectionService.SelectedCompetitions;
+		PageReferenceService.CurrentPage = this;
+		selectedCountries = ItemSelectionService.SelectedCountries;
+		selectedCompetitions = ItemSelectionService.SelectedCompetitions;
 
-		filteredCompetitions = competitions;
+		filteredCompetitions = selectedCompetitions;
 
-		foreach(var competition in ItemSelectionService.SelectedCompetitions)
+		foreach (var competition in selectedCompetitions)
 		{
-			var clubsList = await ClubClient.GetClubsAsync(competition.TransfermarktId);
+			var clubs = await ClubClient.GetClubsAsync(competition.TransfermarktId);
 
-			if (!clubsList.Any())
+			if (!clubs.Any())
 			{
-				var country = ItemSelectionService.SelectedCountries.FirstOrDefault(country => country.Competitions.Contains(competition));
+				var country = selectedCountries.First(country => country.Competitions.Contains(competition));
 
 				await CompetititonClient.GetCompetitionsAsync(country.TransfermarktId, true);
+
+				clubs = await ClubClient.GetClubsAsync(competition.TransfermarktId);
 			}
 
-			clubs = new Dictionary<string, IEnumerable<ClubResponse>>()
+			this.clubs = new Dictionary<string, IEnumerable<ClubResponse>>()
 			{
-				[competition.TransfermarktId] = clubsList
+				[competition.TransfermarktId] = clubs
 			};
 		}
 	}
 
 	private IEnumerable<ClubResponse> GetClubs(CompetitionResponse competition)
 	{
-		clubs.TryGetValue(competition.TransfermarktId, out var clubsList);
+		this.clubs.TryGetValue(competition.TransfermarktId, out var clubs);
 
-		return clubsList ?? Enumerable.Empty<ClubResponse>();
+		return clubs ?? Enumerable.Empty<ClubResponse>();
 	}
 
-	private void ToggleCompetitionSelection(CompetitionResponse competition)
+	private void ToggleCompetitionExpansion(CompetitionResponse competition)
 	{
-		if (!selectedCompetitions.Add(competition))
+		if (!expandedCompetitions.Add(competition))
 		{
-			selectedCompetitions.Remove(competition);
+			expandedCompetitions.Remove(competition);
 		}
 	}
 
 	private void SelectAllClubs()
 	{
-		if (ItemSelectionService.SelectedClubs.Count() == ItemSelectionService.SelectedCompetitions.SelectMany(competition => competition.ClubIds).Count())
+		if (selectedClubs.Count() == selectedCompetitions.SelectMany(competition => competition.ClubIds).Count())
 		{
-			ItemSelectionService.SelectedClubs = new HashSet<ClubResponse>();
+			selectedClubs = new();
 		}
 		else
 		{
-			ItemSelectionService.SelectedClubs = clubs.SelectMany(kvp => kvp.Value).ToHashSet();
+			selectedClubs = clubs.SelectMany(kvp => kvp.Value).ToHashSet();
 		}
 	}
 
 	private void FilterCompetitions()
 	{
-		filteredCompetitions = competitions?
+		filteredCompetitions = selectedCompetitions?
 			.Where(competition => competition.Name.Contains(_searchedCompetition, StringComparison.OrdinalIgnoreCase))
 			.ToHashSet() ?? new HashSet<CompetitionResponse>();
 	}
 
 	private void NavigateToPlayers()
 	{
+		ItemSelectionService.SelectedClubs = selectedClubs;
+
 		NavigationHistoryService.NavigateTo("/players");
 	}
 }

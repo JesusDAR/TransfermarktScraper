@@ -9,10 +9,13 @@
 
 @attribute [StreamRendering(true)]
 
+@implements IRefreshablePage
+
 @inject ICountryClient CountryClient
 @inject IOptions<ClientSettings> ClientSettings
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
+@inject IPageReferenceService PageReferenceService
 
 <PageTitle>Countries</PageTitle>
 
@@ -45,6 +48,7 @@ else
                        FullWidth="true"
                        Size="Size.Large"
                        Variant="Variant.Filled"
+                       Disabled="!selectedCountries.Any()"
                        OnClick="NavigateToCompetitions">
                 Scrape competitions
             </MudButton>
@@ -53,7 +57,6 @@ else
     <MudGrid Spacing="3" Justify="Justify.FlexStart" Class="mt-6">
         @foreach (var country in filteredCountries)
         {
-
             <MudItem xs="2">
                 <MudPaper>
                     <MudButton OnClick="() => ToggleCountrySelection(country)" FullWidth="true" Class="justify-start px-2">
@@ -68,7 +71,7 @@ else
                     </MudButton>
                 </MudPaper>
             </MudItem>
-            @if (ItemSelectionService.SelectedCountries.Contains(country))
+            @if (selectedCountries.Contains(country))
             {
                 <MudBadge Class="mt-4" Overlap="true" Origin="Origin.TopRight" Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
             }
@@ -78,7 +81,8 @@ else
 
 @code {
     private IEnumerable<CountryResponse> countries = null!;
-    private List<CountryResponse> filteredCountries = new();
+    private HashSet<CountryResponse> filteredCountries = new();
+    private HashSet<CountryResponse> selectedCountries = new();
     private string _searchedCountry = string.Empty;
 
     private string SearchedCountry
@@ -94,18 +98,31 @@ else
         }
     }
 
+    public async Task ForceOnInitializedAsync()
+    {
+        filteredCountries = new();
+        selectedCountries = new();
+        _searchedCountry = string.Empty;
+
+        await OnInitializedAsync();
+        StateHasChanged();
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        PageReferenceService.CurrentPage = this;
+        selectedCountries = ItemSelectionService.SelectedCountries;
+
         countries = await CountryClient.GetCountriesAsync();
 
-        filteredCountries = countries.ToList();
+        filteredCountries = countries.ToHashSet();
     }
 
     private void ToggleCountrySelection(CountryResponse country)
     {
-        if (!ItemSelectionService.SelectedCountries.Add(country))
+        if (!selectedCountries.Add(country))
         {
-            ItemSelectionService.SelectedCountries.Remove(country);
+            selectedCountries.Remove(country);
         }
     }
 
@@ -113,23 +130,25 @@ else
     {
         filteredCountries = countries?
             .Where(country => country.Name.Contains(_searchedCountry, StringComparison.OrdinalIgnoreCase))
-            .ToList() ?? new List<CountryResponse>();
+            .ToHashSet() ?? new();
     }
 
     private void SelectAllCountries()
     {
-        if (ItemSelectionService.SelectedCountries.Count() == countries.Count())
+        if (selectedCountries.Count() == countries.Count())
         {
-            ItemSelectionService.SelectedCountries = new HashSet<CountryResponse>();
+            selectedCountries = new();
         }
         else
         {
-            ItemSelectionService.SelectedCountries = countries.ToHashSet();
+            selectedCountries = countries.ToHashSet();
         }
     }
 
     private void NavigateToCompetitions()
     {
+        ItemSelectionService.SelectedCountries = selectedCountries;
+
         NavigationHistoryService.NavigateTo("/competitions");
     }
 }

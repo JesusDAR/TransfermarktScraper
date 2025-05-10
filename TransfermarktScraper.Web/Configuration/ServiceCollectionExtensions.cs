@@ -82,6 +82,9 @@ namespace TransfermarktScraper.Web.Configuration
             // Register item selection service
             services.AddSingleton<IItemSelectionService, ItemSelectionService>();
 
+            // Register item page reference service for refreshing the pages.
+            services.AddScoped<IPageReferenceService, PageReferenceService>();
+
             return services;
         }
     }

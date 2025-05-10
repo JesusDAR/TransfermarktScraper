@@ -17,6 +17,6 @@ namespace TransfermarktScraper.Web.Services.Impl
         public HashSet<ClubResponse> SelectedClubs { get; set; } = [];
 
         /// <inheritdoc/>
-        public HashSet<PlayerResponse> SelectedPlayers { get; set; } = [];
+        public PlayerResponse? SelectedPlayer { get; set; }
     }
 }

@@ -386,7 +386,7 @@ else
         if (selectedPlayer != null && selectedPlayer.MarketValues != null && selectedPlayer.MarketValues.Any())
         {
             var dates = selectedPlayer.MarketValues.Select(mv => mv.Date);
-            var yearsMonths = dates.Select(date => string.Concat(date.Month, "/", date.Year.ToString())).ToList();
+            var yearsMonths = dates.Select(date => string.Concat(date.Month, "/", date.ToString("yy"))).ToList();
             XAxisLabels = yearsMonths.ToArray();
 
             var seriesData = selectedPlayer.MarketValues.Select(mv => (double)mv.Value).ToArray();
@@ -405,7 +405,7 @@ else
 
             AxisOptions = new AxisChartOptions
             {
-                XAxisLabelRotation = 20
+                XAxisLabelRotation = 40
             };
 
             Options = new ChartOptions

@@ -406,6 +406,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 {
                     var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
 
+                    var isMatchInformationAvailable = await CheckMatchInformationIsAvailableAsync(tableDataLocators);
+                    if (!isMatchInformationAvailable)
+                    {
+                        continue;
+                    }
+
                     var matchDayTableDataResult = await GetMatchDayTableDataResultAsync(tableDataLocators, 0);
                     var date = await GetDateAsync(tableDataLocators, 1);
                     var homeClubTableDataResult = await GetClubTableDataResultAsync(tableDataLocators, 2);
@@ -1659,6 +1665,28 @@ namespace TransfermarktScraper.BLL.Services.Impl
             }
 
             return substitutedOff;
+        }
+
+        /// <summary>
+        /// Checks whether the information of o match is available.
+        /// </summary>
+        /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
+        /// <returns>A boolean value indicating if the match has finished and the results are known and posted in Transfermarkt.</returns>
+        private async Task<bool> CheckMatchInformationIsAvailableAsync(IReadOnlyList<ILocator> tableDataLocators)
+        {
+            bool isInformationAvailable = false;
+            try
+            {
+                var texts = await Task.WhenAll(tableDataLocators.Select(td => td.InnerTextAsync()));
+                var tableDatasText = string.Join(" ", texts);
+                isInformationAvailable = !tableDatasText.ToLower().Contains("information not yet available");
+                return isInformationAvailable;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Getting {nameof(isInformationAvailable)} failed.";
+                throw ScrapingException.LogError(nameof(CheckMatchInformationIsAvailableAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+            }
         }
 
         /// <summary>

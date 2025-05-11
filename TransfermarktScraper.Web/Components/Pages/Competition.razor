@@ -1,19 +1,27 @@
 @page "/competitions"
 
+@using TransfermarktScraper.Domain.DTOs.Request
 @using TransfermarktScraper.Domain.DTOs.Response
+@using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
+@using Mapster
 
 @attribute [StreamRendering(true)]
 
 @implements IRefreshablePage
 
+@inject ICountryClient CountryClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 @inject IPageReferenceService PageReferenceService
 
 <PageTitle>Competitions</PageTitle>
 
-@if (selectedCountries != null)
+@if (selectedCountries == null)
+{
+	<MudText HtmlTag="em">Scraping competitions please wait...</MudText>
+}
+else
 {
 	<MudGrid>
 		<MudItem xs="2">
@@ -104,7 +112,7 @@
 }
 
 @code {
-	private HashSet<CountryResponse> selectedCountries = new();
+	private HashSet<CountryResponse> selectedCountries = null!;
 	private HashSet<CountryResponse> expandedCountries = new();
 	private HashSet<CountryResponse> filteredCountries = new();
 	private HashSet<CompetitionResponse> selectedCompetitions = new();
@@ -123,25 +131,27 @@
 		}
 	}
 
-	public Task ForceOnInitializedAsync()
+	public async Task ForceOnInitializedAsync()
 	{
-		selectedCountries = new();
+		selectedCountries = null!;
 		expandedCountries = new();
 		filteredCountries = new();
 		selectedCompetitions = new();
 		_searchedCountry = string.Empty;
 
-		OnInitialized();
+		await OnInitializedAsync();
 		StateHasChanged();
-
-		return Task.CompletedTask;
 	}
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		PageReferenceService.CurrentPage = this;
-		selectedCountries = ItemSelectionService.SelectedCountries;
 
+		var countryDtos = ItemSelectionService.SelectedCountries.Adapt<IEnumerable<CountryRequest>>();
+
+		var updatedCountries = await CountryClient.GetCountriesAsync(countryDtos);
+
+		selectedCountries = updatedCountries.ToHashSet();
 		filteredCountries = selectedCountries;
 	}
 

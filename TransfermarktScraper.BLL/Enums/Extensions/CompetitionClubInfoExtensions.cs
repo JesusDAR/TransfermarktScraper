@@ -71,6 +71,11 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                     case CompetitionClubInfo.Tier:
                         selector = "span";
                         spanLocator = labelLocator.Locator(selector);
+                        await spanLocator.WaitForAsync(new ()
+                        {
+                            State = WaitForSelectorState.Visible,
+                            Timeout = 100,
+                        });
                         spanText = await spanLocator.InnerTextAsync();
                         competition.Tier = TierExtensions.ToEnum(spanText);
                         break;
@@ -78,6 +83,11 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                     case CompetitionClubInfo.CurrentChampion:
                         selector = "span";
                         spanLocator = labelLocator.Locator(selector);
+                        await spanLocator.WaitForAsync(new ()
+                        {
+                            State = WaitForSelectorState.Visible,
+                            Timeout = 100,
+                        });
                         spanText = await spanLocator.InnerTextAsync();
                         competition.CurrentChampion = spanText;
                         break;
@@ -85,6 +95,11 @@ namespace TransfermarktScraper.BLL.Enums.Extensions
                     case CompetitionClubInfo.MostTimesChampion:
                         selector = "span[itemprop='dataItem'] > a";
                         var linkLocator = labelLocator.Locator(selector);
+                        await linkLocator.WaitForAsync(new ()
+                        {
+                            State = WaitForSelectorState.Visible,
+                            Timeout = 100,
+                        });
                         spanText = await linkLocator.InnerTextAsync();
                         competition.MostTimesChampion = spanText;
                         break;

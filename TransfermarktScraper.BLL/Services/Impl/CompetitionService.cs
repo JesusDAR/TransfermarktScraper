@@ -187,22 +187,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId.ToLower(), ".png");
 
                 // Competition Club Info
-                var clubInfoLocator = GetClubInfoLocatorAsync();
+                var clubInfoLocator = await GetClubInfoLocatorAsync();
                 if (clubInfoLocator != null)
                 {
                     await SetClubInfoValuesAsync(competition, clubInfoLocator);
                 }
 
                 // Competition Info Box
-                var infoBoxLocator = GetInfoBoxLocator();
+                var infoBoxLocator = await GetInfoBoxLocatorAsync();
                 if (infoBoxLocator != null)
                 {
                     await SetInfoBoxValuesAsync(competition, infoBoxLocator);
                 }
 
                 // Competition Market Value Box
-                var marKetValueBoxLocator = GetMarketValueBoxLocator();
-
+                var marKetValueBoxLocator = await GetMarketValueBoxLocatorAsync();
                 if (marKetValueBoxLocator != null)
                 {
                     await SetMarketValueAsync(competition, marKetValueBoxLocator);
@@ -237,14 +236,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Retrieves the locator for the club information section on the page.
+        /// Retrieves asynchronously the locator for the club information section on the page.
         /// </summary>
-        /// <returns>A <see cref="ILocator"/> for the club info section, null if there is none.</returns>
-        private ILocator? GetClubInfoLocatorAsync()
+        /// <returns>A task that represents the asynchronous operation with an <see cref="ILocator"/> for the club info section, null if there is none.</returns>
+        private async Task<ILocator?> GetClubInfoLocatorAsync()
         {
             var selector = ".data-header__club-info";
             try
             {
+                await _page.WaitForSelectorAsync(
+                    selector,
+                    new PageWaitForSelectorOptions
+                    {
+                        State = WaitForSelectorState.Visible,
+                        Timeout = 100,
+                    });
                 var clubInfoLocator = _page.Locator(selector) ?? throw new Exception("club info section not found.");
 
                 return clubInfoLocator;
@@ -296,14 +302,21 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Retrieves the locator for the info box section on the page.
+        /// Retrieves asynchronously the locator for the info box section on the page.
         /// </summary>
-        /// <returns>A <see cref="ILocator"/> for the info box section, null if there is none.</returns>
-        private ILocator? GetInfoBoxLocator()
+        /// <returns>A task that represents the asynchronous operation with an <see cref="ILocator"/> for the info box section, null if there is none.</returns>
+        private async Task<ILocator?> GetInfoBoxLocatorAsync()
         {
             var selector = ".data-header__info-box";
             try
             {
+                await _page.WaitForSelectorAsync(
+                    selector,
+                    new PageWaitForSelectorOptions
+                    {
+                        State = WaitForSelectorState.Visible,
+                        Timeout = 100,
+                    });
                 var infoBoxLocator = _page.Locator(selector) ?? throw new Exception("info box section not found.");
 
                 return infoBoxLocator;
@@ -315,7 +328,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetInfoBoxLocator), nameof(CompetitionService), message, _page.Url, _logger, ex);
+                throw ScrapingException.LogError(nameof(GetInfoBoxLocatorAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
             }
 
             return null;
@@ -357,12 +370,19 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <summary>
         /// Asynchronously waits for and retrieves the locator for the market value box on the page.
         /// </summary>
-        /// <returns>A <see cref="ILocator"/> for the market value box element on the page, null if there is none.</returns>
-        private ILocator? GetMarketValueBoxLocator()
+        /// <returns>A task that represents the asynchronous operation with an <see cref="ILocator"/> for the market value box element on the page, null if there is none.</returns>
+        private async Task<ILocator?> GetMarketValueBoxLocatorAsync()
         {
             var selector = ".data-header__box--small";
             try
             {
+                await _page.WaitForSelectorAsync(
+                    selector,
+                    new PageWaitForSelectorOptions
+                    {
+                        State = WaitForSelectorState.Visible,
+                        Timeout = 100,
+                    });
                 var marKetValueBoxLocator = _page.Locator(selector) ?? throw new Exception("market value box not found.");
 
                 return marKetValueBoxLocator;
@@ -370,7 +390,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed.";
-                ScrapingException.LogWarning(nameof(GetMarketValueBoxLocator), nameof(CompetitionService), message, _page.Url, _logger, ex);
+                ScrapingException.LogWarning(nameof(GetMarketValueBoxLocatorAsync), nameof(CompetitionService), message, _page.Url, _logger, ex);
             }
 
             return null;

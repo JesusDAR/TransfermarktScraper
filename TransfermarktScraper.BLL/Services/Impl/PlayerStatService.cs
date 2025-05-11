@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
+using MongoDB.Bson.Serialization.Serializers;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Models.PlayerStat;
 using TransfermarktScraper.BLL.Services.Interfaces;
@@ -456,11 +457,14 @@ namespace TransfermarktScraper.BLL.Services.Impl
                         Link = matchDayTableDataResult.MatchDayLink,
                         HomeClubName = homeClubTableDataResult.ClubName,
                         HomeClubLogo = homeClubTableDataResult.ClubLogo,
+                        HomeClubLink = homeClubTableDataResult.ClubLink,
                         AwayClubName = awayClubTableDataResult.ClubName,
                         AwayClubLogo = awayClubTableDataResult.ClubLogo,
+                        AwayClubLink = awayClubTableDataResult.ClubLink,
                         HomeClubGoals = resultTableDataResult.HomeClubGoals,
                         AwayClubGoals = resultTableDataResult.AwayClubGoals,
                         MatchResult = resultTableDataResult.MatchResult,
+                        MatchResultLink = resultTableDataResult.MatchResultLink,
                         IsResultAddition = resultTableDataResult.IsResultAddition,
                         IsResultPenalties = resultTableDataResult.IsResultPenalties,
                         Position = positionTableDataResult.Position,
@@ -697,8 +701,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 selector = "href";
                 competitionLink = await competitionLinkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(competitionLink)} from the '{selector}' attribute.");
-
-                competitionLink = competitionLink.Replace(_scraperSettings.BaseUrl, string.Empty);
+                competitionLink = string.Concat(_scraperSettings.BaseUrl, competitionLink);
 
                 return competitionLink;
             }
@@ -999,6 +1002,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     yellowCard = part0 + part1;
                     return yellowCard;
+                }
+
+                if (yellowCardString.Equals("\u2714")) // tick char
+                {
+                    return 90;
                 }
 
                 if (!int.TryParse(yellowCardString, out yellowCard))
@@ -1314,8 +1322,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var matchDayLinkLocator = tableDataLocator.Locator(selector);
                 selector = "href";
                 var matchDayLink = await matchDayLinkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(matchDayTableDataResult.MatchDayLink)} from the '{selector}' attribute.");
-
-                matchDayLink = matchDayLink.Replace(_scraperSettings.BaseUrl, string.Empty);
+                matchDayLink = string.Concat(_scraperSettings.BaseUrl, matchDayLink);
 
                 matchDayTableDataResult.MatchDay = matchDay;
                 matchDayTableDataResult.MatchDayLink = matchDayLink;
@@ -1372,6 +1379,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 selector = "href";
                 var clubLink = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the club link from the '{selector}' attribute.");
                 var clubTransfermarktId = ExtractClubTransfermarktId(clubLink);
+                clubLink = string.Concat(_scraperSettings.BaseUrl, clubLink);
 
                 selector = "title";
                 var clubName = await linkLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubName)} from the '{selector}' attribute.");
@@ -1380,9 +1388,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 var clubLogoLocator = linkLocator.Locator(selector);
                 selector = "src";
                 var clubLogo = await clubLogoLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(clubTableDataResult.ClubLogo)} from the '{selector}' attribute.");
+                clubLogo = clubLogo.Replace("tiny", "head");
 
                 clubTableDataResult.ClubName = clubName;
                 clubTableDataResult.ClubLogo = clubLogo;
+                clubTableDataResult.ClubLink = clubLink;
                 clubTableDataResult.ClubTransfermarktId = clubTransfermarktId;
                 return clubTableDataResult;
             }
@@ -1406,8 +1416,23 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var tableDataLocator = tableDataLocators[index];
 
-                var selector = "a > span";
-                var resultLocator = tableDataLocator.Locator(selector);
+                var selector = "a";
+                var linkLocator = tableDataLocator.Locator(selector);
+                selector = "href";
+                var matchResultLink = await linkLocator.GetAttributeAsync(selector);
+                if (matchResultLink == null)
+                {
+                    var message = $"Failed to obtain {nameof(matchResultLink)}";
+                    ScrapingException.LogWarning(nameof(GetResultTableDataResultAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                }
+                else
+                {
+                    matchResultLink = string.Concat(_scraperSettings.BaseUrl, matchResultLink);
+                }
+
+
+                selector = ":scope > span";
+                var resultLocator = linkLocator.Locator(selector);
                 var resultText = await resultLocator.InnerTextAsync();
                 var resultsString = resultText.Split(" ")[0].Split(":");
 
@@ -1437,7 +1462,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                 bool isResultAddition = default;
                 bool isResultPenalties = default;
-                selector = "+ span";
+                selector = ":scope > span";
                 var additionalResultInfoLocator = resultLocator.Locator(selector);
                 bool hasAdditionalResultInfo = await additionalResultInfoLocator.CountAsync() > 0;
 
@@ -1459,6 +1484,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 resultTableDataResult.HomeClubGoals = homeClubGoals;
                 resultTableDataResult.AwayClubGoals = awayClubGoals;
                 resultTableDataResult.MatchResult = matchResult;
+                resultTableDataResult.MatchResultLink = matchResultLink ?? string.Empty;
                 resultTableDataResult.IsResultAddition = isResultAddition;
                 resultTableDataResult.IsResultPenalties = isResultPenalties;
                 return resultTableDataResult;
@@ -1668,7 +1694,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Checks whether the information of o match is available.
+        /// Checks whether the information of o match is available or if the row has any data inside.
         /// </summary>
         /// <param name="tableDataLocators">A list of locators containing match stat information.</param>
         /// <returns>A boolean value indicating if the match has finished and the results are known and posted in Transfermarkt.</returns>
@@ -1679,7 +1705,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
             {
                 var texts = await Task.WhenAll(tableDataLocators.Select(td => td.InnerTextAsync()));
                 var tableDatasText = string.Join(" ", texts);
-                isInformationAvailable = !tableDatasText.ToLower().Contains("information not yet available");
+                isInformationAvailable = !string.IsNullOrWhiteSpace(tableDatasText) && !tableDatasText.ToLower().Contains("information not yet available");
                 return isInformationAvailable;
             }
             catch (Exception ex)

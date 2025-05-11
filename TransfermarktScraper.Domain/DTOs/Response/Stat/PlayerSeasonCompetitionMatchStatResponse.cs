@@ -1,5 +1,6 @@
 ﻿using System;
 using TransfermarktScraper.Domain.Enums;
+using TransfermarktScraper.Domain.Enums.Extensions;
 
 namespace TransfermarktScraper.Domain.DTOs.Response.Stat
 {
@@ -31,7 +32,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the date of the match.
         /// </summary>
-        required public DateTime Date { get; set; }
+        required public string Date { get; set; }
 
         /// <summary>
         /// Gets or sets a naming for the match.
@@ -49,6 +50,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         required public string HomeClubName { get; set; }
 
         /// <summary>
+        /// Gets or sets the home club link.
+        /// </summary>
+        required public string HomeClubLink { get; set; }
+
+        /// <summary>
         /// Gets or sets the home club logo.
         /// </summary>
         required public string HomeClubLogo { get; set; }
@@ -57,6 +63,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// Gets or sets the away club name.
         /// </summary>
         required public string AwayClubName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the away club link.
+        /// </summary>
+        required public string AwayClubLink { get; set; }
 
         /// <summary>
         /// Gets or sets the away club logo.
@@ -79,6 +90,11 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         public MatchResult MatchResult { get; set; } = MatchResult.Unknown;
 
         /// <summary>
+        /// Gets or sets the link of the result of the match for the club.
+        /// </summary>
+        public string? MatchResultLink { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the addition time.
         /// </summary>
         public bool IsResultAddition { get; set; } = false;
@@ -91,7 +107,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the position of the player during the match.
         /// </summary>
-        public Position Position { get; set; }
+        public string Position { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets a value indicating whether the player was the captain during the match.
@@ -146,6 +162,6 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the reason why the player did not played any minute of the match.
         /// </summary>
-        public NotPlayingReason NotPlayingReason { get; set; } = NotPlayingReason.None;
+        public string NotPlayingReason { get; set; } = NotPlayingReasonExtension.ToString(Enums.NotPlayingReason.None);
     }
 }

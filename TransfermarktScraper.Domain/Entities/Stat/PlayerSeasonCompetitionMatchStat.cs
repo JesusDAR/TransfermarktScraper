@@ -117,6 +117,12 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         required public string HomeClubLogo { get; set; }
 
         /// <summary>
+        /// Gets or sets the home club link in Transfermarkt.
+        /// </summary>
+        [BsonElement("homeClubLink")]
+        required public string HomeClubLink { get; set; }
+
+        /// <summary>
         /// Gets or sets the away club name.
         /// </summary>
         [BsonElement("awayClubName")]
@@ -127,6 +133,12 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// </summary>
         [BsonElement("awayClubLogo")]
         required public string AwayClubLogo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the away club link in Transfermarkt.
+        /// </summary>
+        [BsonElement("awayClubLink")]
+        required public string AwayClubLink { get; set; }
 
         /// <summary>
         /// Gets or sets the home club scored goals in the match.
@@ -145,6 +157,12 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// </summary>
         [BsonElement("matchResult")]
         public MatchResult MatchResult { get; set; } = MatchResult.Unknown;
+
+        /// <summary>
+        /// Gets or sets the link of the result of the match in Transfermarkt.
+        /// </summary>
+        [BsonElement("matchResultLink")]
+        public string MatchResultLink { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the addition time.

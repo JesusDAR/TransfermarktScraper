@@ -494,7 +494,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     {
                         TransfermarktId = competitionQuickSelectResult.Id,
                         Name = competitionQuickSelectResult.Name,
-                        Link = competitionQuickSelectResult.Link,
+                        Link = string.Concat(_scraperSettings.BaseUrl, competitionQuickSelectResult.Link),
                     };
 
                     competitions.Add(competition);
@@ -531,12 +531,12 @@ namespace TransfermarktScraper.BLL.Services.Impl
 
                     selector = "src";
                     countryFlag = imgElement.GetAttribute(selector) ?? throw new Exception("Failed to obtain the countryFlag");
+                    countryFlag = countryFlag
+                        .Replace("verysmall", "head")
+                        .Split("?")[0];
 
                     selector = "title";
                     countryName = imgElement.GetAttribute(selector) ?? throw new Exception("Failed to obtaing the countryName");
-                    countryName = countryName
-                        .Replace("verysmall", "head")
-                        .Split("?")[0];
 
                     countryTransfermarktId = ImageUtils.GetTransfermarktIdFromImageUrl(countryFlag);
                 }

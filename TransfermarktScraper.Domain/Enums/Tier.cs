@@ -34,5 +34,10 @@
         /// Youth league level.
         /// </summary>
         YouthLeague = 5,
+
+        /// <summary>
+        /// Play-Offs league.
+        /// </summary>
+        PlayOffs = 6,
     }
 }

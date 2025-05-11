@@ -91,7 +91,15 @@ else
 									</MudAvatar>
 								</CellTemplate>
 							</TemplateColumn>
-							<PropertyColumn Property="club => club.Name" Sortable="false" />
+							<TemplateColumn T="ClubResponse" Context="club" Title="Name">
+								<CellTemplate>
+									<MudLink Href="@club.Item.Link" Target="_blank">
+										<MudText Typo="Typo.subtitle2">
+											@club.Item.Name
+										</MudText>
+									</MudLink>
+								</CellTemplate>
+							</TemplateColumn>
 							<PropertyColumn Property="club => club.MarketValue" Title="Market value (€)" Sortable="false" />
 							<PropertyColumn Property="club => club.PlayersCount" Title="Number of players" Sortable="false" />
 							<PropertyColumn Property="club => club.AgeAverage" Title="Age average" Sortable="false" />

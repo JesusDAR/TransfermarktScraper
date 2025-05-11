@@ -1,5 +1,4 @@
-﻿using System;
-using TransfermarktScraper.Domain.Exceptions;
+﻿using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -21,6 +20,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Tier.SecondTier => "Second Tier",
                 Tier.ThirdTier => "Third Tier",
                 Tier.YouthLeague => "Youth League",
+                Tier.PlayOffs => "Play-Offs",
                 Tier.Unknown => "Unknown Tier",
                 Tier.None => string.Empty,
                 _ => HandleUnsupportedEnum(tier),
@@ -54,6 +54,11 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
             if (tierString.Contains("youth league"))
             {
                 return Tier.YouthLeague;
+            }
+
+            if (tierString.Contains("play-offs"))
+            {
+                return Tier.PlayOffs;
             }
 
             if (!string.IsNullOrEmpty(tierString))

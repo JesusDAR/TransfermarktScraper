@@ -16,6 +16,11 @@
         public string ClubLogo { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the link of the club in Transfermarkt.
+        /// </summary>
+        public string ClubLink { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the unique Transfermarkt identifier for the club.
         /// </summary>
         public string ClubTransfermarktId { get; set; } = string.Empty;

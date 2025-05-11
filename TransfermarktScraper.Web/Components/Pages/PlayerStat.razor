@@ -3,6 +3,7 @@
 @using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Domain.DTOs.Response.Stat
 @using TransfermarktScraper.Domain.DTOs.Request.Stat
+@using TransfermarktScraper.Domain.Enums.Extensions
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 
@@ -97,18 +98,18 @@ else
     {
         <MudList Dense="true" Gutters="true" T="PlayerSeasonStatResponse" Class="mt-6">
             <MudListItem Ripple="false">
-                <MudListSubheader @onclick="() => IsPlayerSeasonOverallStatSelected = !IsPlayerSeasonOverallStatSelected">
+                <MudListSubheader @onclick="() => TogglePlayerSeasonStatExpansion(selectedPlayerSeasonStat)">
                     <MudStack Row="true" AlignItems="AlignItems.Center">
                         <MudText Typo="Typo.h6">
                             @(selectedPlayerSeasonStat.SeasonTransfermarktId == "ges" ? "Overall Career Stats" : $"Stats Season ({selectedPlayerSeasonStat.SeasonTransfermarktId})")
                         </MudText>
                         <MudSpacer />
-                        <MudIcon Icon="@(IsPlayerSeasonOverallStatSelected ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
+                        <MudIcon Icon="@(expandedPlayerSeasonStat.Contains(selectedPlayerSeasonStat) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
                                  Color="Color.Primary"
                                  Size="Size.Large" />
                     </MudStack>
                 </MudListSubheader>
-                <MudCollapse Expanded="@IsPlayerSeasonOverallStatSelected">
+                <MudCollapse Expanded="@expandedPlayerSeasonStat.Contains(selectedPlayerSeasonStat)">
                     <MudTable Items="@selectedPlayerSeasonStat.PlayerSeasonCompetitionStats"
                               T="PlayerSeasonCompetitionStatResponse"
                               Dense="true">
@@ -144,10 +145,11 @@ else
                                     <MudAvatar>
                                         <MudImage Src="@playerSeasonCompetitionStat.CompetitionLogo" Alt="@playerSeasonCompetitionStat.CompetitionName" />
                                     </MudAvatar>
-                                    <MudText Typo="Typo.subtitle2" Class="mt-3">
-                                        @playerSeasonCompetitionStat.CompetitionName
-                                    </MudText>
-
+                                    <MudLink Href="@playerSeasonCompetitionStat.CompetitionLink" Target="_blank">
+                                        <MudText Typo="Typo.subtitle2" Class="mt-3">
+                                            @playerSeasonCompetitionStat.CompetitionName
+                                        </MudText>
+                                    </MudLink>
                                 </MudStack>
                             </MudTd>
                             <MudTd>@playerSeasonCompetitionStat.Appearances</MudTd>
@@ -165,14 +167,14 @@ else
                             @if (Domain.Enums.Extensions.PositionExtensions.ToEnum(selectedPlayer.Position) != Domain.Enums.Position.Goalkeeper)
                             {
                                 <MudTd>@playerSeasonCompetitionStat.PenaltyGoals</MudTd>
-                                <MudTd>@playerSeasonCompetitionStat.MinutesPerGoal</MudTd>
+                                <MudTd>@($"{playerSeasonCompetitionStat.MinutesPerGoal}´")</MudTd>
                             }
                             else
                             {
                                 <MudTd>@playerSeasonCompetitionStat.GoalsConceded</MudTd>
                                 <MudTd>@playerSeasonCompetitionStat.CleanSheets</MudTd>
                             }
-                            <MudTd>@playerSeasonCompetitionStat.MinutesPlayed</MudTd>
+                            <MudTd>@($"{playerSeasonCompetitionStat.MinutesPlayed}´")</MudTd>
                         </RowTemplate>
                     </MudTable>
                 </MudCollapse>
@@ -180,8 +182,8 @@ else
         </MudList>
 
         @if (selectedPlayerSeasonStat.SeasonTransfermarktId != "ges" &&
-      selectedPlayerStat.PlayerSeasonStats.Any(
-          playerSeasonStat => playerSeasonStat.IsScraped && playerSeasonStat.SeasonTransfermarktId.Equals(selectedPlayerSeasonStat.SeasonTransfermarktId)))
+    selectedPlayerStat.PlayerSeasonStats.Any(
+        playerSeasonStat => playerSeasonStat.IsScraped && playerSeasonStat.SeasonTransfermarktId.Equals(selectedPlayerSeasonStat.SeasonTransfermarktId)))
         {
             @foreach (var playerSeasonCompetitionStat in GetPlayerSeasonCompetitionStats(selectedPlayerSeasonStat))
             {
@@ -201,7 +203,7 @@ else
                             </MudStack>
                         </MudListSubheader>
                         <MudCollapse Expanded="@expandedPlayerSeasonCompetitionStats.Contains(playerSeasonCompetitionStat)">
-                            <MudTable Items="@playerSeasonCompetitionStat.PlayerSeasonCompetitionMatchStats"
+                            <MudTable Style="white-space: nowrap;" Items="@playerSeasonCompetitionStat.PlayerSeasonCompetitionMatchStats"
                                       T="PlayerSeasonCompetitionMatchStatResponse"
                                       Dense="true">
                                 <HeaderContent>
@@ -214,26 +216,45 @@ else
                                     <MudTh>Goals</MudTh>
                                     <MudTh>Assists</MudTh>
                                     <MudTh>Own Goals</MudTh>
-                                    <MudTh>Yellow Cards</MudTh>
-                                    <MudTh>Second Yellow Cards</MudTh>
+                                    <MudTh>Yellow Card</MudTh>
+                                    <MudTh>Second Yellow Card</MudTh>
+                                    <MudTh>Red Card</MudTh>
                                     <MudTh>Substituted On</MudTh>
                                     <MudTh>Substituted Off</MudTh>
                                     <MudTh>Minutes Played</MudTh>
                                 </HeaderContent>
                                 <RowTemplate Context="playerSeasonCompetitionMatchStat">
-                                    <MudTd>@playerSeasonCompetitionMatchStat.MatchDay</MudTd>
+                                    <MudTd>
+                                        <MudLink Href="@playerSeasonCompetitionMatchStat.Link" Target="_blank">
+                                            <MudText Typo="Typo.subtitle2">
+                                                @playerSeasonCompetitionMatchStat.MatchDay
+                                            </MudText>
+                                        </MudLink>
+                                    </MudTd>
                                     <MudTd>@playerSeasonCompetitionMatchStat.Date</MudTd>
                                     <MudTd>
-                                        <MudAvatar Size="Size.Small">
-                                            <MudImage Src="@playerSeasonCompetitionMatchStat.HomeClubLogo" Alt="@playerSeasonCompetitionMatchStat.HomeClubName" />
-                                        </MudAvatar>
-                                        @playerSeasonCompetitionMatchStat.HomeClubName
+                                        <MudStack Row="true">
+                                            <MudAvatar Size="Size.Small">
+                                                <MudImage Src="@playerSeasonCompetitionMatchStat.HomeClubLogo" Alt="@playerSeasonCompetitionMatchStat.HomeClubName" />
+                                            </MudAvatar>
+                                            <MudLink Href="@playerSeasonCompetitionMatchStat.HomeClubLink" Target="_blank">
+                                                <MudText Typo="Typo.subtitle2">
+                                                    @playerSeasonCompetitionMatchStat.HomeClubName
+                                                </MudText>
+                                            </MudLink>
+                                        </MudStack>
                                     </MudTd>
                                     <MudTd>
-                                        <MudAvatar Size="Size.Small">
-                                            <MudImage Src="@playerSeasonCompetitionMatchStat.AwayClubLogo" Alt="@playerSeasonCompetitionMatchStat.AwayClubName" />
-                                        </MudAvatar>
-                                        @playerSeasonCompetitionMatchStat.AwayClubName
+                                        <MudStack Row="true">
+                                            <MudAvatar Size="Size.Small">
+                                                <MudImage Src="@playerSeasonCompetitionMatchStat.AwayClubLogo" Alt="@playerSeasonCompetitionMatchStat.AwayClubName" />
+                                            </MudAvatar>
+                                            <MudLink Href="@playerSeasonCompetitionMatchStat.AwayClubLink" Target="_blank">
+                                                <MudText Typo="Typo.subtitle2">
+                                                    @playerSeasonCompetitionMatchStat.AwayClubName
+                                                </MudText>
+                                            </MudLink>
+                                        </MudStack>
                                     </MudTd>
                                     <MudTd>
                                         @{
@@ -245,37 +266,39 @@ else
                                                 Domain.Enums.MatchResult.Loss => Color.Error,
                                                 _ => Color.Default
                                             };
+                                            var additionalResult = string.Empty;
+                                            if (playerSeasonCompetitionMatchStat.IsResultAddition)
+                                            {
+                                                additionalResult = "AET";
+                                            }
+                                            @if (playerSeasonCompetitionMatchStat.IsResultPenalties)
+                                            {
+                                                additionalResult = "on pens";
+                                            }
                                         }
 
-                                        <MudText Color="@resultTextColor">@result</MudText>
-
-                                        @if (playerSeasonCompetitionMatchStat.IsResultAddition)
-                                        {
-                                            <MudText>AET</MudText>
-                                        }
-                                        @if (playerSeasonCompetitionMatchStat.IsResultPenalties)
-                                        {
-                                            <MudText>on pens</MudText>
-                                        }
+                                        <MudLink Href="@playerSeasonCompetitionMatchStat.MatchResultLink" Target="_blank">
+                                            <MudText Typo="Typo.subtitle2" Color="@resultTextColor">
+                                                @(string.IsNullOrEmpty(additionalResult) ? result : string.Concat(result, " ", additionalResult))
+                                            </MudText>
+                                        </MudLink>
                                     </MudTd>
-                                    @if (playerSeasonCompetitionMatchStat.NotPlayingReason == Domain.Enums.NotPlayingReason.None)
+                                    @if (NotPlayingReasonExtension.ToEnum(playerSeasonCompetitionMatchStat.NotPlayingReason) == Domain.Enums.NotPlayingReason.None)
                                     {
                                         <MudTd>@playerSeasonCompetitionMatchStat.Position</MudTd>
                                         <MudTd>@playerSeasonCompetitionMatchStat.Goals</MudTd>
                                         <MudTd>@playerSeasonCompetitionMatchStat.Assists</MudTd>
                                         <MudTd>@playerSeasonCompetitionMatchStat.OwnGoals</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.YellowCard}'")</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SecondYellowCard}'")</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.RedCard}'")</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOn}'")</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOff}'")</MudTd>
-                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.MinutesPlayed}'")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.YellowCard}´")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SecondYellowCard}´")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.RedCard}´")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOn}´")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.SubstitutedOff}´")</MudTd>
+                                        <MudTd>@($"{playerSeasonCompetitionMatchStat.MinutesPlayed}´")</MudTd>
                                     }
                                     else
                                     {
-                                        <MudTd>
-                                            @(Domain.Enums.Extensions.NotPlayingReasonExtension.ToString(playerSeasonCompetitionMatchStat.NotPlayingReason))
-                                        </MudTd>
+                                        <MudTd colspan="10" Style="text-align: center;">@(playerSeasonCompetitionMatchStat.NotPlayingReason)</MudTd>
                                     }
                                 </RowTemplate>
                             </MudTable>
@@ -296,8 +319,7 @@ else
     private PlayerSeasonStatResponse? selectedPlayerSeasonStat;
 
     private HashSet<PlayerSeasonCompetitionStatResponse> expandedPlayerSeasonCompetitionStats = new();
-
-    private bool IsPlayerSeasonOverallStatSelected = true;
+    private HashSet<PlayerSeasonStatResponse> expandedPlayerSeasonStat = new();
 
     public string[] XAxisLabels { get; set; } = Array.Empty<string>();
     private List<ChartSeries> Series = new();
@@ -370,6 +392,14 @@ else
                     selectedPlayerStat.PlayerSeasonStats[existingPlayerSeasonStatIndex] = selectedPlayerSeasonStat;
                 }
             }
+        }
+    }
+
+    private void TogglePlayerSeasonStatExpansion(PlayerSeasonStatResponse playerSeasonStat)
+    {
+        if (!expandedPlayerSeasonStat.Add(playerSeasonStat))
+        {
+            expandedPlayerSeasonStat.Remove(playerSeasonStat);
         }
     }
 

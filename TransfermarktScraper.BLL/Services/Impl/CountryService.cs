@@ -135,7 +135,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                 if (page == 1)
                 {
                     competitionNameSearchPath = string.Concat(_scraperSettings.SearchPath, "?query=", Uri.EscapeDataString(competitionNameToSearch));
-
                 }
                 else
                 {

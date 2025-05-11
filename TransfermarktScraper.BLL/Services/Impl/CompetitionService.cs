@@ -299,7 +299,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// Retrieves the locator for the info box section on the page.
         /// </summary>
         /// <returns>A <see cref="ILocator"/> for the info box section, null if there is none.</returns>
-        private ILocator GetInfoBoxLocator()
+        private ILocator? GetInfoBoxLocator()
         {
             var selector = ".data-header__info-box";
             try
@@ -461,7 +461,7 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <summary>
-        /// Extracts the collection of HTML table data cells (<td> elements) for a specific competition from the Transfermarkt search results HTML document.
+        /// Extracts the collection of HTML table data cells (td elements) for a specific competition from the Transfermarkt search results HTML document.
         /// </summary>
         /// <param name="document">The parsed HTML document representing the Transfermarkt search results page.</param>
         /// <param name="url">The source URL of the page being scraped. Used for logging in case of an error.</param>

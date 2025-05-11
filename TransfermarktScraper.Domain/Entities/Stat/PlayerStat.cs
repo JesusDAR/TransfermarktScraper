@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
@@ -53,6 +54,6 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the player season stats.
         /// </summary>
         [BsonElement("playerSeasonStats")]
-        required public IList<PlayerSeasonStat> PlayerSeasonStats { get; set; }
+        public IEnumerable<PlayerSeasonStat> PlayerSeasonStats { get; set; } = Enumerable.Empty<PlayerSeasonStat>();
     }
 }

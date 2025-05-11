@@ -13,8 +13,13 @@ namespace TransfermarktScraper.BLL.Utils
         /// <param name="countryTransfermarktIds">The list of country Transfermarkt IDs.</param>
         /// <param name="flagUrl">The base Transfermarkt URL where the flag images are hosted.</param>
         /// <returns>A collection of image URLs corresponding to the given country IDs.</returns>
-        public static IEnumerable<string> ConvertCountryTransfermarktIdsToImageUrls(IEnumerable<string> countryTransfermarktIds, string flagUrl)
+        public static IEnumerable<string> ConvertCountryTransfermarktIdsToImageUrls(IEnumerable<string>? countryTransfermarktIds, string flagUrl)
         {
+            if (countryTransfermarktIds == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
             var imageUrls = new List<string>();
 
             foreach (var countryTransfermarktId in countryTransfermarktIds)
@@ -32,8 +37,13 @@ namespace TransfermarktScraper.BLL.Utils
         /// </summary>
         /// <param name="imageUrls">The list of image URLs.</param>
         /// <returns>A collection of Transfermarkt country IDs extracted from the image URLs.</returns>
-        public static IEnumerable<string> ConvertImageUrlsToCountryTransfermarktIds(IEnumerable<string> imageUrls)
+        public static IEnumerable<string> ConvertImageUrlsToCountryTransfermarktIds(IEnumerable<string>? imageUrls)
         {
+            if (imageUrls == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
             var countryTransfermarktIds = new List<string>();
 
             foreach (var imageUrl in imageUrls)

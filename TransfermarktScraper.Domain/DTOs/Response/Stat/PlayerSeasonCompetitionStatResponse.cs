@@ -46,72 +46,72 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the number of appearances in the competition for the season.
         /// </summary>
-        public int Appearances { get; set; }
+        public int? Appearances { get; set; }
 
         /// <summary>
         /// Gets or sets the number of goals in the competition for the season.
         /// </summary>
-        public int Goals { get; set; }
+        public int? Goals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of assists in the competition for the season.
         /// </summary>
-        public int Assists { get; set; }
+        public int? Assists { get; set; }
 
         /// <summary>
         /// Gets or sets the number of own goals in the competition for the season.
         /// </summary>
-        public int OwnGoals { get; set; }
+        public int? OwnGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted on in the competition for the season.
         /// </summary>
-        public int SubstitutionsOn { get; set; }
+        public int? SubstitutionsOn { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted off in the competition for the season.
         /// </summary>
-        public int SubstitutionsOff { get; set; }
+        public int? SubstitutionsOff { get; set; }
 
         /// <summary>
         /// Gets or sets the number of yellow cards received in the competition for the season.
         /// </summary>
-        public int YellowCards { get; set; }
+        public int? YellowCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of second yellow cards received in the competition for the season.
         /// </summary>
-        public int SecondYellowCards { get; set; }
+        public int? SecondYellowCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of red cards received in the competition for the season.
         /// </summary>
-        public int RedCards { get; set; }
+        public int? RedCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of penalty goals scored in the competition for the season.
         /// </summary>
-        public int PenaltyGoals { get; set; }
+        public int? PenaltyGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of goals that the goalkeeper has conceded in the competition for the season.
         /// </summary>
-        public int GoalsConceded { get; set; } = 0;
+        public int? GoalsConceded { get; set; }
 
         /// <summary>
         /// Gets or sets the number of clean sheets for the goalkeeper in the competition for the season.
         /// </summary>
-        public int CleanSheets { get; set; } = 0;
+        public int? CleanSheets { get; set; }
 
         /// <summary>
         /// Gets or sets the number of minutes per goal scored in the competition for the season.
         /// </summary>
-        public int MinutesPerGoal { get; set; }
+        public int? MinutesPerGoal { get; set; }
 
         /// <summary>
         /// Gets or sets the number of minutes played in the competition for the season.
         /// </summary>
-        public int MinutesPlayed { get; set; }
+        public int? MinutesPlayed { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was in the squad in the competition for the season.

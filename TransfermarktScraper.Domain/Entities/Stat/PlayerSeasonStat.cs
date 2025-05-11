@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Utils;
@@ -73,73 +74,73 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the number of appearances in all competitions of the season.
         /// </summary>
         [BsonElement("appearances")]
-        public int Appearances { get; set; } = 0;
+        public int? Appearances { get; set; }
 
         /// <summary>
         /// Gets or sets the number of goals in all competitions of the season.
         /// </summary>
         [BsonElement("goals")]
-        public int Goals { get; set; } = 0;
+        public int? Goals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of assists in all competitions of the season.
         /// </summary>
         [BsonElement("assists")]
-        public int Assists { get; set; } = 0;
+        public int? Assists { get; set; }
 
         /// <summary>
         /// Gets or sets the number of own goals in all competitions of the season.
         /// </summary>
         [BsonElement("ownGoals")]
-        public int OwnGoals { get; set; } = 0;
+        public int? OwnGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted on in all competitions of the season.
         /// </summary>
         [BsonElement("substitutionsOn")]
-        public int SubstitutionsOn { get; set; } = 0;
+        public int? SubstitutionsOn { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times the player was substituted off in all competitions of the season.
         /// </summary>
         [BsonElement("substitutionsOff")]
-        public int SubstitutionsOff { get; set; } = 0;
+        public int? SubstitutionsOff { get; set; }
 
         /// <summary>
         /// Gets or sets the number of yellow cards received in all competitions of the season.
         /// </summary>
         [BsonElement("yellowCards")]
-        public int YellowCards { get; set; } = 0;
+        public int? YellowCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of second yellow cards received in all competitions of the season.
         /// </summary>
         [BsonElement("secondYellowCards")]
-        public int SecondYellowCards { get; set; } = 0;
+        public int? SecondYellowCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of red cards received in all competitions of the season.
         /// </summary>
         [BsonElement("redCards")]
-        public int RedCards { get; set; } = 0;
+        public int? RedCards { get; set; }
 
         /// <summary>
         /// Gets or sets the number of penalty goals scored in all competitions of the season.
         /// </summary>
         [BsonElement("penaltyGoals")]
-        public int PenaltyGoals { get; set; } = 0;
+        public int? PenaltyGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of goals that the goalkeeper has conceded in all competitions of the season.
         /// </summary>
         [BsonElement("goalsConceded")]
-        public int GoalsConceded { get; set; } = 0;
+        public int? GoalsConceded { get; set; }
 
         /// <summary>
         /// Gets or sets the number of clean sheets for the goalkeeper in all competitions of the season.
         /// </summary>
         [BsonElement("cleanSheets")]
-        public int CleanSheets { get; set; } = 0;
+        public int? CleanSheets { get; set; }
 
         /// <summary>
         /// Gets or sets the number of minutes per goal scored in all competitions of the season.
@@ -157,6 +158,6 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the competition stats for the player in the season.
         /// </summary>
         [BsonElement("playerSeasonCompetitionStats")]
-        public IEnumerable<PlayerSeasonCompetitionStat>? PlayerSeasonCompetitionStats { get; set; }
+        public IEnumerable<PlayerSeasonCompetitionStat> PlayerSeasonCompetitionStats { get; set; } = Enumerable.Empty<PlayerSeasonCompetitionStat>();
     }
 }

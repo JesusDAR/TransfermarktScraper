@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using TransfermarktScraper.Domain.Enums;
@@ -132,13 +132,13 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the home club scored goals in the match.
         /// </summary>
         [BsonElement("homeClubGoals")]
-        public int HomeClubGoals { get; set; } = 0;
+        public int? HomeClubGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the away club scored goals in the match.
         /// </summary>
         [BsonElement("awayClubGoals")]
-        public int AwayClubGoals { get; set; } = 0;
+        public int? AwayClubGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the result of the match.
@@ -174,37 +174,37 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the number of goals the player scored.
         /// </summary>
         [BsonElement("goals")]
-        public int Goals { get; set; } = 0;
+        public int? Goals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of assists the player performed.
         /// </summary>
         [BsonElement("assists")]
-        public int Assists { get; set; } = 0;
+        public int? Assists { get; set; }
 
         /// <summary>
         /// Gets or sets the number of own goals the player scored.
         /// </summary>
         [BsonElement("ownGoals")]
-        public int OwnGoals { get; set; }
+        public int? OwnGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a yellow card during the match.
         /// </summary>
         [BsonElement("yellowCard")]
-        public int YellowCard { get; set; }
+        public int? YellowCard { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a second yellow card during the match.
         /// </summary>
         [BsonElement("secondYellowCard")]
-        public int SecondYellowCard { get; set; }
+        public int? SecondYellowCard { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a red card during the match.
         /// </summary>
         [BsonElement("redCard")]
-        public int RedCard { get; set; }
+        public int? RedCard { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted on.

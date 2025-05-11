@@ -23,7 +23,7 @@ namespace TransfermarktScraper.Domain.Entities
             }
 
             TransfermarktId = playerTransfermarktId;
-            PlayerStatId = EntityUtils.GetHash($"{TransfermarktId}|stat");
+            PlayerStatId = EntityUtils.GetHash($"{playerTransfermarktId}|stat");
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the nationalities of the player.
         /// </summary>
         [BsonElement("nationalities")]
-        required public IEnumerable<string> Nationalities { get; set; }
+        public IEnumerable<string>? Nationalities { get; set; }
 
         /// <summary>
         /// Gets or sets the number of the player.
@@ -105,7 +105,7 @@ namespace TransfermarktScraper.Domain.Entities
         /// Gets or sets the portrait of the player.
         /// </summary>
         [BsonElement("portrait")]
-        required public string Portrait { get; set; } = string.Empty;
+        public string Portrait { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the position of the player.

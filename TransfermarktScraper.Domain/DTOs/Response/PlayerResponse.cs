@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TransfermarktScraper.Domain.DTOs.Response
 {
@@ -61,7 +62,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the nationalities of the player.
         /// </summary>
-        required public IEnumerable<string> Nationalities { get; set; }
+        public IEnumerable<string> Nationalities { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
         /// Gets or sets the portrait of the player.
@@ -71,7 +72,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response
         /// <summary>
         /// Gets or sets the portrait of the player.
         /// </summary>
-        required public string Portrait { get; set; } = string.Empty;
+        public string Portrait { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the position of the player.

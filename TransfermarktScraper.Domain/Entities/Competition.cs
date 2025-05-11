@@ -30,12 +30,6 @@ namespace TransfermarktScraper.Domain.Entities
         public int? ClubsCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the coefficient of the competition.
-        /// </summary>
-        [BsonElement("coefficient")]
-        public float? Coefficient { get; set; }
-
-        /// <summary>
         /// Gets or sets the current champion of the competition.
         /// </summary>
         [BsonElement("currentChampion")]

@@ -66,12 +66,12 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets the home club scored goals in the match.
         /// </summary>
-        public int HomeClubGoals { get; set; }
+        public int? HomeClubGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the away club scored goals in the match.
         /// </summary>
-        public int AwayClubGoals { get; set; }
+        public int? AwayClubGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the result of the match for the club.
@@ -96,47 +96,47 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Stat
         /// <summary>
         /// Gets or sets a value indicating whether the player was the captain during the match.
         /// </summary>
-        public bool IsCaptain { get; set; }
+        public bool IsCaptain { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the number of goals the player scored.
         /// </summary>
-        public int Goals { get; set; }
+        public int? Goals { get; set; }
 
         /// <summary>
         /// Gets or sets the number of assists the player performed.
         /// </summary>
-        public int Assists { get; set; }
+        public int? Assists { get; set; }
 
         /// <summary>
         /// Gets or sets the number of own goals the player scored.
         /// </summary>
-        public int OwnGoals { get; set; }
+        public int? OwnGoals { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a yellow card during the match.
         /// </summary>
-        public int YellowCard { get; set; }
+        public int? YellowCard { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a second yellow card during the match.
         /// </summary>
-        public int SecondYellowCard { get; set; }
+        public int? SecondYellowCard { get; set; }
 
         /// <summary>
         /// Gets or sets the time in minutes when the player received a red card during the match.
         /// </summary>
-        public int RedCard { get; set; }
+        public int? RedCard { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted on.
         /// </summary>
-        public int SubstitutedOn { get; set; }
+        public int? SubstitutedOn { get; set; }
 
         /// <summary>
         /// Gets or sets the minute when the player was substituted off.
         /// </summary>
-        public int SubstitutedOff { get; set; }
+        public int? SubstitutedOff { get; set; }
 
         /// <summary>
         /// Gets or sets the number of minutes the player was on the field.

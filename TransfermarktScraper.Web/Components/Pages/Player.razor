@@ -77,13 +77,13 @@ else
 								   Disabled="@(selectedPlayers.Count == 0)">
 							Scrape stats
 						</MudButton>
-						<MudIcon Icon="@(selectedClubs.Contains(club) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
+						<MudIcon Icon="@(expandedClubs.Contains(club) ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.ArrowDropDown)"
 								 Color="Color.Primary"
 								 Size="Size.Large" />
 					</MudStack>
 				</MudListSubheader>
 
-				<MudCollapse Expanded="@selectedClubs.Contains(club)">
+				<MudCollapse Expanded="@expandedClubs.Contains(club)">
 					<MudGrid Spacing="3" Justify="Justify.FlexStart" Class="mt-6">
 						@foreach (var player in GetPlayers(club))
 						{
@@ -175,9 +175,9 @@ else
 
 	private void ToggleClubExpansion(ClubResponse club)
 	{
-		if (!selectedClubs.Add(club))
+		if (!expandedClubs.Add(club))
 		{
-			selectedClubs.Remove(club);
+			expandedClubs.Remove(club);
 		}
 	}
 

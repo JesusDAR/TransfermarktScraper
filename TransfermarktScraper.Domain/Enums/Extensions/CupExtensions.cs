@@ -1,4 +1,5 @@
-﻿using TransfermarktScraper.Domain.Exceptions;
+﻿using System.Linq;
+using TransfermarktScraper.Domain.Exceptions;
 
 namespace TransfermarktScraper.Domain.Enums.Extensions
 {
@@ -33,7 +34,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
         {
             cupString = cupString.ToLower().Trim();
 
-            if (cupString.Contains("domestic"))
+            if (cupString.Contains("domestic") || cupString.Split(' ').Contains("national"))
             {
                 return Cup.Domestic;
             }

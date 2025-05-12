@@ -1,0 +1,55 @@
+﻿@page "/log-viewer"
+@using Microsoft.AspNetCore.SignalR.Client;
+
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<h3>LogViewer</h3>
+
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h6">Logs Console</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                       Href="/"
+                       Target="_self" />
+    </MudAppBar>
+
+    <MudMainContent>
+        <MudPaper Class="pa-4">
+            @foreach (var log in _logs)
+            {
+                <div class="log-entry">@log</div>
+            }
+        </MudPaper>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private List<string> _logs = new();
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:5003/logs")
+            .Build();
+
+        _hubConnection.On<string>("ReceiveLog", async log =>
+        {
+            await InvokeAsync(() =>
+            {
+                _logs.Add(log);
+                StateHasChanged();
+            });
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        _hubConnection?.DisposeAsync();
+    }
+}

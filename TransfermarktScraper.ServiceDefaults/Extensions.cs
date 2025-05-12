@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging.Console;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using TransfermarktScraper.ServiceDefaults.Logging;
 
 namespace Microsoft.Extensions.Hosting
 {
@@ -29,6 +30,8 @@ namespace Microsoft.Extensions.Hosting
             builder.ConfigureOpenTelemetry();
 
             builder.AddDefaultHealthChecks();
+
+            builder.Services.AddSignalR();
 
             builder.AddLogging();
 
@@ -119,6 +122,9 @@ namespace Microsoft.Extensions.Hosting
                 {
                     Predicate = r => r.Tags.Contains("live"),
                 });
+
+                // Logs
+                app.MapHub<LogHub>("/logs");
             }
 
             return app;

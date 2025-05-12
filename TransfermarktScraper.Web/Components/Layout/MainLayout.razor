@@ -1,9 +1,12 @@
 ﻿@inherits LayoutComponentBase
 
+@using TransfermarktScraper.Web.Components.Pages
 @using TransfermarktScraper.Web.Services.Interfaces
+@using Microsoft.AspNetCore.SignalR.Client
 
 @inject INavigationHistoryService NavigationHistoryService
 @inject IPageReferenceService PageReferenceService
+@inject IDialogService DialogService
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -28,6 +31,11 @@
             </MudTooltip>
         </MudContainer>
         <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Terminal"
+                       Color="Color.Inherit"
+                       Edge="Edge.End"
+                       Href="/log-viewer"
+                       Target="_blank" />
         <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                        Color="Color.Inherit"
                        OnClick="ForcePageRefresh" />

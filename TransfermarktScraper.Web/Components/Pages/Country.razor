@@ -1,9 +1,7 @@
 ﻿@page "/countries"
 
-@using Microsoft.Extensions.Options
 @using TransfermarktScraper.Domain.DTOs.Response
 @using TransfermarktScraper.Web.Clients.Interfaces
-@using TransfermarktScraper.Web.Configuration
 @using TransfermarktScraper.Web.Services;
 @using TransfermarktScraper.Web.Services.Interfaces
 
@@ -12,7 +10,6 @@
 @implements IRefreshablePage
 
 @inject ICountryClient CountryClient
-@inject IOptions<ClientSettings> ClientSettings
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 @inject IPageReferenceService PageReferenceService

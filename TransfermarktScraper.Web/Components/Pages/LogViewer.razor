@@ -1,7 +1,11 @@
 ﻿@page "/log-viewer"
+
+@using Microsoft.Extensions.Options
 @using Microsoft.AspNetCore.SignalR.Client;
+@using TransfermarktScraper.Web.Configuration
 
 @inject NavigationManager NavigationManager
+@inject IOptions<ClientSettings> ClientSettings
 @implements IDisposable
 
 <h3>LogViewer</h3>
@@ -20,7 +24,7 @@
         <MudPaper Class="pa-4">
             @foreach (var log in _logs)
             {
-                <div class="log-entry">@log</div>
+                <MudText>@log</MudText>
             }
         </MudPaper>
     </MudMainContent>
@@ -32,8 +36,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var url = string.Concat(ClientSettings.Value.HostUrl, "/logs");
+
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:5003/logs")
+            .WithUrl(url)
             .Build();
 
         _hubConnection.On<string>("ReceiveLog", async log =>

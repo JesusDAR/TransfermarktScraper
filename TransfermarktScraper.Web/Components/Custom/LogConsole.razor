@@ -1,0 +1,55 @@
+﻿@using TransfermarktScraper.Web.Clients.Interfaces
+
+@inject ILogClient LogClient
+
+<MudPaper Class="d-flex flex-column"
+          Style="position: fixed; bottom: 0; left: 0; right: 0; max-height: 35%; min-height:35%; background-color: #1e1e1e; z-index: 1000;"
+          Hidden="@Hidden"
+          Elevation="10">
+
+    <MudPaper Class="pa-2" Style="border: 1px solid #333;">
+        <MudStack Row="true" Justify="Justify.Center">
+            <MudText Typo="Typo.subtitle2">Log Console</MudText>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="flex-grow-1" Style="overflow-y: auto;">
+        @foreach (var log in _logs)
+        {
+            <MudText Class="text-white" Style="white-space: pre-wrap; font-size: 100%; font-family: monospace;">@log</MudText>
+        }
+    </MudPaper>
+</MudPaper>
+
+
+
+@code {
+    [Parameter] public bool Hidden { get; set; }
+
+    private readonly List<string> _logs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LogClient.OnLogReceived += HandleLogReceived;
+        await LogClient.StartAsync();
+    }
+
+    private void HandleLogReceived(string log)
+    {
+        InvokeAsync(() =>
+        {
+            _logs.Add(log);
+            try
+            {
+                StateHasChanged();
+            }
+            catch (ObjectDisposedException) { };
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        LogClient.OnLogReceived -= HandleLogReceived;
+        await LogClient.DisposeAsync();
+    }
+}

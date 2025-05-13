@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-@using TransfermarktScraper.Web.Components.Pages
+@using TransfermarktScraper.Web.Components.Custom
 @using TransfermarktScraper.Web.Services.Interfaces
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -16,7 +16,7 @@
     <MudAppBar Elevation="1">
         <MudText Typo="Typo.h6">TFMScraper</MudText>
         <MudSpacer />
-        <MudContainer Class="d-flex justify-center mr-3">
+        <MudContainer Class="d-flex justify-center ml-18">
             <MudTooltip Text="Go Back">
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                Class="mr-3"
@@ -34,8 +34,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Terminal"
                        Color="Color.Inherit"
                        Edge="Edge.End"
-                       Href="/log-viewer"
-                       Target="_blank" />
+                       OnClick="@ToggleLogConsole" />
         <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                        Color="Color.Inherit"
                        OnClick="ForcePageRefresh" />
@@ -48,6 +47,7 @@
     </MudAppBar>
     <MudMainContent Class="mt-16 pa-4">
         @Body
+        <LogConsole Hidden="_logConsoleHidden" />
     </MudMainContent>
 </MudLayout>
 
@@ -59,6 +59,7 @@
 
 @code {
     private bool _isDarkMode = true;
+    private bool _logConsoleHidden = true;
     private MudTheme? _theme = null;
 
     protected override void OnInitialized()
@@ -94,6 +95,11 @@
     private void DarkModeToggle()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void ToggleLogConsole()
+    {
+        _logConsoleHidden = !_logConsoleHidden;
     }
 
     private readonly PaletteLight _lightPalette = new()

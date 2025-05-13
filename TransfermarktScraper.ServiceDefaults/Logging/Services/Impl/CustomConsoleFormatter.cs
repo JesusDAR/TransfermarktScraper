@@ -6,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
-using TransfermarktScraper.ServiceDefaults.Logging;
+using TransfermarktScraper.ServiceDefaults.Logging.Services.Impl;
+using TransfermarktScraper.ServiceDefaults.Logging.Services.Interfaces;
 
 /// <summary>
 /// A custom console formatter for logging, which applies ANSI color formatting
@@ -17,6 +18,7 @@ public class CustomConsoleFormatter : ConsoleFormatter, IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
     private IHubContext<LogHub>? _hubContext;
+    private ILogStorageService? _logStorage;
     private bool _initialized = false;
 
     /// <summary>
@@ -64,8 +66,11 @@ public class CustomConsoleFormatter : ConsoleFormatter, IDisposable
         if (!_initialized)
         {
             _hubContext = _serviceProvider.GetService<IHubContext<LogHub>>();
+            _logStorage = _serviceProvider.GetService<ILogStorageService>();
             _initialized = true;
         }
+
+        _logStorage?.AddLog(logMessage);
 
         _hubContext?.Clients.All.SendAsync("ReceiveLog", logMessage).ConfigureAwait(false);
     }

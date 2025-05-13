@@ -1,15 +1,10 @@
 ﻿@page "/log-viewer"
 
-@using Microsoft.Extensions.Options
-@using Microsoft.AspNetCore.SignalR.Client;
-@using TransfermarktScraper.Web.Configuration
+@using TransfermarktScraper.Web.Clients.Interfaces
 
-@inject NavigationManager NavigationManager
-@inject IOptions<ClientSettings> ClientSettings
-@implements IDisposable
+@inject ILogClient LogClient
 
-<h3>LogViewer</h3>
-
+<h3>Log Viewer</h3>
 
 <MudLayout>
     <MudAppBar Elevation="1">
@@ -31,31 +26,26 @@
 </MudLayout>
 
 @code {
-    private List<string> _logs = new();
-    private HubConnection? _hubConnection;
+    private readonly List<string> _logs = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var url = string.Concat(ClientSettings.Value.HostUrl, "/logs");
-
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(url)
-            .Build();
-
-        _hubConnection.On<string>("ReceiveLog", async log =>
-        {
-            await InvokeAsync(() =>
-            {
-                _logs.Add(log);
-                StateHasChanged();
-            });
-        });
-
-        await _hubConnection.StartAsync();
+        LogClient.OnLogReceived += HandleLogReceived;
+        await LogClient.StartAsync();
     }
 
-    public void Dispose()
+    private void HandleLogReceived(string log)
     {
-        _hubConnection?.DisposeAsync();
+        InvokeAsync(() =>
+        {
+            _logs.Add(log);
+            StateHasChanged();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        LogClient.OnLogReceived -= HandleLogReceived;
+        await LogClient.DisposeAsync();
     }
 }

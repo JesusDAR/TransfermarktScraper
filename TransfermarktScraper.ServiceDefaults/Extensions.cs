@@ -7,7 +7,8 @@ using Microsoft.Extensions.Logging.Console;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using TransfermarktScraper.ServiceDefaults.Logging;
+using TransfermarktScraper.ServiceDefaults.Logging.Services.Impl;
+using TransfermarktScraper.ServiceDefaults.Logging.Services.Interfaces;
 
 namespace Microsoft.Extensions.Hosting
 {
@@ -30,8 +31,6 @@ namespace Microsoft.Extensions.Hosting
             builder.ConfigureOpenTelemetry();
 
             builder.AddDefaultHealthChecks();
-
-            builder.Services.AddSignalR();
 
             builder.AddLogging();
 
@@ -139,6 +138,8 @@ namespace Microsoft.Extensions.Hosting
         public static TBuilder AddLogging<TBuilder>(this TBuilder builder)
             where TBuilder : IHostApplicationBuilder
         {
+            builder.Services.AddSignalR();
+
             builder.Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
@@ -151,6 +152,8 @@ namespace Microsoft.Extensions.Hosting
 
                 logging.AddDebug();
             });
+
+            builder.Services.AddSingleton<ILogStorageService, LogStorageService>();
 
             return builder;
         }

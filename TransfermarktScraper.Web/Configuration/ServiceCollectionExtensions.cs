@@ -30,6 +30,8 @@ namespace TransfermarktScraper.Web.Configuration
                 configuration.GetSection(nameof(ClientSettings)).Bind(options));
 
             // Register clients
+            services.AddScoped<ILogClient, LogClient>();
+
             services.AddHttpClient<ICountryClient, CountryClient>((serviceProvider, client) =>
             {
                 var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;

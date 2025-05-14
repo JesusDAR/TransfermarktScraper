@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TransfermarktScraper.ServiceDefaults.Logging.DTOs.Response;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {
@@ -9,9 +10,9 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
     public interface ILogClient : IAsyncDisposable
     {
         /// <summary>
-        /// Event triggered when a new log message is received.
+        /// Event triggered when a new log is received.
         /// </summary>
-        event Action<string>? OnLogReceived;
+        event Action<LogResponse>? OnLogReceived;
 
         /// <summary>
         /// Starts the connection to the log server.

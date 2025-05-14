@@ -6,13 +6,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
+using TransfermarktScraper.ServiceDefaults.Logging.DTOs.Response;
+using TransfermarktScraper.ServiceDefaults.Logging.Enums;
 using TransfermarktScraper.ServiceDefaults.Logging.Services.Impl;
 using TransfermarktScraper.ServiceDefaults.Logging.Services.Interfaces;
 
 /// <summary>
 /// A custom console formatter for logging, which applies ANSI color formatting
 /// to log levels and structures the log output with timestamps.
-/// It also sends log messages asynchronously to a SignalR hub.
+/// It also sends logs asynchronously to a SignalR hub.
 /// </summary>
 public class CustomConsoleFormatter : ConsoleFormatter, IDisposable
 {
@@ -32,7 +34,7 @@ public class CustomConsoleFormatter : ConsoleFormatter, IDisposable
     }
 
     /// <summary>
-    /// Writes a log entry to the console, applying ANSI color formatting based on log level.
+    /// Writes a log entry to the console applying ANSI color formatting based on log level, then stores it and sends it to the UI using SignalR.
     /// </summary>
     /// <typeparam name="TState">The type of the log state.</typeparam>
     /// <param name="logEntry">The log entry containing the log level, message, and exception.</param>
@@ -70,9 +72,23 @@ public class CustomConsoleFormatter : ConsoleFormatter, IDisposable
             _initialized = true;
         }
 
-        _logStorage?.AddLog(logMessage);
+        Level level = logEntry.LogLevel switch
+        {
+            LogLevel.Information => Level.Information,
+            LogLevel.Warning => Level.Warning,
+            LogLevel.Error => Level.Error,
+            _ => Level.Other,
+        };
 
-        _hubContext?.Clients.All.SendAsync("ReceiveLog", logMessage).ConfigureAwait(false);
+        LogResponse logResponse = new LogResponse()
+        {
+            Message = logMessage,
+            Level = level,
+        };
+
+        _logStorage?.AddLog(logResponse);
+
+        _hubContext?.Clients.All.SendAsync("ReceiveLog", logResponse).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

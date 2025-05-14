@@ -1,4 +1,5 @@
 ﻿@using TransfermarktScraper.Web.Clients.Interfaces
+@using TransfermarktScraper.ServiceDefaults.Logging.DTOs.Response
 
 @inject ILogClient LogClient
 
@@ -16,7 +17,17 @@
     <MudPaper Class="flex-grow-1" Style="overflow-y: auto;">
         @foreach (var log in _logs)
         {
-            <MudText Class="text-white" Style="white-space: pre-wrap; font-size: 100%; font-family: monospace;">@log</MudText>
+            var logColor = Color.Info;
+            if (log.Level == ServiceDefaults.Logging.Enums.Level.Warning)
+            {
+                logColor = Color.Warning;
+            }
+            if (log.Level == ServiceDefaults.Logging.Enums.Level.Error)
+            {
+                logColor = Color.Error;
+            }
+
+            <MudText Color="@logColor" Style="white-space: pre-wrap; font-size: 100%; font-family: monospace;">@log.Message</MudText>
         }
     </MudPaper>
 </MudPaper>
@@ -26,7 +37,7 @@
 @code {
     [Parameter] public bool Hidden { get; set; }
 
-    private readonly List<string> _logs = new();
+    private readonly List<LogResponse> _logs = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,7 +45,7 @@
         await LogClient.StartAsync();
     }
 
-    private void HandleLogReceived(string log)
+    private void HandleLogReceived(LogResponse log)
     {
         InvokeAsync(() =>
         {

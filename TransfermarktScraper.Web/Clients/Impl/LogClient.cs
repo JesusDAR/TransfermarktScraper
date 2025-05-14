@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
+using TransfermarktScraper.ServiceDefaults.Logging.DTOs.Response;
 using TransfermarktScraper.Web.Clients.Interfaces;
 using TransfermarktScraper.Web.Configuration;
 
@@ -24,14 +25,14 @@ namespace TransfermarktScraper.Web.Clients.Impl
                 .WithUrl(url)
                 .Build();
 
-            _hubConnection.On<string>("ReceiveLog", log =>
+            _hubConnection.On<LogResponse>("ReceiveLog", log =>
             {
                 OnLogReceived?.Invoke(log);
             });
         }
 
         /// <inheritdoc/>
-        public event Action<string>? OnLogReceived;
+        public event Action<LogResponse>? OnLogReceived;
 
         /// <inheritdoc/>
         public async Task StartAsync()

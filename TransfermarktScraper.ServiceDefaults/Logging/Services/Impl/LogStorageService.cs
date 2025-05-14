@@ -1,30 +1,31 @@
-﻿    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using TransfermarktScraper.ServiceDefaults.Logging.Services.Interfaces;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using TransfermarktScraper.ServiceDefaults.Logging.DTOs.Response;
+using TransfermarktScraper.ServiceDefaults.Logging.Services.Interfaces;
 
-    namespace TransfermarktScraper.ServiceDefaults.Logging.Services.Impl
+namespace TransfermarktScraper.ServiceDefaults.Logging.Services.Impl
+{
+    /// <inheritdoc/>
+    public class LogStorageService : ILogStorageService
     {
+        private readonly ConcurrentQueue<LogResponse> _logs = new ();
+
         /// <inheritdoc/>
-        public class LogStorageService : ILogStorageService
+        public void AddLog(LogResponse log)
         {
-            private readonly ConcurrentQueue<string> _logs = new ();
+            _logs.Enqueue(log);
 
-            /// <inheritdoc/>
-            public void AddLog(string log)
+            if (_logs.Count > 1000)
             {
-                _logs.Enqueue(log);
-
-                if (_logs.Count > 1000)
-                {
-                    _logs.TryDequeue(out _);
-                }
-            }
-
-            /// <inheritdoc/>
-            public IReadOnlyList<string> GetLogs()
-            {
-                return _logs.ToList();
+                _logs.TryDequeue(out _);
             }
         }
+
+        /// <inheritdoc/>
+        public IReadOnlyList<LogResponse> GetLogs()
+        {
+            return _logs.ToList();
+        }
     }
+}

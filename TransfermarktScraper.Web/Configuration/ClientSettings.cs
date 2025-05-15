@@ -40,7 +40,6 @@
         /// </summary>
         public string SettingsControllerPath { get; set; } = string.Empty;
 
-
         /// <summary>
         /// Gets or sets the endpoint of the logs.
         /// </summary>

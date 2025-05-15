@@ -1430,7 +1430,6 @@ namespace TransfermarktScraper.BLL.Services.Impl
                     matchResultLink = string.Concat(_scraperSettings.BaseUrl, matchResultLink);
                 }
 
-
                 selector = ":scope > span";
                 var resultLocator = linkLocator.Locator(selector);
                 var resultText = await resultLocator.InnerTextAsync();

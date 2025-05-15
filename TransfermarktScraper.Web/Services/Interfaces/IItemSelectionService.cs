@@ -26,6 +26,6 @@ namespace TransfermarktScraper.Web.Services.Interfaces
         /// <summary>
         /// Gets or sets the currently selected player.
         /// </summary>
-        public PlayerResponse SelectedPlayer { get; set; }
+        public PlayerResponse? SelectedPlayer { get; set; }
     }
 }

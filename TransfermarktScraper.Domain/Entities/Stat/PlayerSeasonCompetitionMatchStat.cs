@@ -162,7 +162,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the link of the result of the match in Transfermarkt.
         /// </summary>
         [BsonElement("matchResultLink")]
-        public string MatchResultLink { get; set; }
+        public string MatchResultLink { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets a value indicating whether the match was decided in the addition time.

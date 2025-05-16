@@ -34,17 +34,14 @@ namespace TransfermarktScraper.ApiService
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.MapScalarApiReference(
-                    options =>
-                        options
-                        .WithTitle("TransfermarktScraper API")
-                        .WithTheme(ScalarTheme.BluePlanet)
-                        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                        .Servers = []); // workaround to prevent scalar from taking a random generated localhost server as base url
-            }
+            app.MapOpenApi();
+            app.MapScalarApiReference(
+                options =>
+                    options
+                    .WithTitle("TransfermarktScraper API")
+                    .WithTheme(ScalarTheme.BluePlanet)
+                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                    .Servers = []); // workaround to prevent scalar from taking a random generated localhost server as base url
 
             app.MapControllers();
 

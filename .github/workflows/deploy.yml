@@ -21,6 +21,13 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BD63F2D7067E44468B1531428125E102 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F5AB57A1F13047209C4CFA69BCA2AB11 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F7CFAC1BAAF74AF686EED16184228AD6 }}
+          
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 

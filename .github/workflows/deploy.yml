@@ -1,0 +1,45 @@
+name: Deploy TransfermarktScraper to Azure
+
+on:
+  push:
+    branches:
+      - main  # Change if your main branch is named differently
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup .NET 9 (preview)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.100-preview.*'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish Web Project
+        run: dotnet publish TransfermarktScraper.Web/TransfermarktScraper.Web.csproj --configuration Release --output ./publish/web
+
+      - name: Publish API Service Project
+        run: dotnet publish TransfermarktScraper.ApiService/TransfermarktScraper.ApiService.csproj --configuration Release --output ./publish/api
+
+      - name: Zip all outputs into a single deployable package
+        run: |
+          mkdir ./finalpublish
+          cp -r ./publish/web/* ./finalpublish/
+          cp -r ./publish/api/* ./finalpublish/
+          zip -r deploy-package.zip ./finalpublish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'ASP-ScraperDevops-b9e4'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: deploy-package.zip

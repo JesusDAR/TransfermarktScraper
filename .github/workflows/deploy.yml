@@ -13,13 +13,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Install .NET 9 (Preview SDK)
-        run: |
-          curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
-          chmod +x dotnet-install.sh
-          ./dotnet-install.sh --version 9.0.100-preview.4 --install-dir "$HOME/dotnet"
-          echo "$HOME/dotnet" >> $GITHUB_PATH
-          echo "DOTNET_ROOT=$HOME/dotnet" >> $GITHUB_ENV
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.1
 
       - name: Azure Login
         uses: azure/login@v1

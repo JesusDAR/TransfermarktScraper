@@ -1,18 +1,14 @@
-name: Deploy TransfermarktScraper to Azure
+name: Deploy TransfermarktScraper to Azure (via Azure Login)
 
 on:
   push:
     branches:
-      - main  # Change if your main branch is named differently
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-      
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
@@ -20,37 +16,36 @@ jobs:
       - name: Setup .NET 9 (preview)
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.102'
+          dotnet-version: '9.0.100-preview.3.24172.9'
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BD63F2D7067E44468B1531428125E102 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F5AB57A1F13047209C4CFA69BCA2AB11 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F7CFAC1BAAF74AF686EED16184228AD6 }}
-          
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish Web Project
         run: dotnet publish TransfermarktScraper.Web/TransfermarktScraper.Web.csproj --configuration Release --output ./publish/web
 
-      - name: Publish API Service Project
+      - name: Publish API Project
         run: dotnet publish TransfermarktScraper.ApiService/TransfermarktScraper.ApiService.csproj --configuration Release --output ./publish/api
 
-      - name: Zip all outputs into a single deployable package
+      - name: Merge output into one folder
         run: |
           mkdir ./finalpublish
           cp -r ./publish/web/* ./finalpublish/
           cp -r ./publish/api/* ./finalpublish/
-          zip -r deploy-package.zip ./finalpublish
+
+      - name: Zip deployment package
+        run: zip -r deploy-package.zip ./finalpublish
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'ASP-ScraperDevops-b9e4'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: deploy-package.zip

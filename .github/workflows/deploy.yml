@@ -15,9 +15,9 @@ jobs:
 
       - name: Manually install .NET 9 SDK (preview)
         run: |
-          wget https://download.visualstudio.microsoft.com/download/pr/05f52767-66da-43a8-b5f2-249c589eb571/ff0db53f3b1c0e20dfc01df0212013ec/dotnet-sdk-9.0.100-preview.3.24172.9-linux-x64.tar.gz
-          mkdir -p $HOME/dotnet
-          tar zxf dotnet-sdk-9.0.100-preview.3.24172.9-linux-x64.tar.gz -C $HOME/dotnet
+          curl -sSL https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
+          chmod +x dotnet-install.sh
+          ./dotnet-install.sh --version 9.0.100-preview.3.24172.9 --install-dir "$HOME/dotnet"
           echo "$HOME/dotnet" >> $GITHUB_PATH
           echo "DOTNET_ROOT=$HOME/dotnet" >> $GITHUB_ENV
 

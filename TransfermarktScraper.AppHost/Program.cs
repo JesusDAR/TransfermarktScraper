@@ -15,10 +15,12 @@ namespace TransfermarktScraper.AppHost
         {
             var builder = DistributedApplication.CreateBuilder(args);
 
-            var apiService = builder.AddProject<Projects.TransfermarktScraper_ApiService>("apiservice");
+            var apiService = builder.AddProject<Projects.TransfermarktScraper_ApiService>("apiservice")
+                .WithHttpHealthCheck("/health");
 
             builder.AddProject<Projects.TransfermarktScraper_Web>("webfrontend")
                 .WithExternalHttpEndpoints()
+                .WithHttpHealthCheck("/health")
                 .WithReference(apiService)
                 .WaitFor(apiService);
 

@@ -16,6 +16,7 @@ namespace TransfermarktScraper.AppHost
             var builder = DistributedApplication.CreateBuilder(args);
 
             var apiService = builder.AddProject<Projects.TransfermarktScraper_ApiService>("apiservice")
+                .WithExternalHttpEndpoints()
                 .WithHttpHealthCheck("/health");
 
             builder.AddProject<Projects.TransfermarktScraper_Web>("webfrontend")

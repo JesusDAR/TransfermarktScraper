@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 
@@ -17,14 +18,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class CompetitionController : ControllerBase
     {
         private readonly ICompetitionService _competitionService;
+        private readonly ILogger<CompetitionController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompetitionController"/> class.
         /// </summary>
         /// <param name="competitionService">The service for scraping competition data.</param>
-        public CompetitionController(ICompetitionService competitionService)
+        /// <param name="logger">The logger.</param>
+        public CompetitionController(
+            ICompetitionService competitionService,
+            ILogger<CompetitionController> logger)
         {
             _competitionService = competitionService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -50,11 +56,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get competitions.");
+
                 var result = await _competitionService.GetCompetitionsAsync(countryTransfermarktId, forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }

@@ -1,4 +1,6 @@
+using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,6 +23,12 @@ namespace TransfermarktScraper.ApiService
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
             // Add service defaults & Aspire client integrations.
             builder.AddServiceDefaults();
 
@@ -32,19 +40,27 @@ namespace TransfermarktScraper.ApiService
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.MapScalarApiReference(
-                    options =>
-                        options
-                        .WithTitle("TransfermarktScraper API")
-                        .WithTheme(ScalarTheme.BluePlanet)
-                        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                        .Servers = []); // workaround to prevent scalar from taking a random generated localhost server as base url
-            }
+            app.UseCors("AllowAll");
+            app.MapOpenApi();
+            app.MapScalarApiReference(
+                options =>
+                    options
+                    .WithTitle("TransfermarktScraper API")
+                    .WithTheme(ScalarTheme.BluePlanet)
+                    .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+                    .Servers = []); // workaround to prevent scalar from taking a random generated localhost server as base url
 
             app.MapControllers();
 
@@ -54,6 +70,7 @@ namespace TransfermarktScraper.ApiService
             app.MapDefaultEndpoints();
 
             var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Current environment: {EnvironmentName}", builder.Environment.EnvironmentName);
             logger.LogInformation("Starting Transfermarkt.ApiService...");
 
             app.Run();

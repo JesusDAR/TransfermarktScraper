@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 
@@ -17,14 +18,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly IPlayerService _playerService;
+        private readonly ILogger<PlayerController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlayerController"/> class.
         /// </summary>
         /// <param name="playerService">The service for scraping player data.</param>
-        public PlayerController(IPlayerService playerService)
+        /// <param name="logger">The logger.</param>
+        public PlayerController(
+            IPlayerService playerService,
+            ILogger<PlayerController> logger)
         {
             _playerService = playerService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -52,11 +58,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get players.");
+
                 var result = await _playerService.GetPlayersAsync(clubTransfermarktId, forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 
@@ -14,14 +15,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class SettingsController : ControllerBase
     {
         private readonly ISettingsService _settingsService;
+        private readonly ILogger<SettingsController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsController"/> class.
         /// </summary>
         /// <param name="settingsService">The service for managing the application settings.</param>
-        public SettingsController(ISettingsService settingsService)
+        /// <param name="logger">The logger.</param>
+        public SettingsController(
+            ISettingsService settingsService,
+            ILogger<SettingsController> logger)
         {
             _settingsService = settingsService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -39,11 +45,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get settings.");
+
                 var result = _settingsService.GetSettings();
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }
@@ -71,6 +80,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }
@@ -98,12 +108,9 @@ namespace TransfermarktScraper.ApiService.Controllers
                 _settingsService.SetCountriesCountToScrape(countriesCountToScrape);
                 return Ok();
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }
@@ -131,6 +138,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }

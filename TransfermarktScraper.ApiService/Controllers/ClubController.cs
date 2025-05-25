@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DnsClient.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using TransfermarktScraper.BLL.Services.Impl;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
 
@@ -17,14 +20,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class ClubController : ControllerBase
     {
         private readonly IClubService _clubService;
+        private readonly ILogger<ClubController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClubController"/> class.
         /// </summary>
         /// <param name="clubService">The service for scraping club data.</param>
-        public ClubController(IClubService clubService)
+        /// <param name="logger">The logger.</param>
+        public ClubController(
+            IClubService clubService,
+            ILogger<ClubController> logger)
         {
             _clubService = clubService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,11 +55,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get clubs.");
+
                 var result = await _clubService.GetClubsAsync(competitionTransfermarktId, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }

@@ -27,6 +27,6 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// <returns>
         /// A task representing the asynchronous operation, returning an <see cref="IEnumerable{T}"/> of <see cref="CountryResponse"/> with full <see cref="CompetitionResponse"/> data.
         /// </returns>
-        Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries);
+        Task<IEnumerable<CountryResponse>> UpdateCountriesCompetitionsAsync(IEnumerable<CountryRequest> countries);
     }
 }

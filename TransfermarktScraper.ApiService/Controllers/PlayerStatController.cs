@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Request.Stat;
 using TransfermarktScraper.Domain.DTOs.Response.Stat;
@@ -19,14 +20,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class PlayerStatController : ControllerBase
     {
         private readonly IPlayerStatService _playerStatService;
+        private readonly ILogger<PlayerStatController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlayerStatController"/> class.
         /// </summary>
         /// <param name="playerStatService">The service for scraping player stat data.</param>
-        public PlayerStatController(IPlayerStatService playerStatService)
+        /// <param name="logger">The logger.</param>
+        public PlayerStatController(
+            IPlayerStatService playerStatService,
+            ILogger<PlayerStatController> logger)
         {
             _playerStatService = playerStatService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -48,16 +54,15 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get player stats.");
+
                 var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, cancellationToken);
                 return Ok(result);
             }
-            catch (HttpRequestException e)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable, e.Message);
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
+                _logger.LogError(ex, "Unexpected Error.");
+                return Problem(ex.Message);
             }
         }
     }

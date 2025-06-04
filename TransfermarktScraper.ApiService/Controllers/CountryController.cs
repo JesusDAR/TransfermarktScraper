@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DnsClient.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Request;
 using TransfermarktScraper.Domain.DTOs.Response;
@@ -18,14 +20,19 @@ namespace TransfermarktScraper.ApiService.Controllers
     public class CountryController : ControllerBase
     {
         private readonly ICountryService _countryService;
+        private readonly ILogger<CountryController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountryController"/> class.
         /// </summary>
         /// <param name="countryService">The service for scraping country data.</param>
-        public CountryController(ICountryService countryService)
+        /// <param name="logger">The logger.</param>
+        public CountryController(
+            ICountryService countryService,
+            ILogger<CountryController> logger)
         {
             _countryService = countryService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -51,11 +58,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
+                _logger.LogInformation("Received request to get countries.");
+
                 var result = await _countryService.GetCountriesAsync(forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }
@@ -77,21 +87,24 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// </returns>
         /// <response code="200">Returns the list of countries with the competitions successfully scraped or retrieved from the database.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
-        [HttpPost]
+        [HttpPut("competitions")]
         [ProducesResponseType(typeof(IEnumerable<CountryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<CountryResponse>>> GetCountriesAsync(
+        public async Task<ActionResult<IEnumerable<CountryResponse>>> UpdateCountriesCompetitionsAsync(
             [FromBody] IEnumerable<CountryRequest> countries,
             [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _countryService.GetCountriesAsync(countries, forceScraping, cancellationToken);
+                _logger.LogInformation("Received request to update countries competitions.");
+
+                var result = await _countryService.UpdateCountriesCompetitionsAsync(countries, forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected Error.");
                 return Problem(ex.Message);
             }
         }

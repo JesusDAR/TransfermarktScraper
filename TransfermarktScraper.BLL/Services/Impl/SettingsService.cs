@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using DnsClient.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.BLL.Services.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response;
@@ -9,19 +11,24 @@ namespace TransfermarktScraper.BLL.Services.Impl
     public class SettingsService : ISettingsService
     {
         private readonly ScraperSettings _scraperSettings;
+        private readonly ILogger<SettingsService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsService"/> class.
         /// </summary>
         /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
-        public SettingsService(IOptions<ScraperSettings> scraperSettings)
+        /// <param name="logger">The logger.</param>
+        public SettingsService(IOptions<ScraperSettings> scraperSettings, ILogger<SettingsService> logger)
         {
             _scraperSettings = scraperSettings.Value;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
         public SettingsResponse GetSettings()
         {
+            _logger.LogInformation("Getting settings...");
+
             var settings = new SettingsResponse
             {
                 IsHeadlessMode = _scraperSettings.HeadlessMode,

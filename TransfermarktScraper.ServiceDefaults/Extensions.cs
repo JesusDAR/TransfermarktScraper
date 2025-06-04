@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,26 +29,27 @@ namespace Microsoft.Extensions.Hosting
         public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder)
             where TBuilder : IHostApplicationBuilder
         {
-            builder.ConfigureOpenTelemetry();
-
-            builder.AddDefaultHealthChecks();
-
-            builder.AddLogging();
-
-            builder.Services.AddServiceDiscovery();
-
-            builder.Services.ConfigureHttpClientDefaults(http =>
+            try
             {
-                http.AddServiceDiscovery();
-            });
+                builder.ConfigureOpenTelemetry();
 
-            // Uncomment the following to restrict the allowed schemes for service discovery.
-            // builder.Services.Configure<ServiceDiscoveryOptions>(options =>
-            // {
-            //     options.AllowedSchemes = ["https"];
-            // });
+                builder.AddDefaultHealthChecks();
 
-            return builder;
+                builder.AddLogging();
+
+                builder.Services.AddServiceDiscovery();
+
+                builder.Services.ConfigureHttpClientDefaults(http =>
+                {
+                    http.AddServiceDiscovery();
+                });
+
+                return builder;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error in {nameof(AddServiceDefaults)}", ex);
+            }
         }
 
         /// <summary>
@@ -121,7 +123,12 @@ namespace Microsoft.Extensions.Hosting
                 {
                     Predicate = r => r.Tags.Contains("live"),
                 });
+            }
 
+            var appName = app.Configuration.GetSection("applicationName").Value;
+
+            if (appName == "TransfermarktScraper.ApiService")
+            {
                 // Logs
                 app.MapHub<LogHub>("/logs");
             }
@@ -167,13 +174,6 @@ namespace Microsoft.Extensions.Hosting
             {
                 builder.Services.AddOpenTelemetry().UseOtlpExporter();
             }
-
-            // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-            //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-            //{
-            //    builder.Services.AddOpenTelemetry()
-            //       .UseAzureMonitor();
-            //}
 
             return builder;
         }

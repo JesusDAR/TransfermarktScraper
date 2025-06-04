@@ -55,6 +55,8 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Starting the scraping competitions process...");
+
             var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;

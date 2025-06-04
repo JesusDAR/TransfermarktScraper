@@ -157,7 +157,7 @@ else
 
 		var countryDtos = ItemSelectionService.SelectedCountries.Adapt<IEnumerable<CountryRequest>>();
 
-		var updatedCountries = await CountryClient.GetCountriesAsync(countryDtos);
+		var updatedCountries = await CountryClient.UpdateCountriesCompetitionsAsync(countryDtos);
 
 		selectedCountries = updatedCountries.ToHashSet();
 		filteredCountries = selectedCountries;

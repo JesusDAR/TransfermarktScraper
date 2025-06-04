@@ -62,7 +62,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the scraping countries process...");
+            int countryLimit = _scraperSettings.CountryLimit;
+
+            _logger.LogInformation("Starting the scraping of {CountryLimit} countries process...", countryLimit);
 
             var countryDtos = Enumerable.Empty<CountryResponse>();
 
@@ -71,6 +73,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
             if (forceScraping)
             {
                 var countriesScraped = await ScrapeCountriesAsync();
+                _logger.LogInformation("countriesScraped: {@countriesScraped}", countriesScraped);
+
+                _logger.LogInformation("PersistCountriesAsync...");
 
                 var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
@@ -98,9 +103,9 @@ namespace TransfermarktScraper.BLL.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CountryResponse>> UpdateCountriesCompetitionsAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Starting the scraping competitions process...");
+            _logger.LogInformation("Starting the updating countries competitions process...");
 
             var countriesDtos = new List<CountryResponse>();
 
@@ -225,7 +230,11 @@ namespace TransfermarktScraper.BLL.Services.Impl
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
         private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
         {
+            _logger.LogInformation("PAGE: {Url}", _page.Url);
+
             var response = await _page.GotoAsync("/");
+
+            _logger.LogInformation("RESPONSE: {Status}", response?.Status);
 
             if (response == null || response.Status != (int)HttpStatusCode.OK)
             {

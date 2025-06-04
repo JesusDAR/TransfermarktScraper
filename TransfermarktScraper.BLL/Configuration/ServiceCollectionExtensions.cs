@@ -25,127 +25,141 @@ namespace TransfermarktScraper.BLL.Configuration
         public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Bind ScraperSettings from appsettings.json
-            services.Configure<ScraperSettings>(options =>
-                configuration.GetSection(nameof(ScraperSettings)).Bind(options));
-
-            // Register Playwright services
-            services.AddSingleton(provider =>
+            try
             {
-                return Playwright.CreateAsync().GetAwaiter().GetResult();
-            }); // One playwright instance for all app
+                services.Configure<ScraperSettings>(options =>
+            configuration.GetSection(nameof(ScraperSettings)).Bind(options));
 
-            // One browser for all app
-            services.AddSingleton(provider =>
-            {
-                var playwright = provider.GetRequiredService<IPlaywright>();
-                var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-
-                return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+                // Register Playwright services
+                services.AddSingleton(provider =>
                 {
-                    Headless = scraperSettings.HeadlessMode, // set to false to see the browser
-                }).GetAwaiter().GetResult();
-            });
+                    return Playwright.CreateAsync().GetAwaiter().GetResult();
+                }); // One playwright instance for all app
 
-            // One browser context per request
-            services.AddScoped(provider =>
-            {
-                var browser = provider.GetRequiredService<IBrowser>();
-                var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-
-                var context = browser.NewContextAsync(new BrowserNewContextOptions
+                // One browser for all app
+                services.AddSingleton(provider =>
                 {
-                    BaseURL = scraperSettings.BaseUrl,
-                }).GetAwaiter().GetResult();
-
-                context.SetDefaultTimeout(scraperSettings.DefaultTimeout);
-
-                return context;
-            });
-
-            // One page per request
-            services.AddScoped(provider =>
-            {
-                var browserContext = provider.GetRequiredService<IBrowserContext>();
-                var page = browserContext.NewPageAsync().GetAwaiter().GetResult();
-
-                // block cookies modal
-                var regex = new Regex(@"Notice\..+\.js");
-                page.RouteAsync(regex, route =>
-                {
-                    route.AbortAsync();
-                });
-
-                return page;
-            });
-
-            // Register Country HttpClient
-            services.AddHttpClient("CountryClient")
-                .ConfigureHttpClient((provider, client) =>
-                {
+                    var playwright = provider.GetRequiredService<IPlaywright>();
                     var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-                    client.BaseAddress = new Uri(scraperSettings.BaseUrl);
-                    client.Timeout = TimeSpan.FromSeconds(10);
+
+                    return playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+                    {
+                        Headless = scraperSettings.HeadlessMode, // set to false to see the browser
+                    }).GetAwaiter().GetResult();
                 });
 
-            // Register MarketValue HttpClient
-            services.AddHttpClient("MarketValueClient")
-                .ConfigureHttpClient((provider, client) =>
+                // One browser context per request
+                services.AddScoped(provider =>
                 {
+                    var browser = provider.GetRequiredService<IBrowser>();
                     var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
-                    client.BaseAddress = new Uri(scraperSettings.BaseUrl);
-                    client.Timeout = TimeSpan.FromSeconds(5);
+
+                    var context = browser.NewContextAsync(new BrowserNewContextOptions
+                    {
+                        BaseURL = scraperSettings.BaseUrl,
+                    }).GetAwaiter().GetResult();
+
+                    context.SetDefaultTimeout(scraperSettings.DefaultTimeout);
+
+                    return context;
                 });
 
-            // Register AngleSharp HTML parser
-            services.AddSingleton<HtmlParser>();
+                // One page per request
+                services.AddScoped(provider =>
+                {
+                    var browserContext = provider.GetRequiredService<IBrowserContext>();
+                    var page = browserContext.NewPageAsync().GetAwaiter().GetResult();
 
-            // Register services
-            services.AddSingleton<ISettingsService, SettingsService>();
-            services.AddScoped<ICountryService, CountryService>();
-            services.AddScoped<ICompetitionService, CompetitionService>();
-            services.AddScoped<IClubService, ClubService>();
-            services.AddScoped<IPlayerService, PlayerService>();
-            services.AddScoped<IMarketValueService, MarketValueService>();
-            services.AddScoped<IPlayerStatService, PlayerStatService>();
+                    // block cookies modal
+                    var regex = new Regex(@"Notice\..+\.js");
+                    page.RouteAsync(regex, route =>
+                    {
+                        route.AbortAsync();
+                    });
 
-            // Register mapping services
-            services.AddMappingServices();
+                    return page;
+                });
 
-            return services;
+                // Register Country HttpClient
+                services.AddHttpClient("CountryClient")
+                    .ConfigureHttpClient((provider, client) =>
+                    {
+                        var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+                        client.BaseAddress = new Uri(scraperSettings.BaseUrl);
+                        client.Timeout = TimeSpan.FromSeconds(10);
+                    });
+
+                // Register MarketValue HttpClient
+                services.AddHttpClient("MarketValueClient")
+                    .ConfigureHttpClient((provider, client) =>
+                    {
+                        var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;
+                        client.BaseAddress = new Uri(scraperSettings.BaseUrl);
+                        client.Timeout = TimeSpan.FromSeconds(5);
+                    });
+
+                // Register AngleSharp HTML parser
+                services.AddSingleton<HtmlParser>();
+
+                // Register services
+                services.AddSingleton<ISettingsService, SettingsService>();
+                services.AddScoped<ICountryService, CountryService>();
+                services.AddScoped<ICompetitionService, CompetitionService>();
+                services.AddScoped<IClubService, ClubService>();
+                services.AddScoped<IPlayerService, PlayerService>();
+                services.AddScoped<IMarketValueService, MarketValueService>();
+                services.AddScoped<IPlayerStatService, PlayerStatService>();
+
+                // Register mapping services
+                services.AddMappingServices();
+
+                return services;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error in {nameof(AddBusinessLogicServices)}", ex);
+            }
         }
 
         private static IServiceCollection AddMappingServices(this IServiceCollection services)
         {
-            services.AddScoped<CountryMapping>();
-            services.AddScoped<CompetitionMapping>();
-            services.AddScoped<ClubMapping>();
-            services.AddScoped<PlayerMapping>();
-            services.AddScoped<PlayerStatMapping>();
-            services.AddScoped<PlayerSeasonStatMapping>();
-
-            var config = TypeAdapterConfig.GlobalSettings;
-
-            var mapperTypes = new[]
+            try
             {
-                typeof(CountryMapping),
-                typeof(CompetitionMapping),
-                typeof(ClubMapping),
-                typeof(PlayerMapping),
-                typeof(PlayerStatMapping),
-                typeof(PlayerSeasonStatMapping),
-            };
+                services.AddScoped<CountryMapping>();
+                services.AddScoped<CompetitionMapping>();
+                services.AddScoped<ClubMapping>();
+                services.AddScoped<PlayerMapping>();
+                services.AddScoped<PlayerStatMapping>();
+                services.AddScoped<PlayerSeasonStatMapping>();
 
-            foreach (var type in mapperTypes)
-            {
-                if (ActivatorUtilities.CreateInstance(services.BuildServiceProvider(), type) is IRegister mapper)
+                var config = TypeAdapterConfig.GlobalSettings;
+
+                var mapperTypes = new[]
                 {
-                    mapper.Register(config);
+                    typeof(CountryMapping),
+                    typeof(CompetitionMapping),
+                    typeof(ClubMapping),
+                    typeof(PlayerMapping),
+                    typeof(PlayerStatMapping),
+                    typeof(PlayerSeasonStatMapping),
+                };
+
+                foreach (var type in mapperTypes)
+                {
+                    if (ActivatorUtilities.CreateInstance(services.BuildServiceProvider(), type) is IRegister mapper)
+                    {
+                        mapper.Register(config);
+                    }
                 }
+
+                services.AddMapster();
+
+                return services;
             }
-
-            services.AddMapster();
-
-            return services;
+            catch (Exception ex)
+            {
+                throw new Exception($"Error in {nameof(AddMappingServices)}", ex);
+            }
         }
     }
 }

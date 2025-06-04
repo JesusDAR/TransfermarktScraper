@@ -1,6 +1,10 @@
+using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using TransfermarktScraper.Web.Components;
 using TransfermarktScraper.Web.Configuration;
@@ -20,6 +24,12 @@ namespace TransfermarktScraper.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
             // Add MudBlazor services
             builder.Services.AddMudServices();
 
@@ -36,11 +46,17 @@ namespace TransfermarktScraper.Web
 
             var app = builder.Build();
 
-            if (!app.Environment.IsDevelopment())
+            app.UseExceptionHandler(errorApp =>
             {
-                app.UseExceptionHandler("/Error", createScopeForErrors: true);
-                app.UseHsts();
-            }
+                errorApp.Run(async context =>
+                {
+                    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                    var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    var exception = exceptionHandlerPathFeature?.Error;
+                    logger.LogError($"Exception Message: {exception?.Message}.");
+                });
+            });
+            app.UseHsts();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -51,6 +67,11 @@ namespace TransfermarktScraper.Web
                 .AddInteractiveServerRenderMode();
 
             app.MapDefaultEndpoints();
+
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Current environment: {EnvironmentName}", builder.Environment.EnvironmentName);
+            logger.LogInformation("Starting Transfermarkt.Web...");
+
             app.Run();
         }
     }

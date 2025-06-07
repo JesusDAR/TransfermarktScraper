@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {

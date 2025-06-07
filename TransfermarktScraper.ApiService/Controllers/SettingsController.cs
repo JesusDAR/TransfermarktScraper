@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -14,19 +14,23 @@ namespace TransfermarktScraper.ApiService.Controllers
     [ApiController]
     public class SettingsController : ControllerBase
     {
-        private readonly ISettingsService _settingsService;
+        private readonly Scraper.Services.Interfaces.ISettingsService _scraperSettingsService;
+        private readonly Exporter.Services.Interfaces.ISettingsService _exporterSettingsService;
         private readonly ILogger<SettingsController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsController"/> class.
         /// </summary>
-        /// <param name="settingsService">The service for managing the application settings.</param>
+        /// <param name="scraperSettingsService">The service for managing the scraper settings.</param>
+        /// <param name="exporterSettingsService">The service for managing the exporter settings.</param>
         /// <param name="logger">The logger.</param>
         public SettingsController(
-            ISettingsService settingsService,
+            Scraper.Services.Interfaces.ISettingsService scraperSettingsService,
+            Exporter.Services.Interfaces.ISettingsService exporterSettingsService,
             ILogger<SettingsController> logger)
         {
-            _settingsService = settingsService;
+            _scraperSettingsService = scraperSettingsService;
+            _exporterSettingsService = exporterSettingsService;
             _logger = logger;
         }
 
@@ -47,7 +51,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             {
                 _logger.LogInformation("Received request to get settings.");
 
-                var result = _settingsService.GetSettings();
+                var result = _scraperSettingsService.GetSettings();
                 return Ok(result);
             }
             catch (Exception ex)
@@ -68,14 +72,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 200 OK if successful.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("headless-mode/{isHeadlessMode}")]
+        [HttpPost("scraper/headless-mode/{isHeadlessMode}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult SetHeadlessMode(bool isHeadlessMode)
         {
             try
             {
-                _settingsService.SetHeadlessMode(isHeadlessMode);
+                _scraperSettingsService.SetHeadlessMode(isHeadlessMode);
                 return Ok();
             }
             catch (Exception ex)
@@ -97,7 +101,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 400 Bad Request if the value is invalid.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("countries-to-scrape/{countriesCountToScrape}")]
+        [HttpPost("scraper/countries-to-scrape/{countriesCountToScrape}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -105,7 +109,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         {
             try
             {
-                _settingsService.SetCountriesCountToScrape(countriesCountToScrape);
+                _scraperSettingsService.SetCountriesCountToScrape(countriesCountToScrape);
                 return Ok();
             }
             catch (Exception ex)
@@ -126,15 +130,63 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 200 OK if successful.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("force-scraping/{isForceScraping}")]
+        [HttpPost("scraper/force-scraping/{isForceScraping}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult SetForceScraping(bool isForceScraping)
         {
             try
             {
-                _settingsService.SetForceScraping(isForceScraping);
+                _scraperSettingsService.SetForceScraping(isForceScraping);
                 return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected Error.");
+                return Problem(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Gets the base flag URL to be used by the UI to display the nationalities flags of the players.
+        /// </summary>
+        /// <returns>
+        /// 200 OK if successful.
+        /// 500 Internal Server Error if an unexpected error occurs.
+        /// </returns>
+        [HttpGet("scraper/flag-url")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<string> GetFlagUrl()
+        {
+            try
+            {
+                var result = _scraperSettingsService.GetFlagUrl();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected Error.");
+                return Problem(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of supported format for the exporter.
+        /// </summary>
+        /// <returns>
+        /// 200 OK if successful.
+        /// 500 Internal Server Error if an unexpected error occurs.
+        /// </returns>
+        [HttpGet("exporter/supported-formats")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<IEnumerable<string>> GetSupportedFormats()
+        {
+            try
+            {
+                var result = _exporterSettingsService.GetSupportedFormats();
+                return Ok(result);
             }
             catch (Exception ex)
             {

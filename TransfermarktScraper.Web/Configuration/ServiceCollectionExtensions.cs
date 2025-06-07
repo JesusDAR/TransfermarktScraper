@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading;
-using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Web.Clients.Impl;
 using TransfermarktScraper.Web.Clients.Interfaces;
-using TransfermarktScraper.Web.Mappers;
 using TransfermarktScraper.Web.Services.Impl;
 using TransfermarktScraper.Web.Services.Interfaces;
 
@@ -73,10 +71,6 @@ namespace TransfermarktScraper.Web.Configuration
                 client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.SettingsControllerPath);
                 client.Timeout = TimeSpan.FromHours(12);
             });
-
-            // Register Mapster services
-            services.AddScoped<CountryMapping>();
-            services.AddMapster();
 
             // Register navigation history service
             services.AddScoped<INavigationHistoryService, NavigationHistoryService>();

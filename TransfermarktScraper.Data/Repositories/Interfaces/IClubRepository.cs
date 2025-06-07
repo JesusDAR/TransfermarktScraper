@@ -31,6 +31,15 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<IEnumerable<Club>> GetAllAsync(string competitionTransfermarktId, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Asynchronously retrieves all <see cref="Club"/>.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains a collection of <see cref="Club"/>, or empty list if no clubs exist.
+        /// </returns>
+        Task<IEnumerable<Club>> GetAllAsync(CancellationToken cancellationToken);
+
+        /// <summary>
         /// Inserts or updates a <see cref="Club"/> entity in the database.
         /// If the <see cref="Club"/> already exists it will be updated; otherwise, a new <see cref="Club"/> will be inserted.
         /// </summary>

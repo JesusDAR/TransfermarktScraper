@@ -2,10 +2,11 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TransfermarktScraper.Domain.DTOs.Request.Stat;
-using TransfermarktScraper.Domain.DTOs.Response.Stat;
+using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat;
 using TransfermarktScraper.Web.Clients.Interfaces;
 using TransfermarktScraper.Web.Configuration;
 
@@ -35,11 +36,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats)
+        public async Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats, bool forceScraping)
         {
             _logger.LogInformation("Sent request to get player stats.");
 
-            var result = await _httpClient.PostAsJsonAsync(_clientSettings.PlayerStatsControllerPath, playerStats);
+            var queryParams = new Dictionary<string, string?>
+            {
+                { "forceScraping", forceScraping.ToString() },
+            };
+
+            var uri = QueryHelpers.AddQueryString(_clientSettings.PlayerStatsControllerPath, queryParams);
+
+            var result = await _httpClient.PostAsJsonAsync(uri, playerStats);
 
             if (result != null && result.IsSuccessStatusCode)
             {

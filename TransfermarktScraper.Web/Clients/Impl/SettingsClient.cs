@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 using TransfermarktScraper.Web.Clients.Interfaces;
 using TransfermarktScraper.Web.Configuration;
 
@@ -45,7 +45,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetHeadlessModeAsync(bool isHeadlessMode)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"/headless-mode/{isHeadlessMode}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/headless-mode/{isHeadlessMode}"),
                 default);
         }
 
@@ -53,7 +53,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetCountriesCountToScrapeAsync(int countriesCountToScrape)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"/countries-to-scrape/{countriesCountToScrape}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/countries-to-scrape/{countriesCountToScrape}"),
                 default);
         }
 
@@ -61,8 +61,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetForceScrapingAsync(bool isForceScraping)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"/force-scraping/{isForceScraping}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/force-scraping/{isForceScraping}"),
                 default);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> GetFlagUrlAsync()
+        {
+            var result = await _httpClient.GetFromJsonAsync<string>(
+                string.Concat(_clientSettings.SettingsControllerPath, $"/flag-url"),
+                default);
+
+            return result ?? string.Empty;
         }
     }
 }

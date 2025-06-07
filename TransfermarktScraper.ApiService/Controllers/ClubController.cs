@@ -6,9 +6,8 @@ using DnsClient.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TransfermarktScraper.BLL.Services.Impl;
-using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
+using TransfermarktScraper.Scraper.Services.Interfaces;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {

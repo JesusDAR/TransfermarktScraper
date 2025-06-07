@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Scalar.AspNetCore;
-using TransfermarktScraper.BLL.Configuration;
 using TransfermarktScraper.Data.Configuration;
+using TransfermarktScraper.Domain.Configuration;
+using TransfermarktScraper.Exporter.Configuration;
+using TransfermarktScraper.Scraper.Configuration;
 
 namespace TransfermarktScraper.ApiService
 {
@@ -35,8 +37,10 @@ namespace TransfermarktScraper.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails();
 
+            builder.Services.AddDomainServices();
             builder.Services.AddDataServices(builder.Configuration);
-            builder.Services.AddBusinessLogicServices(builder.Configuration);
+            builder.Services.AddScraperServices(builder.Configuration);
+            builder.Services.AddExporterServices(builder.Configuration);
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 

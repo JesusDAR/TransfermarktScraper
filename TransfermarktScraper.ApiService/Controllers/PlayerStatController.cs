@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TransfermarktScraper.BLL.Services.Interfaces;
-using TransfermarktScraper.Domain.DTOs.Request.Stat;
-using TransfermarktScraper.Domain.DTOs.Response.Stat;
+using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat;
+using TransfermarktScraper.Scraper.Services.Interfaces;
 
 namespace TransfermarktScraper.ApiService.Controllers
 {
@@ -39,6 +38,9 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Retrieves the player stats from Transfermarkt or from the database.
         /// </summary>
         /// <param name="playerStatRequests">The list of player stat request DTO.</param>
+        /// <param name="forceScraping">
+        /// A boolean flag that determines whether to force scraping of the player stat data, even if it exists in the database.
+        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns> An <see cref="ActionResult{T}"/> containing a <see cref="PlayerStatResponse"/> object.</returns>
         /// <response code="200">Returns the of player stat successfully scraped.</response>
@@ -50,13 +52,14 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IEnumerable<PlayerStatResponse>>> GetPlayerStatsAsync(
             [FromBody] IEnumerable<PlayerStatRequest> playerStatRequests,
+            [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Received request to get player stats.");
 
-                var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, cancellationToken);
+                var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, forceScraping, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

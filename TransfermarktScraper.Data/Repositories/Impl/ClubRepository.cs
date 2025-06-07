@@ -62,6 +62,22 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<Club>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var clubs = await _clubs.Find(_ => true).ToListAsync(cancellationToken);
+
+                return clubs;
+            }
+            catch (Exception)
+            {
+                var message = $"Failed to retrieve all clubs from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(ClubRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<Club> InsertOrUpdateAsync(Club club, CancellationToken cancellationToken)
         {
             try

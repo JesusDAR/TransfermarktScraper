@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 using TransfermarktScraper.Web.Services.Interfaces;
 
 namespace TransfermarktScraper.Web.Services.Impl

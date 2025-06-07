@@ -1,8 +1,8 @@
 @page "/players/{playerTransfermarktId}/stats"
 
-@using TransfermarktScraper.Domain.DTOs.Response
-@using TransfermarktScraper.Domain.DTOs.Response.Stat
-@using TransfermarktScraper.Domain.DTOs.Request.Stat
+@using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat
+@using TransfermarktScraper.Domain.DTOs.Response.Scraper
+@using TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat
 @using TransfermarktScraper.Domain.Enums.Extensions
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
@@ -11,6 +11,7 @@
 
 @implements IRefreshablePage
 
+@inject ISettingsClient SettingsClient
 @inject IPlayerStatClient PlayerStatClient
 @inject IItemSelectionService ItemSelectionService
 @inject IPageReferenceService PageReferenceService
@@ -45,11 +46,14 @@ else
                             <MudIcon Icon="@Icons.Material.Filled.SouthAmerica" Size="Size.Small" />
                             Nationalities:
                             <MudAvatarGroup Spacing="0">
-                                @foreach (var nationality in selectedPlayer.Nationalities)
-                                {
-                                    <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
-                                        <MudImage Src=@nationality></MudImage>
-                                    </MudAvatar>
+                                @{
+                                    var nationalityImages = Domain.Utils.DTO.ImageUtils.ConvertCountryTransfermarktIdsToImageUrls(selectedPlayer.Nationalities, flagUrl);
+                                    foreach (var nationalityImage in nationalityImages)
+                                    {
+                                        <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
+                                            <MudImage Src=@nationalityImage></MudImage>
+                                        </MudAvatar>
+                                    }
                                 }
                             </MudAvatarGroup>
                         </MudStack>
@@ -313,6 +317,7 @@ else
 @code {
     [Parameter]
     public string playerTransfermarktId { get; set; } = default!;
+    private string flagUrl = null!;
 
     private PlayerResponse? selectedPlayer = null!;
     private PlayerStatResponse? selectedPlayerStat = null!;
@@ -341,6 +346,7 @@ else
     {
         PageReferenceService.CurrentPage = this;
         selectedPlayer = ItemSelectionService.SelectedPlayer;
+        flagUrl = await GetFlagUrlAsync();
 
         if (selectedPlayer != null)
         {
@@ -477,8 +483,14 @@ else
 
         var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
 
-        var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
+        var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests, default);
 
         return playerStatResponses;              
+    }
+
+    private async Task<string> GetFlagUrlAsync()
+    {
+        var result = await SettingsClient.GetFlagUrlAsync();
+        return result;
     }
 }

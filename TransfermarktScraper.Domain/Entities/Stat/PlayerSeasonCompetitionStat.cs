@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using TransfermarktScraper.Domain.Utils;
+using TransfermarktScraper.Domain.Utils.Entity;
 
 namespace TransfermarktScraper.Domain.Entities.Stat
 {

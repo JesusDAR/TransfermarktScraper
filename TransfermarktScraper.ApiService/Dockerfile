@@ -12,7 +12,8 @@ ARG BUILD_CONFIGURATION=Release
 
 WORKDIR /src
 COPY ["TransfermarktScraper.ApiService/TransfermarktScraper.ApiService.csproj", "TransfermarktScraper.ApiService/"]
-COPY ["TransfermarktScraper.BLL/TransfermarktScraper.BLL.csproj", "TransfermarktScraper.BLL/"]
+COPY ["TransfermarktScraper.Scraper/TransfermarktScraper.Scraper.csproj", "TransfermarktScraper.Scraper/"]
+COPY ["TransfermarktScraper.Scraper/TransfermarktScraper.Exporter.csproj", "TransfermarktScraper.Exporter/"]
 COPY ["TransfermarktScraper.Data/TransfermarktScraper.Data.csproj", "TransfermarktScraper.Data/"]
 COPY ["TransfermarktScraper.Domain/TransfermarktScraper.Domain.csproj", "TransfermarktScraper.Domain/"]
 COPY ["TransfermarktScraper.ServiceDefaults/TransfermarktScraper.ServiceDefaults.csproj", "TransfermarktScraper.ServiceDefaults/"]

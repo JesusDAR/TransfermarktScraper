@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using TransfermarktScraper.Domain.DTOs.Response;
+using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 
 namespace TransfermarktScraper.Web.Clients.Interfaces
 {
@@ -44,5 +44,11 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// </param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task SetForceScrapingAsync(bool isForceScraping);
+
+        /// <summary>
+        /// Gets the base flag URL to be used by the UI to display the nationalities flags of the players.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains the flag base URL used by Transfermarkt.</returns>
+        Task<string> GetFlagUrlAsync();
     }
 }

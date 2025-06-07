@@ -9,7 +9,7 @@ using TransfermarktScraper.Data.Context.Interfaces;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.Entities.Stat;
 using TransfermarktScraper.Domain.Exceptions;
-using TransfermarktScraper.Domain.Utils;
+using TransfermarktScraper.Domain.Utils.Entity;
 
 namespace TransfermarktScraper.Data.Repositories.Impl
 {
@@ -65,6 +65,23 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             catch (Exception)
             {
                 var message = $"Failed to retrieve player stats for the provided Transfermarkt IDs: {string.Join(", ", playerTransfermarktIds)} from the database.";
+                throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(PlayerStatRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<PlayerStat>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var playerStats = await _playerStats.Find(_ => true)
+                    .ToListAsync(cancellationToken);
+
+                return playerStats;
+            }
+            catch (Exception)
+            {
+                var message = $"Failed to retrieve player stats from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(PlayerStatRepository), _logger);
             }
         }

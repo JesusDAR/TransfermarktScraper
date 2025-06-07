@@ -1,7 +1,8 @@
 @page "/players"
 
-@using TransfermarktScraper.Domain.DTOs.Request.Stat
+@using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat
 @using TransfermarktScraper.Domain.DTOs.Response
+@using TransfermarktScraper.Domain.DTOs.Response.Scraper
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 
@@ -225,7 +226,7 @@ else
 			playerStatRequests.Add(playerStatRequest);
 		}
 
-		await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
+		await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests, default);
 	}
 
 	private void NavigateToPlayerStats()

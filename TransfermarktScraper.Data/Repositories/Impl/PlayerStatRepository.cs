@@ -87,6 +87,20 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _playerStats.DeleteManyAsync(FilterDefinition<PlayerStat>.Empty, cancellationToken);
+            }
+            catch (Exception)
+            {
+                var message = "Failed to delete all player stats from the database.";
+                throw DatabaseException.LogError(message, nameof(RemoveAllAsync), nameof(PlayerStatRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<PlayerSeasonStat>> GetPlayerSeasonStatsAsync(string playerTransfermarktId, IEnumerable<string> seasonTransfermarktIds, CancellationToken cancellationToken)
         {
             try

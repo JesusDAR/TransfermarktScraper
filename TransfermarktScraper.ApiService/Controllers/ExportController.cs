@@ -25,11 +25,11 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportController"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
         /// <param name="countryCompetitionExporterService">The country-competition export data service.</param>
         /// <param name="clubPlayerExporterService">The club-player export data service.</param>
         /// <param name="playerStatExporterService">The player stats export data service.</param>
         /// <param name="masterExporterService">The master export data service.</param>
+        /// <param name="logger">The logger.</param>
         public ExportController(
             ICountryCompetitionExporterService countryCompetitionExporterService,
             IClubPlayerExporterService clubPlayerExporterService,

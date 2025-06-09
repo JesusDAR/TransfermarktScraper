@@ -46,5 +46,14 @@ namespace TransfermarktScraper.Scraper.Services.Interfaces
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public Task CheckCountryAndCompetitionScrapingStatus(string competitionTransfermarktId, string competitionLink, string competitionName, int page, int competitionsSearched, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Asynchronously removes all the countries from the database.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        public Task RemoveAllAsync(CancellationToken cancellationToken);
     }
 }

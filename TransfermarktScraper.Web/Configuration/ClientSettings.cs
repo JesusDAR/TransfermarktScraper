@@ -46,6 +46,11 @@
         public string ExporterControllerPath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the Master controller.
+        /// </summary>
+        public string MasterControllerPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the endpoint of the logs.
         /// </summary>
         public string LogsEndpoint { get; set; } = string.Empty;

@@ -5,6 +5,7 @@
 
 @inject IJSRuntime JSRuntime
 @inject ICountryClient CountryClient
+@inject IMasterClient MasterClient
 @inject IExporterClient ExporterClient
 @inject ISettingsClient SettingsClient
 @inject INavigationHistoryService NavigationHistoryService
@@ -19,6 +20,14 @@
     </MudItem>
 </MudGrid>
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+    <MudItem md="2" Class="d-flex justify-center">
+        <MudButton Color="Color.Error"
+                   Size="Size.Large"
+                   Variant="Variant.Filled"
+                   OnClick="CleanDatabaseAsync">
+            Clean Database
+        </MudButton>
+    </MudItem>
     <MudItem md="2">
         <MudStack Row="true">
             <MudSelect Label="Select exporting format"
@@ -39,12 +48,12 @@
                            OnClick="ExportCountryCompetitionDataAsync" />
         </MudStack>
     </MudItem>
-    <MudItem md="2">
+    <MudItem md="2" Class="d-flex justify-center">
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
-                   Variant="Variant.Filled"
+                   Variant="Variant.Filled"          
                    OnClick="ScrapeAllAsync">
-            Scrape all
+            Scrape all data
         </MudButton>
     </MudItem>
 
@@ -167,5 +176,10 @@
         {
             await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
         }
+    }
+
+    private async Task CleanDatabaseAsync()
+    {
+        await MasterClient.CleanDatabaseAsync(default);
     }
 }

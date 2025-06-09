@@ -79,6 +79,13 @@ namespace TransfermarktScraper.Web.Configuration
                 client.Timeout = TimeSpan.FromHours(12);
             });
 
+            services.AddHttpClient<IMasterClient, MasterClient>((serviceProvider, client) =>
+            {
+                var clientSettings = serviceProvider.GetRequiredService<IOptions<ClientSettings>>().Value;
+                client.BaseAddress = new Uri(clientSettings.HostUrl + clientSettings.MasterControllerPath);
+                client.Timeout = TimeSpan.FromHours(12);
+            });
+
             // Register navigation history service
             services.AddScoped<INavigationHistoryService, NavigationHistoryService>();
 

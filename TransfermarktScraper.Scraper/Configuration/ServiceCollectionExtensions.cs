@@ -107,6 +107,7 @@ namespace TransfermarktScraper.Scraper.Configuration
                 services.AddScoped<IPlayerService, PlayerService>();
                 services.AddScoped<IMarketValueService, MarketValueService>();
                 services.AddScoped<IPlayerStatService, PlayerStatService>();
+                services.AddScoped<IMasterService, MasterService>();
 
                 return services;
             }

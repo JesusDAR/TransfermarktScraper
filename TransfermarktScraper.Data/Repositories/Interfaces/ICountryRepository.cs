@@ -21,6 +21,24 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<Country?> GetAsync(string countryTransfermarktId, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Asynchronously retrieves the number of countries persisted on database.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains the countries already persisted.
+        /// </returns>
+        Task<long> GetCountAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Asynchronously removes all the countries from the database.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        Task RemoveAllAsync(CancellationToken cancellationToken);
+
+        /// <summary>
         /// Asynchronously retrieves a <see cref="Competition"/> by its unique Transfermarkt identifier.
         /// </summary>
         /// <param name="competitionTransfermarktId">The unique Transfermarkt identifier of the <see cref="Competition"/>.</param>

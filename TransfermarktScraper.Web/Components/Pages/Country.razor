@@ -186,8 +186,8 @@ else
 
     private async Task ExportCountryCompetitionDataAsync()
     {
-        var fileContentResult= await ExporterClient.ExportCountryCompetitionDataAsync(_selectedFormat, default);
-        
+        var fileContentResult = await ExporterClient.ExportCountryCompetitionDataAsync(_selectedFormat, default);
+
         if (fileContentResult != null)
         {
             await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);

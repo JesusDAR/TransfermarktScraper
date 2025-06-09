@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
+using TransfermarktScraper.Data.Repositories.Impl;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 using TransfermarktScraper.Domain.Entities;
@@ -44,7 +45,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var clubResponse = club.Adapt<ClubResponse>();
 
-            _logger.LogInformation("Succesfully obtained the club of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
+            _logger.LogInformation("Successfully obtained the club of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
 
             return clubResponse;
         }
@@ -58,9 +59,15 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var clubResponses = clubs.Adapt<IEnumerable<ClubResponse>>();
 
-            _logger.LogInformation("Succesfully obtained the clubs of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
+            _logger.LogInformation("Successfully obtained the clubs of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
 
             return clubResponses;
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            await _clubRepository.RemoveAllAsync(cancellationToken);
         }
 
         /// <summary>

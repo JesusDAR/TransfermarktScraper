@@ -78,6 +78,20 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _clubs.DeleteManyAsync(FilterDefinition<Club>.Empty, cancellationToken);
+            }
+            catch (Exception)
+            {
+                var message = "Failed to delete all clubs from the database.";
+                throw DatabaseException.LogError(message, nameof(RemoveAllAsync), nameof(ClubRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<Club> InsertOrUpdateAsync(Club club, CancellationToken cancellationToken)
         {
             try

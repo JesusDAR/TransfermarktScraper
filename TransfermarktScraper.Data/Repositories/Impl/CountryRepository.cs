@@ -46,6 +46,22 @@ namespace TransfermarktScraper.Data.Repositories.Impl
         }
 
         /// <inheritdoc/>
+        public async Task<long> GetCountAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var count = await _countries.CountDocumentsAsync(FilterDefinition<Country>.Empty, cancellationToken: cancellationToken);
+
+                return count;
+            }
+            catch (Exception)
+            {
+                var message = $"Failed to retrieve the number of countries in the database.";
+                throw DatabaseException.LogError(message, nameof(GetCountAsync), nameof(CountryRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<Competition?> GetCompetitionAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
         {
             try
@@ -106,6 +122,20 @@ namespace TransfermarktScraper.Data.Repositories.Impl
             {
                 var message = $"Failed to retrieve all competitions of the country with Transfermarkt ID: {countryTransfermarktId} from the database.";
                 throw DatabaseException.LogError(message, nameof(GetAllAsync), nameof(CountryRepository), _logger);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _countries.DeleteManyAsync(FilterDefinition<Country>.Empty, cancellationToken);
+            }
+            catch (Exception)
+            {
+                var message = "Failed to delete all countries from the database.";
+                throw DatabaseException.LogError(message, nameof(RemoveAllAsync), nameof(CountryRepository), _logger);
             }
         }
 

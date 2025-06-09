@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
+using TransfermarktScraper.Data.Repositories.Impl;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat;
 using TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat;
@@ -88,6 +89,12 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             _logger.LogInformation("Successfully obtained the players stats.");
 
             return playerStatResponses;
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            await _playerStatRepository.RemoveAllAsync(cancellationToken);
         }
 
         /// <summary>

@@ -69,7 +69,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var competitionDtos = competitions.Adapt<IEnumerable<CompetitionResponse>>();
 
-            _logger.LogInformation("Succesfully obtained the competitions of the country {CountryTransfermarktId}.", countryTransfermarktId);
+            _logger.LogInformation("Successfully obtained the competitions of the country {CountryTransfermarktId}.", countryTransfermarktId);
 
             return competitionDtos;
         }
@@ -119,7 +119,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, $"Error in interceptor for country: {countryTransfermarktId}");
+                    var message = $"Error in interceptor for country: {countryTransfermarktId}";
+                    ScrapingException.LogError(nameof(SetQuickSelectCompetitionsInterceptorAsync), nameof(CompetitionService), message, url, _logger, ex);
                 }
             });
         }

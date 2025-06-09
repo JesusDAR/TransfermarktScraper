@@ -95,7 +95,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var marketValues = GetMarketValues(marketValueResult.MarketValueItemResults, uri);
 
-            _logger.LogInformation("Succesfully obtained the market values of the player {PlayerTransfermarktId} from page: {Url}.", playerTransfermarktId, _httpClient.BaseAddress + uri);
+            _logger.LogInformation("Successfully obtained the market values of the player {PlayerTransfermarktId} from page: {Url}.", playerTransfermarktId, _httpClient.BaseAddress + uri);
 
             return marketValues;
         }

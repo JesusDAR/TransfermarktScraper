@@ -68,33 +68,39 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var countryDtos = Enumerable.Empty<CountryResponse>();
 
+            var countries = Enumerable.Empty<Country>();
+
             forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
 
-            if (forceScraping)
+            var countriesAlreadyPersisted = await _countryRepository.GetCountAsync(cancellationToken);
+
+            if (countriesAlreadyPersisted >= countryLimit)
             {
-                var countriesScraped = await ScrapeCountriesAsync();
+                countryLimit = (int)countriesAlreadyPersisted;
 
-                var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
+                if (!forceScraping)
+                {
+                    countries = await _countryRepository.GetAllAsync(cancellationToken);
 
-                countryDtos = countriesUpdatedOrInserted.Adapt<IEnumerable<CountryResponse>>();
+                    countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
 
-                return countryDtos;
+                    countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
+
+                    _logger.LogInformation("Successfully obtained {CountryLimit} countries.", countryLimit);
+
+                    return countryDtos;
+                }
             }
 
-            var countries = await _countryRepository.GetAllAsync(cancellationToken);
+            await RemoveAllAsync(cancellationToken);
 
-            if (!countries.Any() || countries.Count() < _scraperSettings.CountryLimit)
-            {
-                var countriesScraped = await ScrapeCountriesAsync();
+            var countriesScraped = await ScrapeCountriesAsync();
 
-                var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
+            var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-                countryDtos = countriesInserted.Adapt<IEnumerable<CountryResponse>>();
+            countryDtos = countriesInserted.Adapt<IEnumerable<CountryResponse>>();
 
-                return countryDtos;
-            }
-
-            countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
+            countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
 
             _logger.LogInformation("Succesfully obtained {CountryLimit} countries.", countryLimit);
 
@@ -123,7 +129,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 countriesDtos.Add(countryDto);
             }
 
-            _logger.LogInformation("Succesfully updated the countries competitions.");
+            _logger.LogInformation("Successfully updated the countries competitions.");
 
             return countriesDtos;
         }
@@ -176,6 +182,12 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             return;
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAllAsync(CancellationToken cancellationToken)
+        {
+            await _countryRepository.RemoveAllAsync(cancellationToken);
         }
 
         /// <summary>

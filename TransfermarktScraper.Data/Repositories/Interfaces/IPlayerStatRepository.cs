@@ -43,6 +43,15 @@ namespace TransfermarktScraper.Data.Repositories.Interfaces
         Task<IEnumerable<PlayerStat>> GetAllAsync(CancellationToken cancellationToken);
 
         /// <summary>
+        /// Asynchronously removes all the player stats from the database.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        Task RemoveAllAsync(CancellationToken cancellationToken);
+
+        /// <summary>
         /// Retrieves a filtered list of <see cref="PlayerSeasonStat"/> objects for a specific player and a set of season Transfermarkt IDs.
         /// </summary>
         /// <param name="playerTransfermarktId">The Transfermarkt ID of the player.</param>

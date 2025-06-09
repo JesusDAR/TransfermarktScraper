@@ -31,5 +31,14 @@ namespace TransfermarktScraper.Scraper.Services.Interfaces
         /// A <see cref="Task"/> representing the asynchronous operation, containing a list of <see cref="ClubResponse"/> DTOs.
         /// </returns>
         public Task<IEnumerable<ClubResponse>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Asynchronously removes all the clubs from the database.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// </returns>
+        public Task RemoveAllAsync(CancellationToken cancellationToken);
     }
 }

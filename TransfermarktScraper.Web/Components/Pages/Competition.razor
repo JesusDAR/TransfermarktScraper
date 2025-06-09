@@ -22,7 +22,8 @@
 
 @if (selectedCountries == null)
 {
-	<MudText HtmlTag="em">Scraping competitions please wait...</MudText>
+	<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+	<MudText HtmlTag="em" Class="mt-4">Scraping competitions please wait...</MudText>
 }
 else
 {

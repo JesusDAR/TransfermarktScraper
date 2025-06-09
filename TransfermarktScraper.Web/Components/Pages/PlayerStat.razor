@@ -22,7 +22,8 @@
 
 @if (selectedPlayer == null || selectedPlayerStat == null)
 {
-    <MudText HtmlTag="em">Scraping player stats please wait...</MudText>
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+    <MudText HtmlTag="em" Class="mt-4">Scraping player stats please wait...</MudText>
 }
 else
 {

@@ -23,7 +23,8 @@
 
 @if (players == null || !players.Any())
 {
-	<MudText HtmlTag="em">Scraping players please wait...</MudText>
+	<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+	<MudText HtmlTag="em" Class="mt-4">Scraping players please wait...</MudText>
 }
 else
 {

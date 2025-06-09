@@ -41,6 +41,11 @@
         public string SettingsControllerPath { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the path of the Exporter controller.
+        /// </summary>
+        public string ExporterControllerPath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the endpoint of the logs.
         /// </summary>
         public string LogsEndpoint { get; set; } = string.Empty;

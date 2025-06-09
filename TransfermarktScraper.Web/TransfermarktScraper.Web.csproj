@@ -29,4 +29,8 @@
     <ProjectReference Include="..\TransfermarktScraper.ServiceDefaults\TransfermarktScraper.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\js\downloadFile.js" />
+  </ItemGroup>
+
 </Project>

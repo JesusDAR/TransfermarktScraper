@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -14,7 +16,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
     {
         private readonly HttpClient _httpClient;
         private readonly ClientSettings _clientSettings;
-        private readonly ILogger<PlayerStatClient> _logger;
+        private readonly ILogger<SettingsClient> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SettingsClient"/> class.
@@ -25,7 +27,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public SettingsClient(
             HttpClient httpClient,
             IOptions<ClientSettings> clientSettings,
-            ILogger<PlayerStatClient> logger)
+            ILogger<SettingsClient> logger)
         {
             _httpClient = httpClient;
             _clientSettings = clientSettings.Value;
@@ -45,7 +47,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetHeadlessModeAsync(bool isHeadlessMode)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/headless-mode/{isHeadlessMode}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/headless-mode/{isHeadlessMode}"),
                 default);
         }
 
@@ -53,7 +55,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetCountriesCountToScrapeAsync(int countriesCountToScrape)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/countries-to-scrape/{countriesCountToScrape}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/countries-to-scrape/{countriesCountToScrape}"),
                 default);
         }
 
@@ -61,18 +63,28 @@ namespace TransfermarktScraper.Web.Clients.Impl
         public async Task SetForceScrapingAsync(bool isForceScraping)
         {
             await _httpClient.PostAsync(
-                string.Concat(_clientSettings.SettingsControllerPath, $"scraper/force-scraping/{isForceScraping}"),
+                string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/force-scraping/{isForceScraping}"),
                 default);
         }
 
         /// <inheritdoc/>
         public async Task<string> GetFlagUrlAsync()
         {
-            var result = await _httpClient.GetFromJsonAsync<string>(
-                string.Concat(_clientSettings.SettingsControllerPath, $"/flag-url"),
+            var result = await _httpClient.GetStringAsync(
+                string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/flag-url"),
                 default);
 
             return result ?? string.Empty;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+        {
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<string>>(
+                string.Concat(_clientSettings.SettingsControllerPath, $"/exporter/supported-formats"),
+                default);
+
+            return result ?? Enumerable.Empty<string>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/countries"
+@page "/countries"
 
 @using TransfermarktScraper.Domain.DTOs.Response.Scraper
 @using TransfermarktScraper.Web.Clients.Interfaces
@@ -8,7 +8,10 @@
 
 @implements IRefreshablePage
 
+@inject IJSRuntime JSRuntime
 @inject ICountryClient CountryClient
+@inject IExporterClient ExporterClient
+@inject ISettingsClient SettingsClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 @inject IPageReferenceService PageReferenceService
@@ -30,6 +33,26 @@ else
                           Immediate="true" />
         </MudItem>
         <MudSpacer />
+        <MudItem xs="2" Class="d-flex justify-end">
+            <MudSelect Label="Select exporting format"
+                       Class="mr-2"
+                       Variant="Variant.Filled"
+                       T="string"
+                       @bind-value="_selectedFormat">
+                @{
+                    if (formats != null)
+                    {
+                        foreach (var format in formats)
+                        {
+                            <MudSelectItem Value="@format">@format</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+            <MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+                           Icon="@Icons.Material.Filled.Download"
+                           OnClick="ExportCountryCompetitionDataAsync" />
+        </MudItem>
         <MudItem xs="2" Class="d-flex justify-end">
             <MudButton Color="Color.Primary"
                        FullWidth="true"
@@ -80,6 +103,8 @@ else
     private HashSet<CountryResponse> filteredCountries = new();
     private HashSet<CountryResponse> selectedCountries = new();
     private string _searchedCountry = string.Empty;
+    private string _selectedFormat = string.Empty;
+    private IEnumerable<string> formats = null!;
 
     private string SearchedCountry
     {
@@ -98,6 +123,7 @@ else
     {
         filteredCountries = new();
         selectedCountries = new();
+        ItemSelectionService.SelectedCountries = new();
         _searchedCountry = string.Empty;
 
         await OnInitializedAsync();
@@ -107,6 +133,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         PageReferenceService.CurrentPage = this;
+        formats = await GetSupportedFormatsAsync();
         selectedCountries = ItemSelectionService.SelectedCountries;
 
         countries = await CountryClient.GetCountriesAsync();
@@ -146,5 +173,24 @@ else
         ItemSelectionService.SelectedCountries = selectedCountries;
 
         NavigationHistoryService.NavigateTo("/competitions");
+    }
+
+    private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+    {
+        var result = await SettingsClient.GetSupportedFormatsAsync();
+
+        result = result.Select(format => format.ToUpperInvariant());
+
+        return result;
+    }
+
+    private async Task ExportCountryCompetitionDataAsync()
+    {
+        var fileContentResult= await ExporterClient.ExportCountryCompetitionDataAsync(_selectedFormat, default);
+        
+        if (fileContentResult != null)
+        {
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
+        }
     }
 }

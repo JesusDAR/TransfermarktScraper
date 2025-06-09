@@ -29,7 +29,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <param name="countryCompetitionExporterService">The country-competition export data service.</param>
         /// <param name="clubPlayerExporterService">The club-player export data service.</param>
         /// <param name="playerStatExporterService">The player stats export data service.</param>
-        /// <param name="playerStatExporterService">The master export data service.</param>
+        /// <param name="masterExporterService">The master export data service.</param>
         public ExportController(
             ICountryCompetitionExporterService countryCompetitionExporterService,
             IClubPlayerExporterService clubPlayerExporterService,

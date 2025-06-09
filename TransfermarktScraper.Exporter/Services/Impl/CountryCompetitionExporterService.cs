@@ -34,7 +34,7 @@ namespace TransfermarktScraper.Exporter.Services.Impl
             {
                 "json" => JsonExporterExtension.ExportToJson(countries, "CountriesCompetitions.json"),
                 "csv" => ExportToCsv(countries, "CountriesCompetitions.csv"),
-                "xlsx" => ExportToXlsx(countries, "CounCountriesCompetitionstries.xlsx"),
+                "xlsx" => ExportToXlsx(countries, "CountriesCompetitions.xlsx"),
                 _ => throw new InvalidOperationException($"Format not allowed: {format}. Supported formats: json, csv, xlsx")
             };
         }

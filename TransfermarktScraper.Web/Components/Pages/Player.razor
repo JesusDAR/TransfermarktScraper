@@ -10,7 +10,10 @@
 
 @implements IRefreshablePage
 
+@inject IJSRuntime JSRuntime
+@inject IExporterClient ExporterClient
 @inject IPlayerClient PlayerClient
+@inject ISettingsClient SettingsClient
 @inject IPlayerStatClient PlayerStatClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
@@ -33,6 +36,26 @@ else
 						  Immediate="true" />
 		</MudItem>
 		<MudSpacer />
+		<MudItem xs="2" Class="d-flex justify-end">
+			<MudSelect Label="Select exporting format"
+					   Class="mr-2"
+					   Variant="Variant.Filled"
+					   T="string"
+					   @bind-value="_selectedFormat">
+				@{
+					if (formats != null)
+					{
+						foreach (var format in formats)
+						{
+							<MudSelectItem Value="@format">@format</MudSelectItem>
+						}
+					}
+				}
+			</MudSelect>
+			<MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+						   Icon="@Icons.Material.Filled.Download"
+						   OnClick="ExportClubPlayerDataAsync" />
+		</MudItem>
 		<MudItem xs="2" Class="d-flex justify-end">
 			<MudButton Color="Color.Primary"
 					   FullWidth="true"
@@ -63,8 +86,7 @@ else
 						<MudAvatar Size="Size.Large" Class="mt-2">
 							<MudImage Src="@club.Crest" Alt="@club.Name" />
 						</MudAvatar>
-						<MudSpacer />
-						<MudText Typo="Typo.h6">@club.Name</MudText>
+						<MudText Typo="Typo.h6" Class="ml-5">@club.Name</MudText>
 						<MudSpacer />
 						<MudButton Variant="Variant.Outlined"
 								   Color="Color.Primary"
@@ -120,6 +142,8 @@ else
 	private HashSet<PlayerResponse> selectedPlayers = new();
 	private HashSet<ClubResponse> filteredClubs = new();
 	private string _searchedClub = string.Empty;
+	private string _selectedFormat = string.Empty;
+	private IEnumerable<string> formats = null!;
 
 	private string SearchedClub
 	{
@@ -149,6 +173,7 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		PageReferenceService.CurrentPage = this;
+		formats = await GetSupportedFormatsAsync();
 		selectedClubs = ItemSelectionService.SelectedClubs;
 		selectedPlayers = ItemSelectionService.SelectedPlayer != null ? new() { ItemSelectionService.SelectedPlayer } : new();
 
@@ -236,6 +261,25 @@ else
 			ItemSelectionService.SelectedPlayer = selectedPlayers.First();
 
 			NavigationHistoryService.NavigateTo($"/players/{ItemSelectionService.SelectedPlayer.TransfermarktId}/stats");
+		}
+	}
+
+	private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+	{
+		var result = await SettingsClient.GetSupportedFormatsAsync();
+
+		result = result.Select(format => format.ToUpperInvariant());
+
+		return result;
+	}
+
+	private async Task ExportClubPlayerDataAsync()
+	{
+		var fileContentResult = await ExporterClient.ExportClubPlayerDataAsync(_selectedFormat, default);
+
+		if (fileContentResult != null)
+		{
+			await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
 		}
 	}
 }

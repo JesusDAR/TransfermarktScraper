@@ -8,7 +8,10 @@
 
 @implements IRefreshablePage
 
+@inject IJSRuntime JSRuntime
+@inject IExporterClient ExporterClient
 @inject IClubClient ClubClient
+@inject ISettingsClient SettingsClient
 @inject ICompetitionClient CompetititonClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
@@ -32,6 +35,26 @@ else
 						  Immediate="true" />
 		</MudItem>
 		<MudSpacer />
+		<MudItem xs="2" Class="d-flex justify-end">
+			<MudSelect Label="Select exporting format"
+					   Class="mr-2"
+					   Variant="Variant.Filled"
+					   T="string"
+					   @bind-value="_selectedFormat">
+				@{
+					if (formats != null)
+					{
+						foreach (var format in formats)
+						{
+							<MudSelectItem Value="@format">@format</MudSelectItem>
+						}
+					}
+				}
+			</MudSelect>
+			<MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+						   Icon="@Icons.Material.Filled.Download"
+						   OnClick="ExportClubPlayerDataAsync" />
+		</MudItem>
 		<MudItem xs="2" Class="d-flex justify-end">
 			<MudButton Color="Color.Primary"
 					   FullWidth="true"
@@ -123,6 +146,8 @@ else
 	private HashSet<CountryResponse> selectedCountries = new();
 	private HashSet<CompetitionResponse> filteredCompetitions = new();
 	private string _searchedCompetition = string.Empty;
+	private string _selectedFormat = string.Empty;
+	private IEnumerable<string> formats = null!;
 
 	private string SearchedCompetition
 	{
@@ -153,6 +178,7 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		PageReferenceService.CurrentPage = this;
+		formats = await GetSupportedFormatsAsync();
 		selectedCountries = ItemSelectionService.SelectedCountries;
 		selectedCompetitions = ItemSelectionService.SelectedCompetitions;
 
@@ -217,5 +243,24 @@ else
 		ItemSelectionService.SelectedClubs = selectedClubs;
 
 		NavigationHistoryService.NavigateTo("/players");
+	}
+
+	private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+	{
+		var result = await SettingsClient.GetSupportedFormatsAsync();
+
+		result = result.Select(format => format.ToUpperInvariant());
+
+		return result;
+	}
+
+	private async Task ExportClubPlayerDataAsync()
+	{
+		var fileContentResult = await ExporterClient.ExportClubPlayerDataAsync(_selectedFormat, default);
+
+		if (fileContentResult != null)
+		{
+			await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
+		}
 	}
 }

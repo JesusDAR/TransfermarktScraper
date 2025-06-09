@@ -11,6 +11,8 @@
 
 @implements IRefreshablePage
 
+@inject IJSRuntime JSRuntime
+@inject IExporterClient ExporterClient
 @inject ISettingsClient SettingsClient
 @inject IPlayerStatClient PlayerStatClient
 @inject IItemSelectionService ItemSelectionService
@@ -24,6 +26,28 @@
 }
 else
 {
+    <MudGrid Justify="Justify.FlexEnd">
+        <MudItem xs="2" Class="d-flex mr-10">
+            <MudSelect Label="Select exporting format"
+                       Variant="Variant.Filled"
+                       Class="mr-2"
+                       T="string"
+                       @bind-value="_selectedFormat">
+                @{
+                    if (formats != null)
+                    {
+                        foreach (var format in formats)
+                        {
+                            <MudSelectItem Value="@format">@format</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+            <MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+                           Icon="@Icons.Material.Filled.Download"
+                           OnClick="ExportPlayerStatDataAsync" />
+        </MudItem>
+    </MudGrid>
     <MudStack Row="true">
         <MudGrid Justify="Justify.FlexStart">
             <MudItem xs="2">
@@ -47,12 +71,15 @@ else
                             Nationalities:
                             <MudAvatarGroup Spacing="0">
                                 @{
-                                    var nationalityImages = Domain.Utils.DTO.ImageUtils.ConvertCountryTransfermarktIdsToImageUrls(selectedPlayer.Nationalities, flagUrl);
-                                    foreach (var nationalityImage in nationalityImages)
+                                    if (!string.IsNullOrEmpty(flagUrl))
                                     {
-                                        <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
-                                            <MudImage Src=@nationalityImage></MudImage>
-                                        </MudAvatar>
+                                        var nationalityImages = Domain.Utils.DTO.ImageUtils.ConvertCountryTransfermarktIdsToImageUrls(selectedPlayer.Nationalities, flagUrl);
+                                        foreach (var nationalityImage in nationalityImages)
+                                        {
+                                            <MudAvatar Class="mr-2" Size="Size.Small" Square="true">
+                                                <MudImage Src=@nationalityImage></MudImage>
+                                            </MudAvatar>
+                                        }
                                     }
                                 }
                             </MudAvatarGroup>
@@ -83,7 +110,7 @@ else
                     </MudListItem>
                 </MudList>
             </MudItem>
-            <MudItem xs="6">
+            <MudItem xs="6" Class="pa-4">
                 @if (selectedPlayer.MarketValues != null && selectedPlayer.MarketValues.Any())
                 {
                     <MudChart ChartType="ChartType.Line"
@@ -93,6 +120,7 @@ else
                               AxisChartOptions="@AxisOptions"
                               LegendPosition="Position.Bottom"
                               Width="100%"
+                              Class="ml-20"
                               Height="450px" />
                 }
             </MudItem>
@@ -186,8 +214,8 @@ else
         </MudList>
 
         @if (selectedPlayerSeasonStat.SeasonTransfermarktId != "ges" &&
-    selectedPlayerStat.PlayerSeasonStats.Any(
-        playerSeasonStat => playerSeasonStat.IsScraped && playerSeasonStat.SeasonTransfermarktId.Equals(selectedPlayerSeasonStat.SeasonTransfermarktId)))
+   selectedPlayerStat.PlayerSeasonStats.Any(
+       playerSeasonStat => playerSeasonStat.IsScraped && playerSeasonStat.SeasonTransfermarktId.Equals(selectedPlayerSeasonStat.SeasonTransfermarktId)))
         {
             @foreach (var playerSeasonCompetitionStat in GetPlayerSeasonCompetitionStats(selectedPlayerSeasonStat))
             {
@@ -323,6 +351,9 @@ else
     private PlayerStatResponse? selectedPlayerStat = null!;
     private PlayerSeasonStatResponse? selectedPlayerSeasonStat;
 
+    private string _selectedFormat = string.Empty;
+    private IEnumerable<string> formats = null!;
+
     private HashSet<PlayerSeasonCompetitionStatResponse> expandedPlayerSeasonCompetitionStats = new();
     private HashSet<PlayerSeasonStatResponse> expandedPlayerSeasonStat = new();
 
@@ -345,6 +376,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         PageReferenceService.CurrentPage = this;
+        formats = await GetSupportedFormatsAsync();
         selectedPlayer = ItemSelectionService.SelectedPlayer;
         flagUrl = await GetFlagUrlAsync();
 
@@ -385,7 +417,7 @@ else
 
             var scrapedPlayerSeasonStat = await ScrapePlayerStatsAsync(seasonTransfermarktId);
 
-            if (selectedPlayerStat!= null && scrapedPlayerSeasonStat != null)
+            if (selectedPlayerStat != null && scrapedPlayerSeasonStat != null)
             {
                 var existingPlayerSeasonStatIndex = selectedPlayerStat.PlayerSeasonStats
                     .FindIndex(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId.Equals(seasonTransfermarktId));
@@ -435,21 +467,21 @@ else
                     DataMarkerTooltipSubtitleFormat = "{{X_VALUE}}",
                     Name = "Market Value (€)",
                     Data = seriesData,
-                    ShowDataMarkers = true,        
+                    ShowDataMarkers = true,
                 }
             };
 
             AxisOptions = new AxisChartOptions
-            {
-                XAxisLabelRotation = 40
-            };
+                {
+                    XAxisLabelRotation = 40
+                };
 
             Options = new ChartOptions
-            {
-                YAxisRequireZeroPoint = true,
-                YAxisTicks = 10000,
-                YAxisFormat = "N0",
-            };
+                {
+                    YAxisRequireZeroPoint = true,
+                    YAxisTicks = 10000,
+                    YAxisFormat = "N0",
+                };
         }
     }
 
@@ -474,23 +506,42 @@ else
         }
 
         var playerStatRequest = new PlayerStatRequest()
-        {
-            PlayerTransfermarktId = playerTransfermarktId,
-            SeasonTransfermarktId = seasonTransfermarktId,
-            Position = selectedPlayer.Position,
-            IncludeAllPlayerTransfermarktSeasons = false
-        };
+            {
+                PlayerTransfermarktId = playerTransfermarktId,
+                SeasonTransfermarktId = seasonTransfermarktId,
+                Position = selectedPlayer.Position,
+                IncludeAllPlayerTransfermarktSeasons = false
+            };
 
         var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
 
         var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests, default);
 
-        return playerStatResponses;              
+        return playerStatResponses;
     }
 
     private async Task<string> GetFlagUrlAsync()
     {
         var result = await SettingsClient.GetFlagUrlAsync();
         return result;
+    }
+
+    private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+    {
+        var result = await SettingsClient.GetSupportedFormatsAsync();
+
+        result = result.Select(format => format.ToUpperInvariant());
+
+        return result;
+    }
+
+    private async Task ExportPlayerStatDataAsync()
+    {
+        var fileContentResult = await ExporterClient.ExportPlayerStatDataAsync(_selectedFormat, default);
+
+        if (fileContentResult != null)
+        {
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
+        }
     }
 }

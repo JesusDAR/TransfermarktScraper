@@ -1,21 +1,64 @@
-﻿@page "/start"
+@page "/start"
 
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
 
+@inject IJSRuntime JSRuntime
+@inject ICountryClient CountryClient
+@inject IExporterClient ExporterClient
 @inject ISettingsClient SettingsClient
 @inject INavigationHistoryService NavigationHistoryService
 
 <PageTitle>Start</PageTitle>
 
-<MudGrid>
+<MudGrid ustify="Justify.Center" Spacing="2" Class="mt-6">
     <MudItem xs="12" Class="d-flex justify-center">
         <MudText>
-            Here comes some general explanation about what the app does
+            Massive scraping of all data from Transfermarkt (The process will take a long time to complete)
         </MudText>
     </MudItem>
 </MudGrid>
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+    <MudItem md="2">
+        <MudStack Row="true">
+            <MudSelect Label="Select exporting format"
+                       T="string"
+                       @bind-value="_selectedFormat">
+                @{
+                    if (formats != null)
+                    {
+                        foreach (var format in formats)
+                        {
+                            <MudSelectItem Value="@format">@format</MudSelectItem>
+                        }
+                    }
+                }
+            </MudSelect>
+            <MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+                           Icon="@Icons.Material.Filled.Download"
+                           OnClick="ExportCountryCompetitionDataAsync" />
+        </MudStack>
+    </MudItem>
+    <MudItem md="2">
+        <MudButton Color="Color.Primary"
+                   Size="Size.Large"
+                   Variant="Variant.Filled"
+                   OnClick="ScrapeAllAsync">
+            Scrape all
+        </MudButton>
+    </MudItem>
 
+</MudGrid>
+
+<MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
+
+<MudGrid Justify="Justify.Center" Spacing="2">
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudText>
+            Options to configure the step by step scraping process
+        </MudText>
+    </MudItem>
+</MudGrid>
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
     <MudItem md="2">
         <MudSelect Label="Visual scraping mode"
@@ -45,8 +88,16 @@
         </MudNumericField>
     </MudItem>
 </MudGrid>
-<MudGrid Justify="Justify.Center" Class="mt-6">
-    <MudItem md="6" Class="d-flex justify-center">
+
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-12">
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudText>
+            Click here to start the step by step scraping process
+        </MudText>
+    </MudItem>
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="mt-3">
+    <MudItem>
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
                    Variant="Variant.Filled"
@@ -56,12 +107,12 @@
     </MudItem>
 </MudGrid>
 
-
-
 @code {
     private bool _selectedHeadlessMode;
     private bool _selectedForceScrapingMode;
     private int _selectedCountriesCountToScrape;
+    private string _selectedFormat = string.Empty;
+    private IEnumerable<string> formats = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,6 +120,7 @@
         _selectedCountriesCountToScrape = settings.CountriesCountToScrape;
         _selectedForceScrapingMode = settings.IsForceScraping;
         _selectedHeadlessMode = settings.IsHeadlessMode;
+        formats = await GetSupportedFormatsAsync();
     }
 
     private async Task OnSelectedHeadlessModeChanged(bool selectedHeadlessMode)
@@ -92,5 +144,28 @@
     private void NavigateToCountry()
     {
         NavigationHistoryService.NavigateTo("/countries");
+    }
+
+    private async Task ScrapeAllAsync()
+    {
+    }
+
+    private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
+    {
+        var result = await SettingsClient.GetSupportedFormatsAsync();
+
+        result = result.Select(format => format.ToUpperInvariant());
+
+        return result;
+    }
+
+    private async Task ExportCountryCompetitionDataAsync()
+    {
+        var fileContentResult = await ExporterClient.ExportMasterDataAsync(_selectedFormat, default);
+
+        if (fileContentResult != null)
+        {
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
+        }
     }
 }

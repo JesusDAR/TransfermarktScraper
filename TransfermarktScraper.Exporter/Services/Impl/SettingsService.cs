@@ -25,7 +25,7 @@ namespace TransfermarktScraper.Exporter.Services.Impl
         /// <inheritdoc/>
         public IEnumerable<string> GetSupportedFormats()
         {
-            _logger.LogInformation("Getting exporter supporter formats...");
+            _logger.LogDebug("Getting exporter supporter formats...");
 
             return _exporterSettings.SupportedFormats;
         }

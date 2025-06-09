@@ -151,7 +151,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Gets the base flag URL to be used by the UI to display the nationalities flags of the players.
         /// </summary>
         /// <returns>
-        /// 200 OK if successful.
+        /// 200 OK if successful. With a list of the supported formats.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
         [HttpGet("scraper/flag-url")]

@@ -50,7 +50,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the scraping players process...");
+            _logger.LogInformation("Starting the scraping/fetching players of the club {ClubTransfermarktId} process...", clubTransfermarktId);
 
             var club = await _clubRepository.GetAsync(clubTransfermarktId, cancellationToken);
 
@@ -76,6 +76,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             var playerDtos = players.Adapt<IEnumerable<PlayerResponse>>();
+
+            _logger.LogInformation("Successfully obtained the players of the club {ClubTransfermarktId} process...", clubTransfermarktId);
 
             return playerDtos;
         }

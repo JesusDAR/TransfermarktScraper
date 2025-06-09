@@ -36,11 +36,15 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             ILocator tableRowLocator,
             CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Starting the scraping of the club of the competition {CompetitionTransfermarktId} process...", competitionTransfermarktId);
+
             var club = await ScrapeClubAsync(competitionTransfermarktId, tableRowLocator, cancellationToken);
 
             club = await PersistClubAsync(club, cancellationToken);
 
             var clubResponse = club.Adapt<ClubResponse>();
+
+            _logger.LogInformation("Succesfully obtained the club of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
 
             return clubResponse;
         }
@@ -48,11 +52,13 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<ClubResponse>> GetClubsAsync(string competitionTransfermarktId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the fetching clubs process by competition...");
+            _logger.LogInformation("Starting the fetching clubs of the competition {CompetitionTransfermarktId} process...", competitionTransfermarktId);
 
             var clubs = await _clubRepository.GetAllAsync(competitionTransfermarktId, cancellationToken);
 
             var clubResponses = clubs.Adapt<IEnumerable<ClubResponse>>();
+
+            _logger.LogInformation("Succesfully obtained the clubs of the competition {CompetitionTransfermarktId}.", competitionTransfermarktId);
 
             return clubResponses;
         }

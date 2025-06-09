@@ -55,7 +55,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<PlayerStatResponse>> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStatRequests, bool forceScraping, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the scraping/fetching player stats process...");
+            _logger.LogInformation("Starting the scraping/fetching players stats process...");
 
             var playerTransfermarktIds = playerStatRequests.Select(playerStatRequest => playerStatRequest.PlayerTransfermarktId);
 
@@ -84,6 +84,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             playerStatResponses = existingPlayerStats.Adapt<List<PlayerStatResponse>>();
+
+            _logger.LogInformation("Successfully obtained the players stats.");
 
             return playerStatResponses;
         }

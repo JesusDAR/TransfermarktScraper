@@ -46,7 +46,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             HttpResponseMessage? response = null;
             int maxRetries = 3;
 
-            _logger.LogInformation($"Getting market value from page: {_httpClient.BaseAddress + uri}.");
+            _logger.LogInformation("Starting scraping the market values of the player {PlayerTransfermarktId} from page: {Url} process...", playerTransfermarktId, _httpClient.BaseAddress + uri);
+
             for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
                 try
@@ -93,6 +94,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             var marketValues = GetMarketValues(marketValueResult.MarketValueItemResults, uri);
+
+            _logger.LogInformation("Succesfully obtained the market values of the player {PlayerTransfermarktId} from page: {Url}.", playerTransfermarktId, _httpClient.BaseAddress + uri);
 
             return marketValues;
         }

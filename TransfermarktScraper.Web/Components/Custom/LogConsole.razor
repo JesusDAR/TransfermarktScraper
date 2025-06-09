@@ -4,13 +4,16 @@
 @inject ILogClient LogClient
 
 <MudPaper Class="d-flex flex-column"
-          Style="position: fixed; bottom: 0; left: 0; right: 0; max-height: 35%; min-height:35%; background-color: #1e1e1e; z-index: 1000;"
-          Hidden="@Hidden"
-          Elevation="10">
+Style="position: fixed; bottom: 0; left: 0; right: 0; max-height: 35%; min-height:35%; background-color: #1e1e1e; z-index: 1000;"
+Hidden="@Hidden"
+Elevation="10">
 
     <MudPaper Class="pa-2" Style="border: 1px solid #333;">
-        <MudStack Row="true" Justify="Justify.Center">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center">
             <MudText Typo="Typo.subtitle2">Log Console</MudText>
+            <MudTooltip Text="Clears the log console">
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ClearAll" OnClick="ClearLogs"/>
+            </MudTooltip>
         </MudStack>
     </MudPaper>
 
@@ -37,7 +40,7 @@
 @code {
     [Parameter] public bool Hidden { get; set; }
 
-    private readonly List<LogResponse> _logs = new();
+    private Stack<LogResponse> _logs = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,13 +52,18 @@
     {
         InvokeAsync(() =>
         {
-            _logs.Add(log);
+            _logs.Push(log);
             try
             {
                 StateHasChanged();
             }
             catch (ObjectDisposedException) { };
         });
+    }
+
+    public void ClearLogs()
+    {
+        _logs.Clear();
     }
 
     public async ValueTask DisposeAsync()

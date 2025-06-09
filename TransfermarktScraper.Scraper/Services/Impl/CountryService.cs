@@ -64,7 +64,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         {
             int countryLimit = _scraperSettings.CountryLimit;
 
-            _logger.LogInformation("Starting the scraping of {CountryLimit} countries process...", countryLimit);
+            _logger.LogInformation("Starting the scraping/fetching of {CountryLimit} countries process...", countryLimit);
 
             var countryDtos = Enumerable.Empty<CountryResponse>();
 
@@ -73,9 +73,6 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             if (forceScraping)
             {
                 var countriesScraped = await ScrapeCountriesAsync();
-                _logger.LogInformation("countriesScraped: {@countriesScraped}", countriesScraped);
-
-                _logger.LogInformation("PersistCountriesAsync...");
 
                 var countriesUpdatedOrInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
@@ -98,6 +95,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
+
+            _logger.LogInformation("Succesfully obtained {CountryLimit} countries.", countryLimit);
 
             return countryDtos;
         }
@@ -123,6 +122,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
                 countriesDtos.Add(countryDto);
             }
+
+            _logger.LogInformation("Succesfully updated the countries competitions.");
 
             return countriesDtos;
         }
@@ -230,11 +231,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
         private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
         {
-            _logger.LogInformation("PAGE: {Url}", _page.Url);
-
             var response = await _page.GotoAsync("/");
-
-            _logger.LogInformation("RESPONSE: {Status}", response?.Status);
 
             if (response == null || response.Status != (int)HttpStatusCode.OK)
             {

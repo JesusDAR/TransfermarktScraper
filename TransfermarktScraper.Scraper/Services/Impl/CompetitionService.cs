@@ -54,7 +54,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// <inheritdoc/>
         public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting the scraping competitions process...");
+            _logger.LogInformation("Starting the scraping/fetching competitions of the country {CountryTransfermarktId} process...", countryTransfermarktId);
 
             var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
@@ -68,6 +68,8 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             }
 
             var competitionDtos = competitions.Adapt<IEnumerable<CompetitionResponse>>();
+
+            _logger.LogInformation("Succesfully obtained the competitions of the country {CountryTransfermarktId}.", countryTransfermarktId);
 
             return competitionDtos;
         }

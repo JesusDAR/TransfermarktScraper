@@ -12,10 +12,10 @@
 
 <PageTitle>Start</PageTitle>
 
-<MudGrid ustify="Justify.Center" Spacing="2" Class="mt-6">
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
     <MudItem xs="12" Class="d-flex justify-center">
         <MudText>
-            Massive scraping of all data from Transfermarkt (The process will take a long time to complete)
+            Massive scraping (The process will take a long time to complete) and exporting of all data from Transfermarkt
         </MudText>
     </MudItem>
 </MudGrid>
@@ -69,7 +69,7 @@
     </MudItem>
 </MudGrid>
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
-    <MudItem md="2">
+    <MudItem md="2" Class="d-flex justify-center">
         <MudSelect Label="Visual scraping mode"
                    T="bool"
                    Value="_selectedHeadlessMode"
@@ -78,7 +78,7 @@
             <MudSelectItem Value="false">Enabled</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem md="2">
+    <MudItem md="2" Class="d-flex justify-center">
         <MudSelect Label="Always force scraping mode"
                    T="bool"
                    Value="_selectedForceScrapingMode"
@@ -87,7 +87,7 @@
             <MudSelectItem Value="false">Disabled</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem md="2">
+    <MudItem md="2" Class="d-flex justify-center">
         <MudNumericField Label="Number of countries to scrape"
                          T="int"
                          Value="_selectedCountriesCountToScrape"
@@ -106,7 +106,7 @@
     </MudItem>
 </MudGrid>
 <MudGrid Justify="Justify.Center" Class="mt-3">
-    <MudItem>
+    <MudItem md="2" Class="d-flex justify-center">
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
                    Variant="Variant.Filled"

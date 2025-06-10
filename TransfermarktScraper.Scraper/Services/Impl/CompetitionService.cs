@@ -117,10 +117,10 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
                     await onCountryQuickSelectResultCaptured(countryQuickSelectResult);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    var message = $"Error in interceptor for country: {countryTransfermarktId}";
-                    ScrapingException.LogError(nameof(SetQuickSelectCompetitionsInterceptorAsync), nameof(CompetitionService), message, url, _logger, ex);
+                    var message = $"Interceptor failed. Error in country: {countryTransfermarktId}. Restarting scraping countries process...";
+                    throw InterceptorException.LogError(nameof(SetQuickSelectCompetitionsInterceptorAsync), nameof(CompetitionService), message, _logger);
                 }
             });
         }

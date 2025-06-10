@@ -4,10 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using DnsClient.Internal;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TransfermarktScraper.Domain.DTOs.Request.Scraper;
 using TransfermarktScraper.Domain.DTOs.Response.Scraper;
+using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Scraper.Services.Interfaces;
 
 namespace TransfermarktScraper.ApiService.Controllers
@@ -62,6 +64,12 @@ namespace TransfermarktScraper.ApiService.Controllers
 
                 var result = await _countryService.GetCountriesAsync(forceScraping, cancellationToken);
                 return Ok(result);
+            }
+            catch (InterceptorException)
+            {
+                var message = "Interceptor failed. Restarting scraping countries process...";
+                _logger.LogError(message);
+                return StatusCode(StatusCodes.Status409Conflict, message);
             }
             catch (Exception ex)
             {

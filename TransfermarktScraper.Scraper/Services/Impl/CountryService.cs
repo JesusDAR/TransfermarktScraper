@@ -192,11 +192,16 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
         /// <summary>
         /// Persists a collection of countries by inserting or updating them in the database.
+        /// Before sending them to the repo countries are sorted by ID and filtered out those that don't have.
         /// </summary>
         /// <param name="countries">The collection of country entities to persist.</param>
         /// <returns>A task that represents the asynchronous operation, containing the persisted countries.</returns>
         private async Task<IEnumerable<Country>> PersistCountriesAsync(IEnumerable<Country> countries, CancellationToken cancellationToken)
         {
+            countries = countries
+                .Where(country => !string.IsNullOrEmpty(country.TransfermarktId))
+                .OrderBy(country => int.Parse(country.TransfermarktId));
+
             var countriesInsertedOrUpdated = await _countryRepository.InsertOrUpdateRangeAsync(countries, cancellationToken);
 
             return countries;
@@ -497,32 +502,45 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             for (int i = 0; i < countries.Count; i++)
             {
                 var country = countries[i];
-                var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
 
-                country.TransfermarktId = countryQuickSelectResult.Id;
-                country.Flag = string.Concat(_scraperSettings.FlagUrl, "/", countryQuickSelectResult.Id, ".png");
-
-                var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
-
-                var competitions = new List<Competition>();
-
-                foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
+                try
                 {
-                    var competition = new Competition
+                    var countryQuickSelectResult = countryQuickSelectInterceptorResult.CountryQuickSelectResults[i];
+
+                    country.TransfermarktId = countryQuickSelectResult.Id;
+                    country.Flag = string.Concat(_scraperSettings.FlagUrl, "/", countryQuickSelectResult.Id, ".png");
+
+                    var competitionQuickSelectResults = countryQuickSelectResult.CompetitionQuickSelectResults;
+
+                    var competitions = new List<Competition>();
+
+                    // Checks if the interceptor failed. If so, no competitions for the country.
+                    if (competitionQuickSelectResults != null)
                     {
-                        TransfermarktId = competitionQuickSelectResult.Id,
-                        Name = competitionQuickSelectResult.Name,
-                        Link = string.Concat(_scraperSettings.BaseUrl, competitionQuickSelectResult.Link),
-                    };
+                        foreach (var competitionQuickSelectResult in competitionQuickSelectResults)
+                        {
+                            var competition = new Competition
+                            {
+                                TransfermarktId = competitionQuickSelectResult.Id,
+                                Name = competitionQuickSelectResult.Name,
+                                Link = string.Concat(_scraperSettings.BaseUrl, competitionQuickSelectResult.Link),
+                            };
 
-                    competitions.Add(competition);
+                            competitions.Add(competition);
+                        }
+                    }
+
+                    country.Competitions = competitions;
+
+                    _logger.LogDebug(
+                        "Intercepted country:\n      " +
+                        "{Country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
                 }
-
-                country.Competitions = competitions;
-
-                _logger.LogDebug(
-                    "Intercepted country:\n      " +
-                    "{Country}", JsonSerializer.Serialize(country, new JsonSerializerOptions { WriteIndented = true }));
+                catch (Exception)
+                {
+                    var message = $"Interceptor failed. Error in country: {country.Name}. Restarting scraping countries process...";
+                    throw InterceptorException.LogError(nameof(AddInterceptedQuickSelectResults), nameof(CountryService), message, _logger);
+                }
             }
         }
 

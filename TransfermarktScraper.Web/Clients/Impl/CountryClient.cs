@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TransfermarktScraper.Domain.DTOs.Request.Scraper;
@@ -40,9 +42,19 @@ namespace TransfermarktScraper.Web.Clients.Impl
         {
             _logger.LogInformation("Sent request to get countries.");
 
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<CountryResponse>>(_clientSettings.CountryControllerPath);
+            var response = await _httpClient.GetAsync(_clientSettings.CountryControllerPath);
 
-            return result ?? Enumerable.Empty<CountryResponse>();
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                // Interceptor error handling
+                return await GetCountriesAsync();
+            }
+            else
+            {
+                var result = await response.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
+
+                return result ?? Enumerable.Empty<CountryResponse>();
+            }
         }
 
         /// <inheritdoc/>

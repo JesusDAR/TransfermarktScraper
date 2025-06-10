@@ -173,7 +173,6 @@ namespace TransfermarktScraper.Data.Repositories.Impl
                 if (!hasExistingCountries)
                 {
                     _logger.LogDebug("Inserting {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
-                    countries = countries.OrderBy(country => int.Parse(country.TransfermarktId));
                     await _countries.InsertManyAsync(countries);
                     _logger.LogInformation("Successfully inserted {Count} countries in the database...", countryTransfermarktIds.Count.ToString());
                 }

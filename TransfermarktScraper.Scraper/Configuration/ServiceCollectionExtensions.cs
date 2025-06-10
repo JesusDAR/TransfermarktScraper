@@ -29,13 +29,12 @@ namespace TransfermarktScraper.Scraper.Configuration
                     configuration.GetSection(nameof(ScraperSettings)).Bind(options));
 
                 // Register Playwright services
-                services.AddSingleton(provider =>
+                services.AddScoped(provider =>
                 {
                     return Playwright.CreateAsync().GetAwaiter().GetResult();
-                }); // One playwright instance for all app
+                });
 
-                // One browser for all app
-                services.AddSingleton(provider =>
+                services.AddScoped(provider =>
                 {
                     var playwright = provider.GetRequiredService<IPlaywright>();
                     var scraperSettings = provider.GetRequiredService<IOptions<ScraperSettings>>().Value;

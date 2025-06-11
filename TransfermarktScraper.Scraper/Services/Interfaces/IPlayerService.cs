@@ -17,6 +17,6 @@ namespace TransfermarktScraper.Scraper.Services.Interfaces
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of player response DTOs.</returns>
-        public Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken);
+        public Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping = false, CancellationToken cancellationToken = default);
     }
 }

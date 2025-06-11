@@ -11,5 +11,12 @@
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         public Task CleanDatabaseAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Scrapes all data available in Transfermarkt.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public Task ScrapeAllAsync(CancellationToken cancellationToken);
     }
 }

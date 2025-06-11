@@ -5,7 +5,6 @@ using Mapster;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
-using TransfermarktScraper.Data.Repositories.Impl;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Request.Scraper.Stat;
 using TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat;

@@ -155,10 +155,6 @@
         NavigationHistoryService.NavigateTo("/countries");
     }
 
-    private async Task ScrapeAllAsync()
-    {
-    }
-
     private async Task<IEnumerable<string>> GetSupportedFormatsAsync()
     {
         var result = await SettingsClient.GetSupportedFormatsAsync();
@@ -181,5 +177,10 @@
     private async Task CleanDatabaseAsync()
     {
         await MasterClient.CleanDatabaseAsync(default);
+    }
+
+    private async Task ScrapeAllAsync()
+    {
+        await MasterClient.ScrapeAllAsync(default);
     }
 }

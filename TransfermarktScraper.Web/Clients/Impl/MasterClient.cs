@@ -40,5 +40,15 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             await _httpClient.GetAsync(uri, cancellationToken);
         }
+
+        /// <inheritdoc/>
+        public async Task ScrapeAllAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Sent request to scrape all data.");
+
+            var uri = string.Concat(_clientSettings.MasterControllerPath, "/scrape-all");
+
+            await _httpClient.GetAsync(uri, cancellationToken);
+        }
     }
 }

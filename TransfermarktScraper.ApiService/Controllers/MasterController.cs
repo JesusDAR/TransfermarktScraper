@@ -40,7 +40,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <response code="500">For unexpected errors.</response>
         [HttpGet("clean-database")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> CleanDatabaseAsync(
             CancellationToken cancellationToken)
         {
@@ -49,6 +49,34 @@ namespace TransfermarktScraper.ApiService.Controllers
                 _logger.LogInformation("Received request to clean database.");
 
                 await _masterService.CleanDatabaseAsync(cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected Error.");
+                return Problem(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Scrapes all data available in Transfermarkt.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>
+        /// <response code="200">If the operation was successful.</response>
+        /// <response code="500">For unexpected errors.</response>
+        [HttpGet("scrape-all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ScrapeAllAsync(
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation("Received request to scrape all data.");
+
+                await _masterService.ScrapeAllAsync(cancellationToken);
 
                 return Ok();
             }

@@ -2,13 +2,14 @@
 using System.Text.RegularExpressions;
 using Mapster;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
-using TransfermarktScraper.Data.Repositories.Impl;
 using TransfermarktScraper.Data.Repositories.Interfaces;
 using TransfermarktScraper.Domain.DTOs.Response.Scraper;
 using TransfermarktScraper.Domain.Entities;
 using TransfermarktScraper.Domain.Exceptions;
 using TransfermarktScraper.Domain.Utils.DTO;
+using TransfermarktScraper.Scraper.Configuration;
 using TransfermarktScraper.Scraper.Services.Interfaces;
 using TransfermarktScraper.Scraper.Utils;
 
@@ -18,16 +19,22 @@ namespace TransfermarktScraper.Scraper.Services.Impl
     public class ClubService : IClubService
     {
         private readonly IClubRepository _clubRepository;
+        private readonly ScraperSettings _scraperSettings;
         private readonly ILogger<ClubService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClubService"/> class.
         /// </summary>
         /// <param name="clubRepository">The club repository for accessing and managing the club data.</param>
+        /// <param name="scraperSettings">The scraper settings containing configuration values.</param>
         /// <param name="logger">The logger.</param>
-        public ClubService(IClubRepository clubRepository, ILogger<ClubService> logger)
+        public ClubService(
+            IClubRepository clubRepository,
+            IOptions<ScraperSettings> scraperSettings,
+            ILogger<ClubService> logger)
         {
             _clubRepository = clubRepository;
+            _scraperSettings = scraperSettings.Value;
             _logger = logger;
         }
 
@@ -219,6 +226,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 selector = "href";
                 link = await nameTitleLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(link)} from the '{selector}' attribute.");
                 link = link.Replace("startseite", "kader"); // To set the detailed club page
+                link = string.Concat(_scraperSettings.BaseUrl, link); 
                 return link;
             }
             catch (Exception ex)

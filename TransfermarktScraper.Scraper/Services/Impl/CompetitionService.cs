@@ -180,12 +180,20 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         {
             foreach (var competition in competitions)
             {
-                var response = await _page.GotoAsync(competition.Link);
+                int attempt = 0;
+                int maxAttempts = 5;
+                int statusCode = (int)HttpStatusCode.NoContent;
 
-                if (response == null || response.Status != (int)HttpStatusCode.OK)
+                while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
                 {
-                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
-                    throw ScrapingException.LogError(nameof(ScrapeCompetitionsAsync), nameof(CompetitionService), message, _page.Url, _logger);
+                    attempt++;
+                    var response = await _page.GotoAsync(competition.Link);
+
+                    if (response == null || response.Status != (int)HttpStatusCode.OK)
+                    {
+                        var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                        ScrapingException.LogWarning(nameof(ScrapeCompetitionsAsync), nameof(CompetitionService), message, _page.Url, _logger);
+                    }
                 }
 
                 competition.Logo = string.Concat(_scraperSettings.LogoUrl, "/", competition.TransfermarktId.ToLower(), ".png");

@@ -2,6 +2,7 @@
 
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
+@using System.Threading;
 
 @inject IJSRuntime JSRuntime
 @inject ICountryClient CountryClient
@@ -11,6 +12,50 @@
 @inject INavigationHistoryService NavigationHistoryService
 
 <PageTitle>Start</PageTitle>
+
+@if (_isSpinnerActivated)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+}
+
+<MudGrid Justify="Justify.Center" Spacing="2">
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudText>
+            Options to configure the scraping process
+        </MudText>
+    </MudItem>
+</MudGrid>
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+    <MudItem md="2" Class="d-flex justify-center">
+        <MudSelect Label="Visual scraping mode"
+                   T="bool"
+                   Value="_selectedHeadlessMode"
+                   ValueChanged="OnSelectedHeadlessModeChanged">
+            <MudSelectItem Value="true">Disabled</MudSelectItem>
+            <MudSelectItem Value="false">Enabled</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    <MudItem md="2" Class="d-flex justify-center">
+        <MudSelect Label="Always force scraping mode"
+                   T="bool"
+                   Value="_selectedForceScrapingMode"
+                   ValueChanged="OnSelectedForceScrapingModeChanged">
+            <MudSelectItem Value="true">Enabled</MudSelectItem>
+            <MudSelectItem Value="false">Disabled</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    <MudItem md="2" Class="d-flex justify-center">
+        <MudNumericField Label="Number of countries to scrape"
+                         T="int"
+                         Value="_selectedCountriesCountToScrape"
+                         ValueChanged="OnSelectedCountriesCountToScrapeChanged"
+                         Variant="Variant.Text"
+                         Min="0">
+        </MudNumericField>
+    </MudItem>
+</MudGrid>
+
+<MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
 
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
     <MudItem xs="12" Class="d-flex justify-center">
@@ -48,54 +93,24 @@
                            OnClick="ExportCountryCompetitionDataAsync" />
         </MudStack>
     </MudItem>
-    <MudItem md="2" Class="d-flex justify-center">
+    <MudItem md="2" Class="d-flex justify-end">
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
-                   Variant="Variant.Filled"          
+                   Variant="Variant.Filled"
                    OnClick="ScrapeAllAsync">
             Scrape all data
         </MudButton>
     </MudItem>
+    <MudItem md="2" Class="d-flex justify-space-evenly">
+        <MudButton Color="Color.Warning"
+                   Size="Size.Large"
+                   Variant="Variant.Filled"
+                   Disabled="!_isScrapingAllRunning"
+                   OnClick="CancelScrapeAll">
+            Stop Scraping
+        </MudButton>
+    </MudItem>
 
-</MudGrid>
-
-<MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
-
-<MudGrid Justify="Justify.Center" Spacing="2">
-    <MudItem xs="12" Class="d-flex justify-center">
-        <MudText>
-            Options to configure the step by step scraping process
-        </MudText>
-    </MudItem>
-</MudGrid>
-<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
-    <MudItem md="2" Class="d-flex justify-center">
-        <MudSelect Label="Visual scraping mode"
-                   T="bool"
-                   Value="_selectedHeadlessMode"
-                   ValueChanged="OnSelectedHeadlessModeChanged">
-            <MudSelectItem Value="true">Disabled</MudSelectItem>
-            <MudSelectItem Value="false">Enabled</MudSelectItem>
-        </MudSelect>
-    </MudItem>
-    <MudItem md="2" Class="d-flex justify-center">
-        <MudSelect Label="Always force scraping mode"
-                   T="bool"
-                   Value="_selectedForceScrapingMode"
-                   ValueChanged="OnSelectedForceScrapingModeChanged">
-            <MudSelectItem Value="true">Enabled</MudSelectItem>
-            <MudSelectItem Value="false">Disabled</MudSelectItem>
-        </MudSelect>
-    </MudItem>
-    <MudItem md="2" Class="d-flex justify-center">
-        <MudNumericField Label="Number of countries to scrape"
-                         T="int"
-                         Value="_selectedCountriesCountToScrape"
-                         ValueChanged="OnSelectedCountriesCountToScrapeChanged"
-                         Variant="Variant.Text"
-                         Min="0">
-        </MudNumericField>
-    </MudItem>
 </MudGrid>
 
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-12">
@@ -122,13 +137,18 @@
     private int _selectedCountriesCountToScrape;
     private string _selectedFormat = string.Empty;
     private IEnumerable<string> formats = null!;
+    private bool _isScrapingAllRunning = false;
+    private bool _isSpinnerActivated = false;
+    private CancellationTokenSource? _cts;
 
     protected override async Task OnInitializedAsync()
     {
+        _isSpinnerActivated = false;
         var settings = await SettingsClient.GetSettingsAsync();
         _selectedCountriesCountToScrape = settings.CountriesCountToScrape;
         _selectedForceScrapingMode = settings.IsForceScraping;
         _selectedHeadlessMode = settings.IsHeadlessMode;
+        _isScrapingAllRunning = false;
         formats = await GetSupportedFormatsAsync();
     }
 
@@ -166,21 +186,41 @@
 
     private async Task ExportCountryCompetitionDataAsync()
     {
+        _isSpinnerActivated = true;
+
         var fileContentResult = await ExporterClient.ExportMasterDataAsync(_selectedFormat, default);
 
         if (fileContentResult != null)
         {
             await JSRuntime.InvokeVoidAsync("downloadFile", fileContentResult.Base64, fileContentResult.Name, fileContentResult.Format);
         }
+
+        _isSpinnerActivated = false;
     }
 
     private async Task CleanDatabaseAsync()
     {
+        _isSpinnerActivated = true;
+
         await MasterClient.CleanDatabaseAsync(default);
+
+        _isSpinnerActivated = false;
     }
 
     private async Task ScrapeAllAsync()
     {
-        await MasterClient.ScrapeAllAsync(default);
+        _isSpinnerActivated = true;
+        _cts = new CancellationTokenSource();
+        _isScrapingAllRunning = true;
+        await MasterClient.ScrapeAllAsync(_cts.Token);
+        _isScrapingAllRunning = false;
+        _isSpinnerActivated = false;
+    }
+
+    private void CancelScrapeAll()
+    {
+        _cts?.Cancel();
+        _isScrapingAllRunning = false;
+        _isSpinnerActivated = false;
     }
 }

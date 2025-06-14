@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.RegularExpressions;
 using Mapster;
 using Microsoft.Extensions.Logging;
@@ -92,6 +93,22 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         {
             var uri = string.Concat(club.Link, _scraperSettings.DetailedViewPath);
 
+            int attempt = 0;
+            int maxAttempts = 5;
+            int statusCode = (int)HttpStatusCode.NoContent;
+
+            while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
+            {
+                attempt++;
+                var response = await _page.GotoAsync(uri);
+
+                if (response == null || response.Status != (int)HttpStatusCode.OK)
+                {
+                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                    ScrapingException.LogWarning(nameof(ScrapePlayersAsync), nameof(CompetitionService), message, _page.Url, _logger);
+                }
+            }
+
             await _page.GotoAsync(uri);
 
             var tableRowsLocators = await GetTableRowLocatorsAsync();
@@ -101,6 +118,11 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             foreach (var tableRowLocator in tableRowsLocators)
             {
                 var tableDataLocators = await GetTableDataLocatorsAsync(tableRowLocator);
+
+                if (tableDataLocators == null)
+                {
+                    continue;
+                }
 
                 var number = await GetNumberAsync(tableDataLocators, 0);
 
@@ -174,7 +196,38 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             var selector = "#yw1";
             try
             {
-                await _page.WaitForSelectorAsync(selector);
+                int attempt = 0;
+                int maxAttempts = 5;
+                bool isSuccess = false;
+                while (attempt < maxAttempts || !isSuccess)
+                {
+                    try
+                    {
+                        attempt++;
+                        await _page.WaitForSelectorAsync(
+                            selector,
+                            new PageWaitForSelectorOptions
+                            {
+                                State = WaitForSelectorState.Visible,
+                                Timeout = 1000,
+                            });
+                        isSuccess = true;
+                    }
+                    catch (Exception)
+                    {
+                        var message = string.Empty;
+
+                        if (attempt == maxAttempts)
+                        {
+                            message = $"Using selector: '{selector}' failed.";
+                            throw ScrapingException.LogError(nameof(GetTableDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger);
+                        }
+
+                        message = $"Waiting for selector: {selector} to be visible.";
+                        ScrapingException.LogWarning(nameof(GetTableRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger);
+                    }
+                }
+
                 var gridLocator = _page.Locator(selector);
 
                 selector = "table.items > tbody > tr";
@@ -198,21 +251,47 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// A task representing the asynchronous operation that returns a read-only list of <see cref="ILocator"/> objects
         /// representing the player datas.
         /// </returns>
-        private async Task<IReadOnlyList<ILocator>> GetTableDataLocatorsAsync(ILocator tableRowLocator)
+        private async Task<IReadOnlyList<ILocator>?> GetTableDataLocatorsAsync(ILocator tableRowLocator)
         {
             var selector = "> td";
-            try
-            {
-                var tableDataLocator = tableRowLocator.Locator(selector);
-                var tableDataLocators = await tableDataLocator.AllAsync();
 
-                return tableDataLocators;
-            }
-            catch (Exception ex)
+            int attempt = 0;
+            int maxAttempts = 5;
+            while (attempt < maxAttempts)
             {
-                var message = $"Using selector: '{selector}' failed.";
-                throw ScrapingException.LogError(nameof(GetTableDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger, ex);
+                try
+                {
+                    attempt++;
+                    await tableRowLocator.Locator(selector).First.WaitForAsync(
+                        new LocatorWaitForOptions
+                        {
+                            State = WaitForSelectorState.Visible,
+                            Timeout = 1000,
+                        });
+
+                    var tableDataLocators = await tableRowLocator.Locator(selector).AllAsync();
+                    if (tableDataLocators.Count > 0)
+                    {
+                        return tableDataLocators;
+                    }
+
+                    var message = $"Selector '{selector}' matched 0 elements.";
+                    ScrapingException.LogWarning(nameof(GetTableRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger);
+                    return null;
+                }
+                catch (Exception) when (attempt < maxAttempts)
+                {
+                    var message = $"Attempt {attempt} failed for selector: {selector}";
+                    ScrapingException.LogWarning(nameof(GetTableRowLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger);
+                }
+                catch (Exception)
+                {
+                    var message = $"Failed to get table data after {maxAttempts} attempts using selector: '{selector}'";
+                    throw ScrapingException.LogError(nameof(GetTableDataLocatorsAsync), nameof(PlayerService), message, _page.Url, _logger);
+                }
             }
+
+            return null;
         }
 
         /// <summary>

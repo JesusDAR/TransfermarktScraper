@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -48,7 +49,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             var uri = string.Concat(_clientSettings.MasterControllerPath, "/scrape-all");
 
-            await _httpClient.GetAsync(uri, cancellationToken);
+            try
+            {
+                await _httpClient.GetAsync(uri, cancellationToken);
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.LogWarning("Scrape all process interrupted. {Message}", e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(ScrapeAllAsync), e.Message);
+            }
         }
     }
 }

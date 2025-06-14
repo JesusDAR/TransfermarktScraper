@@ -112,15 +112,23 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             {
                 uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", "ges");
 
-                var response = await _page.GotoAsync(uri, new PageGotoOptions
-                {
-                    WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                });
+                int attempt = 0;
+                int maxAttempts = 5;
+                int statusCode = (int)HttpStatusCode.NoContent;
 
-                if (response == null || response.Status != (int)HttpStatusCode.OK)
+                while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
                 {
-                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
-                    throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                    attempt++;
+                    var response = await _page.GotoAsync(uri, new PageGotoOptions
+                    {
+                        WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                    });
+
+                    if (response == null || response.Status != (int)HttpStatusCode.OK)
+                    {
+                        var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                        throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                    }
                 }
 
                 var playerSeasonIds = await GetPlayerSeasonIds();
@@ -145,10 +153,24 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                     {
                         uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", seasonTransfermarktId);
 
-                        var response = await _page.GotoAsync(uri, new PageGotoOptions
+                        int attempt = 0;
+                        int maxAttempts = 5;
+                        int statusCode = (int)HttpStatusCode.NoContent;
+
+                        while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
                         {
-                            WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                        });
+                            attempt++;
+                            var response = await _page.GotoAsync(uri, new PageGotoOptions
+                            {
+                                WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                            });
+
+                            if (response == null || response.Status != (int)HttpStatusCode.OK)
+                            {
+                                var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                                throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                            }
+                        }
 
                         var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
 
@@ -167,10 +189,24 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 {
                     uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
 
-                    var response = await _page.GotoAsync(uri, new PageGotoOptions
+                    int attempt = 0;
+                    int maxAttempts = 5;
+                    int statusCode = (int)HttpStatusCode.NoContent;
+
+                    while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
                     {
-                        WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                    });
+                        attempt++;
+                        var response = await _page.GotoAsync(uri, new PageGotoOptions
+                        {
+                            WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                        });
+
+                        if (response == null || response.Status != (int)HttpStatusCode.OK)
+                        {
+                            var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                            throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                        }
+                    }
 
                     var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
 

@@ -41,19 +41,27 @@ namespace TransfermarktScraper.Web.Clients.Impl
         {
             _logger.LogInformation("Sent request to get countries.");
 
-            var response = await _httpClient.GetAsync(_clientSettings.CountryControllerPath);
-
-            if (response.StatusCode == HttpStatusCode.Conflict)
+            try
             {
-                // Interceptor error handling
-                return await GetCountriesAsync();
-            }
-            else
-            {
-                var result = await response.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
+                var response = await _httpClient.GetAsync(_clientSettings.CountryControllerPath);
 
-                return result ?? Enumerable.Empty<CountryResponse>();
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    return await GetCountriesAsync(); // Interceptor error handling
+                }
+                else
+                {
+                    var result = await response.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
+
+                    return result ?? Enumerable.Empty<CountryResponse>();
+                }
             }
+            catch (System.Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetCountriesAsync), e.Message);
+            }
+
+            return Enumerable.Empty<CountryResponse>();
         }
 
         /// <inheritdoc/>
@@ -61,13 +69,20 @@ namespace TransfermarktScraper.Web.Clients.Impl
         {
             _logger.LogInformation("Sent request to update countries competitions.");
 
-            var result = await _httpClient.PutAsJsonAsync(_clientSettings.CountryControllerPath + "/competitions", countries);
-
-            if (result != null && result.IsSuccessStatusCode)
+            try
             {
-                var content = await result.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
+                var result = await _httpClient.PutAsJsonAsync(_clientSettings.CountryControllerPath + "/competitions", countries);
 
-                return content ?? Enumerable.Empty<CountryResponse>();
+                if (result != null && result.IsSuccessStatusCode)
+                {
+                    var content = await result.Content.ReadFromJsonAsync<IEnumerable<CountryResponse>>();
+
+                    return content ?? Enumerable.Empty<CountryResponse>();
+                }
+            }
+            catch (System.Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(UpdateCountriesCompetitionsAsync), e.Message);
             }
 
             return Enumerable.Empty<CountryResponse>();

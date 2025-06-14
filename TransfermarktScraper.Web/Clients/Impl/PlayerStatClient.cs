@@ -47,13 +47,20 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             var uri = QueryHelpers.AddQueryString(_clientSettings.PlayerStatsControllerPath, queryParams);
 
-            var result = await _httpClient.PostAsJsonAsync(uri, playerStats);
-
-            if (result != null && result.IsSuccessStatusCode)
+            try
             {
-                var content = await result.Content.ReadFromJsonAsync<IEnumerable<PlayerStatResponse>>();
+                var result = await _httpClient.PostAsJsonAsync(uri, playerStats);
 
-                return content;
+                if (result != null && result.IsSuccessStatusCode)
+                {
+                    var content = await result.Content.ReadFromJsonAsync<IEnumerable<PlayerStatResponse>>();
+
+                    return content;
+                }
+            }
+            catch (System.Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetPlayerStatsAsync), e.Message);
             }
 
             return null;

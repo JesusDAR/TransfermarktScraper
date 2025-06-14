@@ -42,9 +42,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             var uri = QueryHelpers.AddQueryString(_clientSettings.ClubControllerPath, "competitionTransfermarktId", competitionTransfermarktId);
 
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<ClubResponse>>(uri);
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<IEnumerable<ClubResponse>>(uri);
 
-            return result ?? Enumerable.Empty<ClubResponse>();
+                return result ?? Enumerable.Empty<ClubResponse>();
+            }
+            catch (System.Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetClubsAsync), e.Message);
+            }
+
+            return Enumerable.Empty<ClubResponse>();
         }
     }
 }

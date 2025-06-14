@@ -48,9 +48,18 @@ namespace TransfermarktScraper.Web.Clients.Impl
 
             var uri = QueryHelpers.AddQueryString(_clientSettings.CompetitionControllerPath, queryParams);
 
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<CompetitionResponse>>(uri);
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<IEnumerable<CompetitionResponse>>(uri);
 
-            return result ?? Enumerable.Empty<CompetitionResponse>();
+                return result ?? Enumerable.Empty<CompetitionResponse>();
+            }
+            catch (System.Exception e)
+            {
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetCompetitionsAsync), e.Message);
+            }
+
+            return Enumerable.Empty<CompetitionResponse>();
         }
     }
 }

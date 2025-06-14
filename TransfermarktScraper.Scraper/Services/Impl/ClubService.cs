@@ -226,7 +226,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 selector = "href";
                 link = await nameTitleLocator.GetAttributeAsync(selector) ?? throw new Exception($"Failed to obtain the {nameof(link)} from the '{selector}' attribute.");
                 link = link.Replace("startseite", "kader"); // To set the detailed club page
-                link = string.Concat(_scraperSettings.BaseUrl, link); 
+                link = string.Concat(_scraperSettings.BaseUrl, link);
                 return link;
             }
             catch (Exception ex)

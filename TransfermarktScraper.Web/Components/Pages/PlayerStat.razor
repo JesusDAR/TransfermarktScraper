@@ -175,9 +175,12 @@ else
                         <RowTemplate Context="playerSeasonCompetitionStat">
                             <MudTd>
                                 <MudStack Row="true">
-                                    <MudAvatar>
-                                        <MudImage Src="@playerSeasonCompetitionStat.CompetitionLogo" Alt="@playerSeasonCompetitionStat.CompetitionName" />
-                                    </MudAvatar>
+                                    @if (playerSeasonCompetitionStat.CompetitionLogo != null)
+                                    {
+                                        <MudAvatar>
+                                            <MudImage Src="@playerSeasonCompetitionStat.CompetitionLogo" Alt="@playerSeasonCompetitionStat.CompetitionName" />
+                                        </MudAvatar>
+                                    }
                                     <MudLink Href="@playerSeasonCompetitionStat.CompetitionLink" Target="_blank">
                                         <MudText Typo="Typo.subtitle2" Class="mt-3">
                                             @playerSeasonCompetitionStat.CompetitionName

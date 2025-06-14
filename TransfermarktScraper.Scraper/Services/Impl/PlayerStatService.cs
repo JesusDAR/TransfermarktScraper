@@ -788,8 +788,10 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             catch (Exception ex)
             {
                 var message = $"Using selector: '{selector}' failed. Table data index: {index}.";
-                throw ScrapingException.LogError(nameof(GetCompetitionLinkAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
+                ScrapingException.LogWarning(nameof(GetCompetitionLogoAsync), nameof(PlayerStatService), message, _page.Url, _logger, ex);
             }
+
+            return competitionLogo;
         }
 
         /// <summary>

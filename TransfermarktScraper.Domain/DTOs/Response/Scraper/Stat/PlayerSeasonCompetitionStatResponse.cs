@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat
@@ -41,7 +41,7 @@ namespace TransfermarktScraper.Domain.DTOs.Response.Scraper.Stat
         /// <summary>
         /// Gets or sets the competition logo.
         /// </summary>
-        required public string CompetitionLogo { get; set; }
+        public string? CompetitionLogo { get; set; }
 
         /// <summary>
         /// Gets or sets the number of appearances in the competition for the season.

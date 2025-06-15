@@ -390,7 +390,7 @@ else
 
             var scrapedPlayerSeasonStat = await ScrapePlayerStatsAsync(seasonTransfermarktId);
 
-            if (scrapedPlayerSeasonStat != null)
+            if (scrapedPlayerSeasonStat != null && scrapedPlayerSeasonStat.Any())
             {
                 if (selectedPlayerStat == null)
                 {

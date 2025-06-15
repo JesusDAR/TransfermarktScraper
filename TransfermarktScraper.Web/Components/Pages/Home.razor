@@ -44,36 +44,17 @@
             <MudSelectItem Value="false">Disabled</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem md="2" Class="d-flex justify-center">
-        <MudNumericField Label="Number of countries to scrape"
-                         T="int"
-                         Value="_selectedCountriesCountToScrape"
-                         ValueChanged="OnSelectedCountriesCountToScrapeChanged"
-                         Variant="Variant.Text"
-                         Min="0">
-        </MudNumericField>
-    </MudItem>
 </MudGrid>
 
 <MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
 
-<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+<MudGrid Justify="Justify.Center" Spacing="2">
     <MudItem xs="12" Class="d-flex justify-center">
         <MudText>
-            Massive scraping (The process will take a long time to complete) and exporting of all data from Transfermarkt
+            Massive exporting of all data in the selected format
         </MudText>
     </MudItem>
-</MudGrid>
-<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
-    <MudItem md="2" Class="d-flex justify-center">
-        <MudButton Color="Color.Error"
-                   Size="Size.Large"
-                   Variant="Variant.Filled"
-                   OnClick="CleanDatabaseAsync">
-            Clean Database
-        </MudButton>
-    </MudItem>
-    <MudItem md="2">
+    <MudItem md="2" Class="mt-6">
         <MudStack Row="true">
             <MudSelect Label="Select exporting format"
                        T="string"
@@ -93,22 +74,55 @@
                            OnClick="ExportCountryCompetitionDataAsync" />
         </MudStack>
     </MudItem>
-    <MudItem md="2" Class="d-flex justify-end">
-        <MudButton Color="Color.Primary"
+</MudGrid>
+
+<MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
+
+<MudGrid Justify="Justify.Center" Spacing="2">
+    <MudItem md="2" Class="d-flex justify-center mt-6">
+        <MudNumericField Label="Number of countries to scrape"
+                         T="int"
+                         Value="_selectedCountriesCountToScrape"
+                         ValueChanged="OnSelectedCountriesCountToScrapeChanged"
+                         Variant="Variant.Text"
+                         Min="0">
+        </MudNumericField>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Justify="Justify.Center" Spacing="2" Class="mt-6">
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudText>
+            Massive scraping (The process will take a long time to complete) of all data from the number of countries selected
+        </MudText>
+    </MudItem>
+    <MudItem md="2" Class="d-flex justify-center mt-6">
+        <MudButton Color="Color.Error"
                    Size="Size.Large"
                    Variant="Variant.Filled"
-                   OnClick="ScrapeAllAsync">
-            Scrape all data
+                   OnClick="CleanDatabaseAsync">
+            Clean Database
         </MudButton>
     </MudItem>
-    <MudItem md="2" Class="d-flex justify-space-evenly">
-        <MudButton Color="Color.Warning"
-                   Size="Size.Large"
-                   Variant="Variant.Filled"
-                   Disabled="!_isScrapingAllRunning"
-                   OnClick="CancelScrapeAll">
-            Stop Scraping
-        </MudButton>
+    <MudItem md="2" Class="d-flex justify-center mt-6">
+        @if (!_isScrapingAllRunning)
+        {
+            <MudButton Color="Color.Primary"
+                       Size="Size.Large"
+                       Variant="Variant.Filled"
+                       OnClick="ScrapeAllAsync">
+                Scrape all data
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Warning"
+                       Size="Size.Large"
+                       Variant="Variant.Filled"
+                       OnClick="CancelScrapeAll">
+                Stop Scraping
+            </MudButton>
+        }
     </MudItem>
 
 </MudGrid>
@@ -116,7 +130,7 @@
 <MudGrid Justify="Justify.Center" Spacing="2" Class="mt-12">
     <MudItem xs="12" Class="d-flex justify-center">
         <MudText>
-            Click here to start the step by step scraping process
+            Step by step scraping of the number of countries selected
         </MudText>
     </MudItem>
 </MudGrid>

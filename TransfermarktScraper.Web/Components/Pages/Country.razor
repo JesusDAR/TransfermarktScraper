@@ -3,6 +3,7 @@
 @using TransfermarktScraper.Domain.DTOs.Response.Scraper
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
+@using System.Threading;
 
 @attribute [StreamRendering(true)]
 
@@ -12,6 +13,7 @@
 @inject ICountryClient CountryClient
 @inject IExporterClient ExporterClient
 @inject ISettingsClient SettingsClient
+@inject IMasterClient MasterClient
 @inject INavigationHistoryService NavigationHistoryService
 @inject IItemSelectionService ItemSelectionService
 @inject IPageReferenceService PageReferenceService
@@ -25,6 +27,10 @@
 }
 else
 {
+    @if (_isSpinnerActivated)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+    }
     <MudGrid>
         <MudItem xs="2">
             <MudTextField Label="Search countries..."
@@ -55,13 +61,37 @@ else
                            OnClick="ExportCountryCompetitionDataAsync" />
         </MudItem>
         <MudItem xs="2" Class="d-flex justify-end">
-            <MudButton Color="Color.Primary"
+            <MudButton Color="Color.Transparent"
                        FullWidth="true"
                        Size="Size.Large"
                        Variant="Variant.Filled"
                        OnClick="SelectAllCountries">
                 Select All
             </MudButton>
+        </MudItem>
+
+        <MudItem xs="2" Class="d-flex justify-end">
+            @if (!_isScrapingAllRunning)
+            {
+                <MudButton Color="Color.Tertiary"
+                           Size="Size.Large"
+                           Variant="Variant.Filled"
+                           FullWidth="true"
+                           Disabled="!selectedCountries.Any()"
+                           OnClick="ScrapeAllFromCountriesAsync">
+                    Scrape all
+                </MudButton>
+            }
+            else
+            {
+                <MudButton Color="Color.Warning"
+                           Size="Size.Large"
+                           Variant="Variant.Filled"
+                           FullWidth="true"
+                           OnClick="CancelScrapeAll">
+                    Stop Scraping
+                </MudButton>
+            }
         </MudItem>
         <MudItem xs="2" Class="d-flex justify-end">
             <MudButton Color="Color.Primary"
@@ -106,6 +136,9 @@ else
     private string _searchedCountry = string.Empty;
     private string _selectedFormat = string.Empty;
     private IEnumerable<string> formats = null!;
+    private bool _isScrapingAllRunning = false;
+    private bool _isSpinnerActivated = false;
+    private CancellationTokenSource? _cts;
 
     private string SearchedCountry
     {
@@ -183,6 +216,26 @@ else
         result = result.Select(format => format.ToUpperInvariant());
 
         return result;
+    }
+
+    private async Task ScrapeAllFromCountriesAsync()
+    {
+        _isSpinnerActivated = true;
+        _cts = new CancellationTokenSource();
+        _isScrapingAllRunning = true;
+
+        var countryIds = selectedCountries.Select(country => country.TransfermarktId);
+        await MasterClient.ScrapeAllFromCountriesAsync(countryIds, _cts.Token);
+
+        _isScrapingAllRunning = false;
+        _isSpinnerActivated = false;
+    }
+
+    private void CancelScrapeAll()
+    {
+        _cts?.Cancel();
+        _isScrapingAllRunning = false;
+        _isSpinnerActivated = false;
     }
 
     private async Task ExportCountryCompetitionDataAsync()

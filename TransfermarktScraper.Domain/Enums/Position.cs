@@ -59,5 +59,20 @@
         /// Centre-Forward position.
         /// </summary>
         CentreForward = 10,
+
+        /// <summary>
+        /// Right Midfield position.
+        /// </summary>
+        RightMidfield = 11,
+
+        /// <summary>
+        /// Striker position.
+        /// </summary>
+        Striker = 12,
+
+        /// <summary>
+        /// Midfielder position.
+        /// </summary>
+        Midfielder = 13,
     }
 }

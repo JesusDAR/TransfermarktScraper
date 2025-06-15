@@ -46,7 +46,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         /// <inheritdoc/>
         public async Task SetHeadlessModeAsync(bool isHeadlessMode)
         {
-            await _httpClient.PostAsync(
+            await _httpClient.PutAsync(
                 string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/headless-mode/{isHeadlessMode}"),
                 default);
         }
@@ -54,7 +54,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         /// <inheritdoc/>
         public async Task SetCountriesCountToScrapeAsync(int countriesCountToScrape)
         {
-            await _httpClient.PostAsync(
+            await _httpClient.PutAsync(
                 string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/countries-to-scrape/{countriesCountToScrape}"),
                 default);
         }
@@ -62,7 +62,7 @@ namespace TransfermarktScraper.Web.Clients.Impl
         /// <inheritdoc/>
         public async Task SetForceScrapingAsync(bool isForceScraping)
         {
-            await _httpClient.PostAsync(
+            await _httpClient.PutAsync(
                 string.Concat(_clientSettings.SettingsControllerPath, $"/scraper/force-scraping/{isForceScraping}"),
                 default);
         }

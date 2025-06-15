@@ -93,7 +93,7 @@ namespace TransfermarktScraper.Domain.Entities.Stat
         /// Gets or sets the competition logo.
         /// </summary>
         [BsonElement("competitionLogo")]
-        public string CompetitionLogo { get; set; }
+        public string? CompetitionLogo { get; set; }
 
         /// <summary>
         /// Gets or sets the number of appearances in the competition for the season.

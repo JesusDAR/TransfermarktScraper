@@ -72,7 +72,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 200 OK if successful.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("scraper/headless-mode/{isHeadlessMode}")]
+        [HttpPut("scraper/headless-mode/{isHeadlessMode}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult SetHeadlessMode(bool isHeadlessMode)
@@ -101,7 +101,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 400 Bad Request if the value is invalid.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("scraper/countries-to-scrape/{countriesCountToScrape}")]
+        [HttpPut("scraper/countries-to-scrape/{countriesCountToScrape}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -130,7 +130,7 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// 200 OK if successful.
         /// 500 Internal Server Error if an unexpected error occurs.
         /// </returns>
-        [HttpPost("scraper/force-scraping/{isForceScraping}")]
+        [HttpPut("scraper/force-scraping/{isForceScraping}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult SetForceScraping(bool isForceScraping)

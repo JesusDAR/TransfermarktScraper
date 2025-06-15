@@ -58,36 +58,70 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var countries = await _countryService.GetCountriesAsync(false, cancellationToken);
 
-            foreach (var country in countries)
+            var countryTransfermarktIds = countries.Select(country => country.TransfermarktId);
+
+            await ScrapeAllFromCountriesAsync(countryTransfermarktIds, cancellationToken);
+
+            _logger.LogInformation("Successfully scraped all data.");
+        }
+
+        /// <inheritdoc/>
+        public async Task ScrapeAllFromCountriesAsync(IEnumerable<string> countryTransfermarktIds, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting to scrape all data from countries process...");
+
+            foreach (var countryTransfermarktId in countryTransfermarktIds)
             {
-                // competitions data is completed and clubs are obtained from here.
-                var competitions = await _competitionService.GetCompetitionsAsync(country.TransfermarktId, default, cancellationToken);
+                // completed competitions and clubs data are obtained from here.
+                var competitions = await _competitionService.GetCompetitionsAsync(countryTransfermarktId, default, cancellationToken);
 
                 foreach (var competition in competitions)
                 {
                     var clubs = await _clubService.GetClubsAsync(competition.TransfermarktId, cancellationToken);
 
-                    foreach (var club in clubs)
-                    {
-                        var players = await _playerService.GetPlayersAsync(club.TransfermarktId, default, cancellationToken);
+                    var clubTransfermarktIds = clubs.Select(club => club.TransfermarktId);
 
-                        var playerStatRequests = players.Select(player =>
-                        {
-                            return new PlayerStatRequest
-                            {
-                                SeasonTransfermarktId = string.Empty,
-                                Position = player.Position,
-                                PlayerTransfermarktId = player.TransfermarktId,
-                                IncludeAllPlayerTransfermarktSeasons = true,
-                            };
-                        });
-
-                        await _playerStatService.GetPlayerStatsAsync(playerStatRequests, default);
-                    }
+                    await ScrapeAllFromClubsAsync(clubTransfermarktIds, cancellationToken);
                 }
             }
 
-            _logger.LogInformation("Successfully scraped all data.");
+            _logger.LogInformation("Successfully scraped all data from countries.");
+        }
+
+        /// <inheritdoc/>
+        public async Task ScrapeAllFromClubsAsync(IEnumerable<string> clubTransfermarktIds, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting to scrape all data from clubs process...");
+
+            foreach (var clubTransfermarktId in clubTransfermarktIds)
+            {
+                var players = await _playerService.GetPlayersAsync(clubTransfermarktId, default, cancellationToken);
+
+                var playerStatRequests = players.Select(player =>
+                {
+                    return new PlayerStatRequest
+                    {
+                        SeasonTransfermarktId = string.Empty,
+                        Position = player.Position,
+                        PlayerTransfermarktId = player.TransfermarktId,
+                        IncludeAllPlayerTransfermarktSeasons = true,
+                    };
+                });
+
+                await ScrapeAllFromPlayersAsync(playerStatRequests, default);
+            }
+
+            _logger.LogInformation("Successfully scraped all data from clubs.");
+        }
+
+        /// <inheritdoc/>
+        public async Task ScrapeAllFromPlayersAsync(IEnumerable<PlayerStatRequest> playerStatRequests, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting to scrape all player stat data from players process...");
+
+            await _playerStatService.GetPlayerStatsAsync(playerStatRequests, default);
+
+            _logger.LogInformation("Successfully scraped all player stat data from players.");
         }
     }
 }

@@ -3,6 +3,7 @@
 @using TransfermarktScraper.Domain.DTOs.Response.Scraper
 @using TransfermarktScraper.Web.Clients.Interfaces
 @using TransfermarktScraper.Web.Services.Interfaces
+@using System.Threading;
 
 @attribute [StreamRendering(true)]
 
@@ -11,6 +12,7 @@
 @inject IJSRuntime JSRuntime
 @inject IExporterClient ExporterClient
 @inject IClubClient ClubClient
+@inject IMasterClient MasterClient
 @inject ISettingsClient SettingsClient
 @inject ICompetitionClient CompetititonClient
 @inject INavigationHistoryService NavigationHistoryService
@@ -27,6 +29,10 @@
 }
 else
 {
+	@if (_isSpinnerActivated)
+	{
+		<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-6" />
+	}
 	<MudGrid>
 		<MudItem xs="2">
 			<MudTextField Label="Search competitions..."
@@ -57,13 +63,36 @@ else
 						   OnClick="ExportClubPlayerDataAsync" />
 		</MudItem>
 		<MudItem xs="2" Class="d-flex justify-end">
-			<MudButton Color="Color.Primary"
+			<MudButton Color="Color.Transparent"
 					   FullWidth="true"
 					   Size="Size.Large"
 					   Variant="Variant.Filled"
 					   OnClick="SelectAllClubs">
 				Select All
 			</MudButton>
+		</MudItem>
+		<MudItem xs="2" Class="d-flex justify-end">
+			@if (!_isScrapingAllRunning)
+			{
+				<MudButton Color="Color.Tertiary"
+						   Size="Size.Large"
+						   Variant="Variant.Filled"
+						   FullWidth="true"
+						   Disabled="!selectedClubs.Any()"
+						   OnClick="ScrapeAllFromClubsAsync">
+					Scrape all
+				</MudButton>
+			}
+			else
+			{
+				<MudButton Color="Color.Warning"
+						   Size="Size.Large"
+						   Variant="Variant.Filled"
+						   FullWidth="true"
+						   OnClick="CancelScrapeAll">
+					Stop Scraping
+				</MudButton>
+			}
 		</MudItem>
 		<MudItem xs="2" Class="d-flex justify-end">
 			<MudButton Color="Color.Primary"
@@ -149,6 +178,9 @@ else
 	private string _searchedCompetition = string.Empty;
 	private string _selectedFormat = string.Empty;
 	private IEnumerable<string> formats = null!;
+	private bool _isScrapingAllRunning = false;
+	private bool _isSpinnerActivated = false;
+	private CancellationTokenSource? _cts;
 
 	private string SearchedCompetition
 	{
@@ -253,6 +285,26 @@ else
 		result = result.Select(format => format.ToUpperInvariant());
 
 		return result;
+	}
+
+	private async Task ScrapeAllFromClubsAsync()
+	{
+		_isSpinnerActivated = true;
+		_cts = new CancellationTokenSource();
+		_isScrapingAllRunning = true;
+
+		var clubIds = selectedClubs.Select(club => club.TransfermarktId);
+		await MasterClient.ScrapeAllFromClubsAsync(clubIds, _cts.Token);
+
+		_isScrapingAllRunning = false;
+		_isSpinnerActivated = false;
+	}
+
+	private void CancelScrapeAll()
+	{
+		_cts?.Cancel();
+		_isScrapingAllRunning = false;
+		_isSpinnerActivated = false;
 	}
 
 	private async Task ExportClubPlayerDataAsync()

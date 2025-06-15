@@ -148,6 +148,5 @@ namespace TransfermarktScraper.Domain.Mappings.Exporter
                 .Map(dest => dest.PlayerSeasonCompetitionMatchStatMinutesPlayed, src => src.PlayerSeasonCompetitionMatchStat.MinutesPlayed)
                 .Map(dest => dest.PlayerSeasonCompetitionMatchStatNotPlayingReason, src => src.PlayerSeasonCompetitionMatchStat.NotPlayingReason);
         }
-
     }
 }

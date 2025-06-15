@@ -63,27 +63,70 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var playerStatResponses = new List<PlayerStatResponse>();
 
-            if (forceScraping)
+            foreach (var playerStatRequest in playerStatRequests)
             {
-                foreach (var playerStatRequest in playerStatRequests)
+                PlayerStatResponse playerStatResponse;
+
+                var existingPlayerStat = existingPlayerStats.FirstOrDefault(ps => ps.PlayerTransfermarktId == playerStatRequest.PlayerTransfermarktId);
+
+                if (forceScraping || existingPlayerStat == null)
                 {
-                    PlayerStatResponse playerStatResponse;
+                    var playerStat = await ScrapePlayerStatAsync(playerStatRequest, null, cancellationToken);
 
-                    var existingPlayerStat = existingPlayerStats.FirstOrDefault(existingPlayerStat => existingPlayerStat.PlayerTransfermarktId == playerStatRequest.PlayerTransfermarktId);
-
-                    var playerStat = await ScrapePlayerStatAsync(playerStatRequest, existingPlayerStat, cancellationToken);
-
-                    var updatedPlayerStat = await _playerStatRepository.InsertOrUpdateAsync(playerStat, cancellationToken);
-
-                    playerStatResponse = updatedPlayerStat.Adapt<PlayerStatResponse>();
-
-                    playerStatResponses.Add(playerStatResponse);
+                    existingPlayerStat = playerStat;
                 }
 
-                return playerStatResponses;
+                var existingPlayerSeasonStats = existingPlayerStat.PlayerSeasonStats;
+
+                var newPlayerSeasonStats = new List<PlayerSeasonStat>();
+
+                if (playerStatRequest.IncludeAllPlayerTransfermarktSeasons)
+                {
+                    foreach (var existingPlayerSeasonStat in existingPlayerSeasonStats)
+                    {
+                        if (forceScraping || !existingPlayerSeasonStat.IsScraped)
+                        {
+                            var scrapedPlayerSeasonStat = await ScrapePlayerSeasonStatAsync(playerStatRequest, cancellationToken);
+
+                            newPlayerSeasonStats.Add(scrapedPlayerSeasonStat);
+                        }
+                        else
+                        {
+                            newPlayerSeasonStats.Add(existingPlayerSeasonStat);
+                        }
+                    }
+                }
+                else
+                {
+                    var existingPlayerSeasonStat = existingPlayerSeasonStats.First(pss => pss.SeasonTransfermarktId == playerStatRequest?.SeasonTransfermarktId);
+
+                    if (forceScraping || !existingPlayerSeasonStat.IsScraped)
+                    {
+                        var scrapedPlayerSeasonStat = await ScrapePlayerSeasonStatAsync(playerStatRequest, cancellationToken);
+
+                        newPlayerSeasonStats.AddRange(existingPlayerSeasonStats.Except(new List<PlayerSeasonStat> { existingPlayerSeasonStat }));
+
+                        newPlayerSeasonStats.Add(scrapedPlayerSeasonStat);
+                    }
+                    else
+                    {
+                        newPlayerSeasonStats = existingPlayerSeasonStats.ToList();
+                    }
+                }
+
+                existingPlayerStat.PlayerSeasonStats = newPlayerSeasonStats;
+
+                var newPlayerStat = await _playerStatRepository.InsertOrUpdateAsync(existingPlayerStat, cancellationToken);
+
+                playerStatResponse = newPlayerStat.Adapt<PlayerStatResponse>();
+
+                playerStatResponses.Add(playerStatResponse);
             }
 
-            playerStatResponses = existingPlayerStats.Adapt<List<PlayerStatResponse>>();
+            if (!playerStatResponses.Any())
+            {
+                playerStatResponses = existingPlayerStats.Adapt<List<PlayerStatResponse>>();
+            }
 
             _logger.LogInformation("Successfully obtained the players stats.");
 
@@ -97,132 +140,84 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <summary>
-        /// Scrapes player stat data from Transfermarkt based on the given player stat request.
+        /// Navigates to the player's Transfermarkt statistics page and extracts season statistics.
+        /// Initializes and returns a <see cref="PlayerStat"/> object populated with season stats.
+        /// </summary>
+        /// <param name="playerStatRequest">Request containing the player's Transfermarkt ID.</param>
+        /// <param name="playerStat">An optional existing PlayerStat object to be updated.</param>
+        /// <param name="cancellationToken">The cancellatio token.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the populated <see cref="PlayerStat"/>.</returns>
+        private async Task<PlayerStat> ScrapePlayerStatAsync(PlayerStatRequest playerStatRequest, PlayerStat? playerStat, CancellationToken cancellationToken)
+        {
+            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", "ges");
+
+            int attempt = 0;
+            int maxAttempts = 5;
+            int statusCode = (int)HttpStatusCode.NoContent;
+
+            while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
+            {
+                attempt++;
+                var response = await _page.GotoAsync(uri, new PageGotoOptions
+                {
+                    WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                });
+
+                if (response == null || response.Status != (int)HttpStatusCode.OK)
+                {
+                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                    throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
+                }
+            }
+
+            var playerSeasonIds = await GetPlayerSeasonIds();
+
+            playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
+            {
+                PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)).ToList(),
+            };
+
+            return playerStat;
+        }
+
+        /// <summary>
+        /// Scrapes player season stat data from Transfermarkt based on the given player stat request.
         /// </summary>
         /// <param name="playerStatRequest">The player stat request DTO.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
-        /// A <see cref="PlayerStat"/> entity containing the player's stat.
+        /// A <see cref="PlayerSeasonStat"/> entity containing the player's season stat.
         /// </returns>
-        private async Task<PlayerStat> ScrapePlayerStatAsync(PlayerStatRequest playerStatRequest, PlayerStat? playerStat, CancellationToken cancellationToken)
+        private async Task<PlayerSeasonStat> ScrapePlayerSeasonStatAsync(PlayerStatRequest playerStatRequest, CancellationToken cancellationToken)
         {
-            var uri = string.Empty;
+            var uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
 
-            if (playerStat == null)
+            int attempt = 0;
+            int maxAttempts = 5;
+            int statusCode = (int)HttpStatusCode.NoContent;
+
+            while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
             {
-                uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", "ges");
-
-                int attempt = 0;
-                int maxAttempts = 5;
-                int statusCode = (int)HttpStatusCode.NoContent;
-
-                while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
+                attempt++;
+                var response = await _page.GotoAsync(uri, new PageGotoOptions
                 {
-                    attempt++;
-                    var response = await _page.GotoAsync(uri, new PageGotoOptions
-                    {
-                        WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                    });
+                    WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
+                });
 
-                    if (response == null || response.Status != (int)HttpStatusCode.OK)
-                    {
-                        var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
-                        throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
-                    }
-                }
-
-                var playerSeasonIds = await GetPlayerSeasonIds();
-
-                playerStat = new PlayerStat(playerStatRequest.PlayerTransfermarktId)
+                if (response == null || response.Status != (int)HttpStatusCode.OK)
                 {
-                    PlayerSeasonStats = playerSeasonIds.Select(seasonTransfermarkId => new PlayerSeasonStat(playerStatRequest.PlayerTransfermarktId, seasonTransfermarkId)).ToList(),
-                };
-            }
-
-            var playerSeasonStats = new List<PlayerSeasonStat>();
-
-            if (playerStatRequest.IncludeAllPlayerTransfermarktSeasons)
-            {
-                var seasonTransfermarktIds = playerStat.PlayerSeasonStats.Select(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId);
-
-                foreach (var seasonTransfermarktId in seasonTransfermarktIds)
-                {
-                    var existingPlayerSeasonStat = playerStat.PlayerSeasonStats.First(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId == seasonTransfermarktId);
-
-                    if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
-                    {
-                        uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", seasonTransfermarktId);
-
-                        int attempt = 0;
-                        int maxAttempts = 5;
-                        int statusCode = (int)HttpStatusCode.NoContent;
-
-                        while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
-                        {
-                            attempt++;
-                            var response = await _page.GotoAsync(uri, new PageGotoOptions
-                            {
-                                WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                            });
-
-                            if (response == null || response.Status != (int)HttpStatusCode.OK)
-                            {
-                                var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
-                                throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
-                            }
-                        }
-
-                        var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
-
-                        playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, seasonTransfermarktId, cancellationToken);
-
-                        playerSeasonStat.IsScraped = true;
-                        playerSeasonStats.Add(playerSeasonStat);
-                    }
-                }
-            }
-            else
-            {
-                var existingPlayerSeasonStat = playerStat.PlayerSeasonStats.First(playerSeasonStat => playerSeasonStat.SeasonTransfermarktId == playerStatRequest.SeasonTransfermarktId);
-
-                if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
-                {
-                    uri = string.Concat(_scraperSettings.PlayerStatsPath, "/", playerStatRequest.PlayerTransfermarktId, _scraperSettings.DetailedViewPath, "?saison=", playerStatRequest.SeasonTransfermarktId);
-
-                    int attempt = 0;
-                    int maxAttempts = 5;
-                    int statusCode = (int)HttpStatusCode.NoContent;
-
-                    while (attempt < maxAttempts && statusCode != (int)HttpStatusCode.OK)
-                    {
-                        attempt++;
-                        var response = await _page.GotoAsync(uri, new PageGotoOptions
-                        {
-                            WaitUntil = WaitUntilState.DOMContentLoaded, // wait until all elements in the page are loaded
-                        });
-
-                        if (response == null || response.Status != (int)HttpStatusCode.OK)
-                        {
-                            var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
-                            throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
-                        }
-                    }
-
-                    var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
-
-                    playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
-
-                    playerSeasonStat.IsScraped = true;
-                    playerSeasonStats.Add(playerSeasonStat);
+                    var message = $"Navigating to page: {_page.Url} failed. status code: {response?.Status.ToString() ?? "null"}";
+                    throw ScrapingException.LogError(nameof(ScrapePlayerStatAsync), nameof(PlayerStatService), message, _page.Url, _logger);
                 }
             }
 
-            playerStat.PlayerSeasonStats = playerStat.PlayerSeasonStats
-                .Select(playerSeasonStat => playerSeasonStats
-                    .FirstOrDefault(playerSeasonStatToAdd => playerSeasonStat.SeasonTransfermarktId == playerSeasonStatToAdd.SeasonTransfermarktId) ?? playerSeasonStat)
-                .ToList();
+            var playerSeasonStat = await GetPlayerSeasonStatAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
 
-            return playerStat;
+            playerSeasonStat.PlayerSeasonCompetitionStats = await GetPlayerSeasonCompetitionStatsAsync(playerStatRequest, playerStatRequest.SeasonTransfermarktId, cancellationToken);
+
+            playerSeasonStat.IsScraped = true;
+
+            return playerSeasonStat;
         }
 
         /// <summary>

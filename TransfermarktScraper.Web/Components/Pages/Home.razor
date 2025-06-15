@@ -70,6 +70,7 @@
                 }
             </MudSelect>
             <MudIconButton Disabled="string.IsNullOrEmpty(_selectedFormat)"
+                           Class="pt-5"
                            Icon="@Icons.Material.Filled.Download"
                            OnClick="ExportCountryCompetitionDataAsync" />
         </MudStack>
@@ -79,9 +80,10 @@
 <MudDivider DividerType="DividerType.Middle" Class="mt-12 mb-12 my-6" />
 
 <MudGrid Justify="Justify.Center" Spacing="2">
-    <MudItem md="2" Class="d-flex justify-center mt-6">
+    <MudItem md="2" Class="d-flex justify-center mt-2">
         <MudNumericField Label="Number of countries to scrape"
                          T="int"
+                         FullWidth="true"
                          Value="_selectedCountriesCountToScrape"
                          ValueChanged="OnSelectedCountriesCountToScrapeChanged"
                          Variant="Variant.Text"
@@ -99,6 +101,7 @@
     <MudItem md="2" Class="d-flex justify-center mt-6">
         <MudButton Color="Color.Error"
                    Size="Size.Large"
+                   FullWidth="true"
                    Variant="Variant.Filled"
                    OnClick="CleanDatabaseAsync">
             Clean Database
@@ -107,9 +110,10 @@
     <MudItem md="2" Class="d-flex justify-center mt-6">
         @if (!_isScrapingAllRunning)
         {
-            <MudButton Color="Color.Primary"
+            <MudButton Color="Color.Tertiary"
                        Size="Size.Large"
                        Variant="Variant.Filled"
+                       FullWidth="true"
                        OnClick="ScrapeAllAsync">
                 Scrape all data
             </MudButton>
@@ -119,6 +123,7 @@
             <MudButton Color="Color.Warning"
                        Size="Size.Large"
                        Variant="Variant.Filled"
+                       FullWidth="true"
                        OnClick="CancelScrapeAll">
                 Stop Scraping
             </MudButton>
@@ -139,6 +144,7 @@
         <MudButton Color="Color.Primary"
                    Size="Size.Large"
                    Variant="Variant.Filled"
+                   FullWidth="true"
                    OnClick="NavigateToCountry">
             Scrape countries
         </MudButton>
@@ -226,7 +232,9 @@
         _isSpinnerActivated = true;
         _cts = new CancellationTokenSource();
         _isScrapingAllRunning = true;
+
         await MasterClient.ScrapeAllAsync(_cts.Token);
+
         _isScrapingAllRunning = false;
         _isSpinnerActivated = false;
     }

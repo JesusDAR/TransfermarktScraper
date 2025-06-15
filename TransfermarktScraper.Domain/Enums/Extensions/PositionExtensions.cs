@@ -26,6 +26,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 Position.LeftWinger => "Left Winger",
                 Position.RightWinger => "Right Winger",
                 Position.CentreForward => "Centre-Forward",
+                Position.RightMidfield => "Right Midfield",
+                Position.Striker => "Striker",
+                Position.Midfielder => "Midfielder",
                 Position.Unknown => "Unknown",
                 _ => HandleUnsupportedEnum(position),
             };
@@ -52,6 +55,9 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
                 "left winger" => Position.LeftWinger,
                 "right winger" => Position.RightWinger,
                 "centre-forward" => Position.CentreForward,
+                "right midfield" => Position.RightMidfield,
+                "striker" => Position.Striker,
+                "midfielder" => Position.Midfielder,
                 "unknown" => Position.Unknown,
                 _ => HandleUnsupportedString(positionString),
             };

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -46,14 +47,15 @@ namespace TransfermarktScraper.Web
 
             var app = builder.Build();
 
-            app.UseExceptionHandler(errorApp =>
+            app.UseExceptionHandler(builder =>
             {
-                errorApp.Run(async context =>
+                builder.Run(context =>
                 {
                     var logger = app.Services.GetRequiredService<ILogger<Program>>();
                     var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
                     var exception = exceptionHandlerPathFeature?.Error;
                     logger.LogError($"Exception Message: {exception?.Message}.");
+                    return Task.CompletedTask;
                 });
             });
             app.UseHsts();

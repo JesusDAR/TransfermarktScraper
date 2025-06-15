@@ -56,7 +56,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetSettings), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -84,7 +84,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(SetHeadlessMode), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -114,7 +114,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(SetCountriesCountToScrape), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -142,7 +142,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(SetForceScraping), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -166,7 +166,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetFlagUrl), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -190,7 +190,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetSupportedFormats), ex.Message);
                 return Problem(ex.Message);
             }
         }

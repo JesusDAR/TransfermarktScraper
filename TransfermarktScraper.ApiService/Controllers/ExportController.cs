@@ -75,7 +75,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(ExportCountryCompetitionDataAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -111,7 +111,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(ExportClubPlayerDataAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -147,7 +147,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(ExportPlayerStatDataAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -183,7 +183,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(ExportMasterAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }

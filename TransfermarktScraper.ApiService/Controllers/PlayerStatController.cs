@@ -64,7 +64,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetPlayerStatsAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }

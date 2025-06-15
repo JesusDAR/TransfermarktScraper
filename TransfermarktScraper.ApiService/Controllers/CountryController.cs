@@ -72,7 +72,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(GetCountriesAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }
@@ -111,7 +111,7 @@ namespace TransfermarktScraper.ApiService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected Error.");
+                _logger.LogError("Unexpected Error on {MethodName}. Message: {Message}", nameof(UpdateCountriesCompetitionsAsync), ex.Message);
                 return Problem(ex.Message);
             }
         }

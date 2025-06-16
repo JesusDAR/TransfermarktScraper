@@ -19,6 +19,7 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
             {
                 Cup.Domestic => "Domestic Cup",
                 Cup.International => "International Cup",
+                Cup.Supercup => "Domestic Super Cup",
                 Cup.Unknown => "Unknown Cup",
                 Cup.None => string.Empty,
                 _ => HandleUnsupportedEnum(cup),
@@ -42,6 +43,11 @@ namespace TransfermarktScraper.Domain.Enums.Extensions
             if (cupString.Contains("international"))
             {
                 return Cup.International;
+            }
+
+            if (cupString.Contains("super cup"))
+            {
+                return Cup.Supercup;
             }
 
             if (!string.IsNullOrWhiteSpace(cupString))

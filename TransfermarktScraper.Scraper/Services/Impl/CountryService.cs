@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -68,41 +69,51 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var countryDtos = Enumerable.Empty<CountryResponse>();
 
-            var countries = Enumerable.Empty<Country>();
+            var countries = new List<Country>();
 
-            var countriesAlreadyPersisted = await _countryRepository.GetCountAsync(cancellationToken);
+            var countriesAlreadyPersisted = (int)await _countryRepository.GetCountAsync(cancellationToken);
 
             if (countriesAlreadyPersisted >= countryLimit)
             {
-                countryLimit = (int)countriesAlreadyPersisted;
+                countries = (await _countryRepository.GetAllAsync(cancellationToken)).ToList();
 
-                if (!_scraperSettings.ForceScraping)
-                {
-                    countries = await _countryRepository.GetAllAsync(cancellationToken);
+                countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
 
-                    countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
+                countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
 
-                    countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
+                _logger.LogInformation("Successfully obtained {CountryLimit} countries.", countriesAlreadyPersisted);
 
-                    _logger.LogInformation("Successfully obtained {CountryLimit} countries.", countryLimit);
-
-                    return countryDtos;
-                }
+                return countryDtos;
             }
+            else
+            {
+                countries = (await _countryRepository.GetAllAsync(cancellationToken)).ToList();
 
-            await RemoveAllAsync(cancellationToken);
+                var remainingCountriesToScrape = countryLimit - countriesAlreadyPersisted;
 
-            var countriesScraped = await ScrapeCountriesAsync();
+                int maxBatchSize = 10;
+                int numberOfBatches = (int)Math.Ceiling((double)remainingCountriesToScrape / maxBatchSize);
 
-            var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
+                for (int i = 0; i < numberOfBatches; i++)
+                {
+                    var remaining = countryLimit - countriesAlreadyPersisted;
+                    var currentBatchSize = (int)Math.Min(maxBatchSize, remaining);
 
-            countryDtos = countriesInserted.Adapt<IEnumerable<CountryResponse>>();
+                    var countriesScraped = await ScrapeCountriesAsync(countriesAlreadyPersisted, currentBatchSize);
+                    var countriesInserted = await PersistCountriesAsync(countriesScraped, cancellationToken);
 
-            countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
+                    countries.AddRange(countriesInserted);
+                    countriesAlreadyPersisted = countriesAlreadyPersisted + currentBatchSize;
+                }
 
-            _logger.LogInformation("Succesfully obtained {CountryLimit} countries.", countryLimit);
+                countryDtos = countries.Adapt<IEnumerable<CountryResponse>>();
 
-            return countryDtos;
+                countryDtos = countryDtos.OrderBy(countryDto => countryDto.Name);
+
+                _logger.LogInformation("Successfully obtained {CountryLimit} countries.", countryLimit);
+
+                return countryDtos;
+            }
         }
 
         /// <inheritdoc/>
@@ -242,9 +253,12 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         /// <summary>
         /// Scrapes the list of countries from Transfermarkt.
         /// </summary>
+        /// <param name="countriesAlreadyPersisted">The countries that have already been persisted in the current scraping process.
+        /// Used for recovery and start scraping from the country where the process failed.</param>
+        /// <param name="currentBatchSize">The current number of items to be scraped in the batch.</param>
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains a list of <see cref="Country"/> objects.</returns>
-        private async Task<IEnumerable<Country>> ScrapeCountriesAsync()
+        private async Task<IEnumerable<Country>> ScrapeCountriesAsync(int countriesAlreadyPersisted, int currentBatchSize)
         {
             var response = await _page.GotoAsync("/");
 
@@ -257,26 +271,22 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             var countryQuickSelectInterceptorResult = InitializeCountryQuickSelectInterceptor();
 
             var countrySelectorLocator = await GetCountrySelectorLocatorAsync();
-            var itemLocators = await GetItemLocatorsAsync(countrySelectorLocator);
+            var itemLocators = (await GetItemLocatorsAsync(countrySelectorLocator)).AsEnumerable();
+
+            itemLocators = itemLocators.Skip(countriesAlreadyPersisted);
+            itemLocators = itemLocators.Take(currentBatchSize);
 
             var countries = new Collection<Country>();
-            int countryLimit = _scraperSettings.CountryLimit;
-            int countriesScrapedCounter = 0;
 
             foreach (var itemLocator in itemLocators)
             {
-                if (countryLimit == 0 || countriesScrapedCounter < countryLimit)
-                {
-                    var countryName = await GetCountryNameAsync(itemLocator, countrySelectorLocator);
+                var countryName = await GetCountryNameAsync(itemLocator, countrySelectorLocator);
 
-                    await countryQuickSelectInterceptorResult.InterceptorTask;
+                await countryQuickSelectInterceptorResult.InterceptorTask;
 
-                    CreateAndAddCountry(countries, countryName);
+                CreateAndAddCountry(countries, countryName);
 
-                    await GetDropdownLocatorAsync(countrySelectorLocator);
-
-                    countriesScrapedCounter++;
-                }
+                await GetDropdownLocatorAsync(countrySelectorLocator);
             }
 
             AddInterceptedQuickSelectResults(countries, countryQuickSelectInterceptorResult);

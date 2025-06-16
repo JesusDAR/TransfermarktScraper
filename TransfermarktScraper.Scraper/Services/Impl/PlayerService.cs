@@ -195,7 +195,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             try
             {
                 int attempt = 0;
-                int maxAttempts = 5;
+                int maxAttempts = 10;
                 bool isSuccess = false;
                 while (attempt < maxAttempts || !isSuccess)
                 {
@@ -207,7 +207,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                             new PageWaitForSelectorOptions
                             {
                                 State = WaitForSelectorState.Visible,
-                                Timeout = 1000,
+                                Timeout = 2000,
                             });
                         isSuccess = true;
                     }
@@ -254,7 +254,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             var selector = "> td";
 
             int attempt = 0;
-            int maxAttempts = 5;
+            int maxAttempts = 10;
             while (attempt < maxAttempts)
             {
                 try
@@ -264,7 +264,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                         new LocatorWaitForOptions
                         {
                             State = WaitForSelectorState.Visible,
-                            Timeout = 1000,
+                            Timeout = 2000,
                         });
 
                     var tableDataLocators = await tableRowLocator.Locator(selector).AllAsync();

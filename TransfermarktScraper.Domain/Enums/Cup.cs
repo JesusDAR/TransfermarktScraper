@@ -24,5 +24,10 @@
         /// International cup.
         /// </summary>
         International = 3,
+
+        /// <summary>
+        /// Domestic super cup.
+        /// </summary>
+        Supercup = 4,
     }
 }

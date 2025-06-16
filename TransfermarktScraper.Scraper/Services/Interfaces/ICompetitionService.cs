@@ -15,13 +15,9 @@ namespace TransfermarktScraper.Scraper.Services.Interfaces
         /// and persists it before returning the result.
         /// </summary>
         /// <param name="countryTransfermarktId">The country Transfermarkt ID used to identify the country.</param>
-        /// <param name="forceScraping">
-        /// A boolean value indicating whether to force scraping of the competitions data even if it exists in the database.
-        /// If set to true, the method will ignore the database content and scrape the data from Transfermarkt.
-        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="CompetitionResponse"/> objects.</returns>
-        public Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping = false, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Scrapes the competition row from the Transfermarkt competition search results page based on a known competition name and ID.

@@ -36,20 +36,13 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats, bool forceScraping)
+        public async Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats)
         {
             _logger.LogInformation("Sent request to get player stats.");
 
-            var queryParams = new Dictionary<string, string?>
-            {
-                { "forceScraping", forceScraping.ToString() },
-            };
-
-            var uri = QueryHelpers.AddQueryString(_clientSettings.PlayerStatsControllerPath, queryParams);
-
             try
             {
-                var result = await _httpClient.PostAsJsonAsync(uri, playerStats);
+                var result = await _httpClient.PostAsJsonAsync(_clientSettings.PlayerStatsControllerPath, playerStats);
 
                 if (result != null && result.IsSuccessStatusCode)
                 {

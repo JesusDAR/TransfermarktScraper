@@ -36,14 +36,13 @@ namespace TransfermarktScraper.Web.Clients.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping)
+        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId)
         {
             _logger.LogInformation("Sent request to get competitions.");
 
             var queryParams = new Dictionary<string, string?>
             {
                 { "countryTransfermarktId", countryTransfermarktId },
-                { "forceScraping", forceScraping.ToString() },
             };
 
             var uri = QueryHelpers.AddQueryString(_clientSettings.CompetitionControllerPath, queryParams);

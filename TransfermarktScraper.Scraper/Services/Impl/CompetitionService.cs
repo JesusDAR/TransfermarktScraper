@@ -52,15 +52,13 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CompetitionResponse>> GetCompetitionsAsync(string countryTransfermarktId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping/fetching competitions of the country {CountryTransfermarktId} process...", countryTransfermarktId);
 
             var competitions = await _countryRepository.GetAllAsync(countryTransfermarktId, cancellationToken);
 
-            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
-
-            if (forceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
+            if (_scraperSettings.ForceScraping || competitions.Any(competition => string.IsNullOrEmpty(competition.Logo)))
             {
                 var competitionsScraped = await ScrapeCompetitionsAsync(competitions, cancellationToken);
 

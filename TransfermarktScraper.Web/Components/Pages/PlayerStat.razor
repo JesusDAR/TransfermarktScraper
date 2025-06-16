@@ -519,7 +519,7 @@ else
 
         var playerStatRequests = new List<PlayerStatRequest> { playerStatRequest };
 
-        var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests, default);
+        var playerStatResponses = await PlayerStatClient.GetPlayerStatsAsync(playerStatRequests);
 
         return playerStatResponses;
     }

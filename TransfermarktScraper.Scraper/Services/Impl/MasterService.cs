@@ -56,7 +56,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         {
             _logger.LogInformation("Starting to scrape all data process...");
 
-            var countries = await _countryService.GetCountriesAsync(false, cancellationToken);
+            var countries = await _countryService.GetCountriesAsync(cancellationToken);
 
             var countryTransfermarktIds = countries.Select(country => country.TransfermarktId);
 
@@ -73,7 +73,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
             foreach (var countryTransfermarktId in countryTransfermarktIds)
             {
                 // completed competitions and clubs data are obtained from here.
-                var competitions = await _competitionService.GetCompetitionsAsync(countryTransfermarktId, default, cancellationToken);
+                var competitions = await _competitionService.GetCompetitionsAsync(countryTransfermarktId, cancellationToken);
 
                 foreach (var competition in competitions)
                 {
@@ -95,7 +95,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             foreach (var clubTransfermarktId in clubTransfermarktIds)
             {
-                var players = await _playerService.GetPlayersAsync(clubTransfermarktId, default, cancellationToken);
+                var players = await _playerService.GetPlayersAsync(clubTransfermarktId, cancellationToken);
 
                 var playerStatRequests = players.Select(player =>
                 {

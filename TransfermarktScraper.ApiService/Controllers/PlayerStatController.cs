@@ -38,9 +38,6 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Retrieves the player stats from Transfermarkt or from the database.
         /// </summary>
         /// <param name="playerStatRequests">The list of player stat request DTO.</param>
-        /// <param name="forceScraping">
-        /// A boolean flag that determines whether to force scraping of the player stat data, even if it exists in the database.
-        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns> An <see cref="ActionResult{T}"/> containing a <see cref="PlayerStatResponse"/> object.</returns>
         /// <response code="200">Returns the of player stat successfully scraped.</response>
@@ -52,14 +49,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public async Task<ActionResult<IEnumerable<PlayerStatResponse>>> GetPlayerStatsAsync(
             [FromBody] IEnumerable<PlayerStatRequest> playerStatRequests,
-            [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Received request to get player stats.");
 
-                var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, forceScraping, cancellationToken);
+                var result = await _playerStatService.GetPlayerStatsAsync(playerStatRequests, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

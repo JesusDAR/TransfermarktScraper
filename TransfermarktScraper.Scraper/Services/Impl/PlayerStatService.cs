@@ -53,7 +53,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PlayerStatResponse>> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStatRequests, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PlayerStatResponse>> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStatRequests, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping/fetching players stats process...");
 
@@ -69,7 +69,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
                 var existingPlayerStat = existingPlayerStats.FirstOrDefault(ps => ps.PlayerTransfermarktId == playerStatRequest.PlayerTransfermarktId);
 
-                if (forceScraping || existingPlayerStat == null)
+                if (_scraperSettings.ForceScraping || existingPlayerStat == null)
                 {
                     var playerStat = await ScrapePlayerStatAsync(playerStatRequest, null, cancellationToken);
 
@@ -84,7 +84,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 {
                     foreach (var existingPlayerSeasonStat in existingPlayerSeasonStats)
                     {
-                        if (forceScraping || !existingPlayerSeasonStat.IsScraped)
+                        if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
                         {
                             var scrapedPlayerSeasonStat = await ScrapePlayerSeasonStatAsync(playerStatRequest, cancellationToken);
 
@@ -100,7 +100,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 {
                     var existingPlayerSeasonStat = existingPlayerSeasonStats.First(pss => pss.SeasonTransfermarktId == playerStatRequest?.SeasonTransfermarktId);
 
-                    if (forceScraping || !existingPlayerSeasonStat.IsScraped)
+                    if (_scraperSettings.ForceScraping || !existingPlayerSeasonStat.IsScraped)
                     {
                         var scrapedPlayerSeasonStat = await ScrapePlayerSeasonStatAsync(playerStatRequest, cancellationToken);
 

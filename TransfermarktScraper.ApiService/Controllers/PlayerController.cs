@@ -38,9 +38,6 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// If scraping is forced or the data is unavailable, it scrapes the players and returns them.
         /// </summary>
         /// <param name="clubTransfermarktId">The Transfermarkt club ID used to identify the club.</param>
-        /// <param name="forceScraping">
-        /// A boolean flag that determines whether to force scraping of the players data, even if it exists in the database.
-        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="PlayerResponse"/> objects,
@@ -53,14 +50,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PlayerResponse>>> GetPlayersAsync(
             [FromQuery] string clubTransfermarktId,
-            [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Received request to get players.");
 
-                var result = await _playerService.GetPlayersAsync(clubTransfermarktId, forceScraping, cancellationToken);
+                var result = await _playerService.GetPlayersAsync(clubTransfermarktId, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

@@ -225,7 +225,7 @@ else
 			{
 				var country = selectedCountries.First(country => country.Competitions.Contains(competition));
 
-				await CompetititonClient.GetCompetitionsAsync(country.TransfermarktId, true);
+				await CompetititonClient.GetCompetitionsAsync(country.TransfermarktId);
 
 				clubs = await ClubClient.GetClubsAsync(competition.TransfermarktId);
 			}

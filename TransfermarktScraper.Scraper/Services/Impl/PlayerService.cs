@@ -49,7 +49,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PlayerResponse>> GetPlayersAsync(string clubTransfermarktId, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting the scraping/fetching players of the club {ClubTransfermarktId} process...", clubTransfermarktId);
 
@@ -63,9 +63,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var players = Enumerable.Empty<Player>();
 
-            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
-
-            if (club.Players == null || forceScraping)
+            if (_scraperSettings.ForceScraping || club.Players == null)
             {
                 players = await ScrapePlayersAsync(club, cancellationToken);
 

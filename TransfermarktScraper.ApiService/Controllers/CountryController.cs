@@ -40,9 +40,6 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// Retrieves a list of countries, either from the database or by scraping Transfermarkt.
         /// If scraping is forced or the data is unavailable, it scrapes the countries and returns them.
         /// </summary>
-        /// <param name="forceScraping">
-        /// A boolean flag that determines whether to force scraping of the country data, even if it exists in the database.
-        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="CountryResponse"/> objects,
@@ -54,14 +51,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(typeof(IEnumerable<CountryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<CountryResponse>>> GetCountriesAsync(
-            [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Received request to get countries.");
 
-                var result = await _countryService.GetCountriesAsync(forceScraping, cancellationToken);
+                var result = await _countryService.GetCountriesAsync(cancellationToken);
                 return Ok(result);
             }
             catch (InterceptorException)
@@ -84,9 +80,6 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// <param name="countries">
         /// The countries from which the full competitions data is requested.
         /// </param>
-        /// <param name="forceScraping">
-        /// A boolean flag that determines whether to force scraping of the country data, even if it exists in the database.
-        /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// An <see cref="ActionResult{T}"/> containing a list of <see cref="CountryResponse"/> objects with the full competitions data,
@@ -99,14 +92,13 @@ namespace TransfermarktScraper.ApiService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<CountryResponse>>> UpdateCountriesCompetitionsAsync(
             [FromBody] IEnumerable<CountryRequest> countries,
-            [FromQuery] bool forceScraping,
             CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Received request to update countries competitions.");
 
-                var result = await _countryService.UpdateCountriesCompetitionsAsync(countries, forceScraping, cancellationToken);
+                var result = await _countryService.UpdateCountriesCompetitionsAsync(countries, cancellationToken);
                 return Ok(result);
             }
             catch (Exception ex)

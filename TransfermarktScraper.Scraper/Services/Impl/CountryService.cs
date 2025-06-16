@@ -60,7 +60,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(bool forceScraping, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CountryResponse>> GetCountriesAsync(CancellationToken cancellationToken)
         {
             int countryLimit = _scraperSettings.CountryLimit;
 
@@ -70,15 +70,13 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             var countries = Enumerable.Empty<Country>();
 
-            forceScraping = forceScraping == true ? true : _scraperSettings.ForceScraping;
-
             var countriesAlreadyPersisted = await _countryRepository.GetCountAsync(cancellationToken);
 
             if (countriesAlreadyPersisted >= countryLimit)
             {
                 countryLimit = (int)countriesAlreadyPersisted;
 
-                if (!forceScraping)
+                if (!_scraperSettings.ForceScraping)
                 {
                     countries = await _countryRepository.GetAllAsync(cancellationToken);
 
@@ -108,7 +106,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<CountryResponse>> UpdateCountriesCompetitionsAsync(IEnumerable<CountryRequest> countries, bool forceScraping = false, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<CountryResponse>> UpdateCountriesCompetitionsAsync(IEnumerable<CountryRequest> countries, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Starting the updating countries competitions process...");
 
@@ -116,7 +114,7 @@ namespace TransfermarktScraper.Scraper.Services.Impl
 
             foreach (var country in countries)
             {
-                var competitions = await _competitionService.GetCompetitionsAsync(country.TransfermarktId, forceScraping, cancellationToken);
+                var competitions = await _competitionService.GetCompetitionsAsync(country.TransfermarktId, cancellationToken);
 
                 var countryDto = new CountryResponse
                 {

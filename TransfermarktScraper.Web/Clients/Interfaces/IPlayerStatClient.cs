@@ -14,10 +14,9 @@ namespace TransfermarktScraper.Web.Clients.Interfaces
         /// Retrieves the player stats based on the specified Transfermarkt player ID.
         /// </summary>
         /// <param name="playerStats">The player stat request.</param>
-        /// <param name="forceScraping"> A boolean flag that determines whether to force scraping of the player stats data, even if it exists in the database. </param>
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <see cref="PlayerStatResponse"/> object if found; otherwise, null.
         /// </returns>
-        Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats, bool forceScraping = false);
+        Task<IEnumerable<PlayerStatResponse>?> GetPlayerStatsAsync(IEnumerable<PlayerStatRequest> playerStats);
     }
 }

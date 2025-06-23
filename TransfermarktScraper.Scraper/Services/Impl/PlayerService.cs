@@ -107,8 +107,6 @@ namespace TransfermarktScraper.Scraper.Services.Impl
                 }
             }
 
-            await _page.GotoAsync(uri);
-
             var tableRowsLocators = await GetTableRowLocatorsAsync();
 
             var players = new List<Player>();

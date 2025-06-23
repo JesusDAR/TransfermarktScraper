@@ -46,9 +46,11 @@ namespace TransfermarktScraper.ApiService.Controllers
         /// wrapped in a successful response or an appropriate error code.
         /// </returns>
         /// <response code="200">Returns the list of countries successfully scraped or retrieved from the database.</response>
+        /// <response code="409">If there is an error due to the interceptor failing.</response>
         /// <response code="500">If there is an error while processing the request, such as a problem with the server or unexpected exception.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<CountryResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<CountryResponse>>> GetCountriesAsync(
             CancellationToken cancellationToken)

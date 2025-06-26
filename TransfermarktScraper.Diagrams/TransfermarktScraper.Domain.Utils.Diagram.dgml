@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<DirectedGraph DataVirtualized="True" GraphDirection="LeftToRight" Layout="Sugiyama" ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+<DirectedGraph DataVirtualized="True" FilterState="CodeSchema_Method,CodeSchema_Event,CodeSchema_Struct,CodeSchema_Field,CodeSchema_Property,CodeSchema_Delegate,UncategorizedCodeElement,UncategorizedRelationship,CodeSchema_Interface,CodeMap_ProjectReference" GraphDirection="LeftToRight" Layout="Sugiyama" ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
-    <Node Id="(@1 @3 @11 Member=(Name=ConvertToFloat @16))" Category="CodeSchema_Method" Bounds="60,120,115.63,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToFloat" />
-    <Node Id="(@1 @3 @11 Member=(Name=ConvertToString OverloadingParameters=[(@13 @14 Type=(Name=Nullable GenericParameterCount=1 GenericArguments=[(@13 @14 Type=Single)]))]))" Category="CodeSchema_Method" Bounds="60,175.96,120.65,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToString" />
-    <Node Id="(@1 @3 @11 Member=(Name=ExtractNumericPart @16))" Category="CodeSchema_Method" Bounds="60,231.92,137.193333333333,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ExtractNumericPart" />
+    <Node Id="(@1 @3 @11 Member=(Name=ConvertToFloat @16))" Category="CodeSchema_Method" Bounds="60,231.92,115.63,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToFloat" />
+    <Node Id="(@1 @3 @11 Member=(Name=ConvertToString OverloadingParameters=[(@13 @14 Type=(Name=Nullable GenericParameterCount=1 GenericArguments=[(@13 @14 Type=Single)]))]))" Category="CodeSchema_Method" Bounds="60,120,120.65,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToString" />
+    <Node Id="(@1 @3 @11 Member=(Name=ExtractNumericPart @16))" Category="CodeSchema_Method" Bounds="60,175.96,137.193333333333,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ExtractNumericPart" />
     <Node Id="(@1 @3 @9 Member=(Name=ConvertCountryTransfermarktIdsToImageUrls OverloadingParameters=[(@13 Namespace=System.Collections.Generic Type=(Name=IEnumerable GenericParameterCount=1 GenericArguments=[(@13 @14 Type=String)])),(@13 @14 Type=String)]))" Category="CodeSchema_Method" Bounds="60,403.84,272.756666666667,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertCountryTransfermarktIdsToImageUrls" />
     <Node Id="(@1 @3 Type=DateUtils Member=(Name=ConvertToDateTime @16))" Category="CodeSchema_Method" Bounds="457.843333333333,175.96,140.33,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToDateTime" />
     <Node Id="(@1 @3 Type=DateUtils Member=(Name=ConvertToString OverloadingParameters=[(@13 @14 Type=(Name=Nullable GenericParameterCount=1 GenericArguments=[(@13 @14 Type=DateTime)]))]))" Category="CodeSchema_Method" Bounds="457.843333333334,120,120.65,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToString" />
     <Node Id="(@1 @3 Type=HeightUtils Member=(Name=ConvertToInt @16))" Category="CodeSchema_Method" Bounds="267.193333333333,120,103.71,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToInt" />
     <Node Id="(@1 @3 Type=HeightUtils Member=(Name=ConvertToString OverloadingParameters=[(@13 @14 Type=Int32)]))" Category="CodeSchema_Method" Bounds="267.193333333333,175.96,120.65,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertToString" />
     <Node Id="(@1 Namespace=TransfermarktScraper.Domain.Utils.Entity Type=EntityUtils Member=(Name=GetHash @16))" Category="CodeSchema_Method" Bounds="763.263333333334,120,81.0866666666667,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="GetHash" />
-    <Node Id="@10" Category="CodeSchema_Class" Bounds="40,307.88,555.556666666667,141.92" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="3" Group="Expanded" Label="ImageUtils" />
-    <Node Id="@12" Category="CodeSchema_Class" Bounds="40,80,177.193333333333,197.88" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="3" Group="Expanded" Label="MoneyUtils" />
+    <Node Id="@10" Category="CodeSchema_Class" Bounds="158.724664858402,38.9999999999127,117.196666666667,44" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="3" Group="Expanded" Label="ImageUtils" />
+    <Node Id="@12" Category="CodeSchema_Class" Bounds="163.644664858402,113.000099999913,120.896666666667,44" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="3" Group="Expanded" Label="MoneyUtils" UseManualLocation="True" />
     <Node Id="@15" Category="CodeSchema_Method" Bounds="60,347.88,272.756666666667,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="ConvertImageUrlsToCountryTransfermarktIds" />
     <Node Id="@17" Category="CodeSchema_Method" Bounds="362.756666666667,347.88,212.8,25.96" CodeSchemaProperty_IsPublic="True" CodeSchemaProperty_IsStatic="True" DelayedCrossGroupLinksState="Fetched" Label="GetTransfermarktIdFromImageUrl" />
-    <Node Id="@2" Category="CodeSchema_Assembly" AssemblyTimestamp="06/22/2025 04:53:48" Bounds="0,0,959.44,489.8" CodeSchemaProperty_StrongName="TransfermarktScraper.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" CommonLabel="TransfermarktScraper.Domain" DelayedChildNodesState="Incomplete" DelayedCrossGroupLinksState="Fetched" FilePath="$(e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPath)" Group="Expanded" Label="TransfermarktScraper.Domain.Utils" />
-    <Node Id="@4" Category="CodeSchema_Namespace" Bounds="20,40,618.173333333333,429.8" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="4" Group="Expanded" Label="TransfermarktScraper.Domain.Utils.DTO" />
-    <Node Id="@5" Category="CodeSchema_Namespace" Bounds="668.173333333333,40,271.266666666667,145.96" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="1" Group="Expanded" Label="TransfermarktScraper.Domain.Utils.Entity" />
-    <Node Id="@6" Category="CodeSchema_Class" Bounds="437.843333333333,80,180.33,141.92" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="2" Group="Expanded" Label="DateUtils" />
-    <Node Id="@7" Category="CodeSchema_Class" Bounds="743.263333333333,80,121.086666666667,85.96" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="1" Group="Expanded" Label="EntityUtils" />
-    <Node Id="@8" Category="CodeSchema_Class" Bounds="247.193333333333,80,160.65,141.92" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="2" Group="Expanded" Label="HeightUtils" />
+    <Node Id="@2" Category="CodeSchema_Assembly" AssemblyTimestamp="06/22/2025 04:53:48" Bounds="-26.1986684749313,-42.0001500000874,652.006666666667,240.00045" CodeSchemaProperty_StrongName="TransfermarktScraper.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" CommonLabel="TransfermarktScraper.Domain" DelayedChildNodesState="Incomplete" DelayedCrossGroupLinksState="Fetched" FilePath="$(e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPath)" Group="Expanded" Label="TransfermarktScraper.Domain.Utils" />
+    <Node Id="@4" Category="CodeSchema_Namespace" Bounds="-6.19866847493122,-1.00010000008733,310.74,179.0003" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="4" Group="Expanded" Label="TransfermarktScraper.Domain.Utils.DTO" />
+    <Node Id="@5" Category="CodeSchema_Namespace" Bounds="334.541331525069,-2.0000500000874,271.266666666667,104.0002" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="1" Group="Expanded" Label="TransfermarktScraper.Domain.Utils.Entity" />
+    <Node Id="@6" Category="CodeSchema_Class" Bounds="19.644664858402,39.9999999999127,109.08,44" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="2" Group="Expanded" Label="DateUtils" />
+    <Node Id="@7" Category="CodeSchema_Class" Bounds="413.212998191735,38.0000499999126,113.923333333334,44" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="1" Group="Expanded" Label="EntityUtils" />
+    <Node Id="@8" Category="CodeSchema_Class" Bounds="13.8013315250688,114.000099999913,119.843333333333,44" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="2" Group="Expanded" Label="HeightUtils" />
   </Nodes>
   <Links>
     <Link Source="@10" Target="(@1 @3 @9 Member=(Name=ConvertCountryTransfermarktIdsToImageUrls OverloadingParameters=[(@13 Namespace=System.Collections.Generic Type=(Name=IEnumerable GenericParameterCount=1 GenericArguments=[(@13 @14 Type=String)])),(@13 @14 Type=String)]))" Category="Contains" FetchingParent="@10" />
@@ -72,10 +72,11 @@
     <Property Id="FetchedChildrenCount" DataType="System.Int32" />
     <Property Id="FetchingParent" DataType="Microsoft.VisualStudio.GraphModel.GraphNodeId" />
     <Property Id="FilePath" Label="File Path" Description="File Path" DataType="System.String" />
+    <Property Id="FilterState" DataType="System.String" />
     <Property Id="GraphDirection" DataType="Microsoft.VisualStudio.Diagrams.Layout.LayoutOrientation" />
     <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
     <Property Id="GroupLabel" DataType="System.String" />
-    <Property Id="Icon" DataType="System.String" />
+    <Property Id="Icon" Label="Icon" Description="Icon" DataType="System.String" />
     <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
     <Property Id="IsContainment" DataType="System.Boolean" />
     <Property Id="IsEnabled" DataType="System.Boolean" />
@@ -84,6 +85,7 @@
     <Property Id="NavigationActionLabel" Label="NavigationActionLabel" Description="NavigationActionLabel" DataType="System.String" />
     <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
     <Property Id="TargetType" DataType="System.Type" />
+    <Property Id="UseManualLocation" DataType="System.Boolean" />
     <Property Id="Value" DataType="System.String" />
     <Property Id="ValueLabel" DataType="System.String" />
     <Property Id="Visibility" Label="Visibility" Description="Defines whether a node in the graph is visible or not" DataType="System.Windows.Visibility" />
@@ -169,13 +171,13 @@
       <Setter Property="Stroke" Value="#FF0E619A" />
       <Setter Property="Icon" Value="CodeSchema_Namespace" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Interface" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Interface" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Interface')" />
       <Setter Property="Background" Value="#FF1382CE" />
       <Setter Property="Stroke" Value="#FF1382CE" />
       <Setter Property="Icon" Value="CodeSchema_Interface" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Struct" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Struct" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Struct')" />
       <Setter Property="Background" Value="#FF1382CE" />
       <Setter Property="Stroke" Value="#FF1382CE" />
@@ -188,7 +190,7 @@
       <Setter Property="Icon" Value="CodeSchema_Enum" />
       <Setter Property="LayoutSettings" Value="List" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Delegate" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Delegate" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Delegate')" />
       <Setter Property="Background" Value="#FF1382CE" />
       <Setter Property="Stroke" Value="#FF1382CE" />
@@ -200,26 +202,26 @@
       <Setter Property="Stroke" Value="#FF0E70C0" />
       <Setter Property="Icon" Value="CodeSchema_Class" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Property" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Property" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Property')" />
       <Setter Property="Background" Value="#FFE0E0E0" />
       <Setter Property="Stroke" Value="#FFE0E0E0" />
       <Setter Property="Icon" Value="CodeSchema_Property" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Method" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Method" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Method') Or HasCategory('CodeSchema_CallStackUnresolvedMethod')" />
       <Setter Property="Background" Value="#FFE0E0E0" />
       <Setter Property="Stroke" Value="#FFE0E0E0" />
       <Setter Property="Icon" Value="CodeSchema_Method" />
       <Setter Property="LayoutSettings" Value="List" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Event" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Event" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Event')" />
       <Setter Property="Background" Value="#FFE0E0E0" />
       <Setter Property="Stroke" Value="#FFE0E0E0" />
       <Setter Property="Icon" Value="CodeSchema_Event" />
     </Style>
-    <Style TargetType="Node" GroupLabel="Field" ValueLabel="Has category">
+    <Style TargetType="Node" IsEnabled="false" GroupLabel="Field" ValueLabel="Has category">
       <Condition Expression="HasCategory('CodeSchema_Field')" />
       <Setter Property="Background" Value="#FFE0E0E0" />
       <Setter Property="Stroke" Value="#FFE0E0E0" />
@@ -323,7 +325,7 @@
       <Condition Expression="HasCategory('CodeMap_SolutionFolder')" />
       <Setter Property="Background" Value="#FFDEBA83" />
     </Style>
-    <Style TargetType="Link" GroupLabel="Project Reference" ValueLabel="Project Reference">
+    <Style TargetType="Link" IsEnabled="false" GroupLabel="Project Reference" ValueLabel="Project Reference">
       <Condition Expression="HasCategory('CodeMap_ProjectReference')" />
       <Setter Property="Stroke" Value="#9A9A9A" />
       <Setter Property="StrokeDashArray" Value="2 2" />
@@ -339,6 +341,7 @@
   <Paths>
     <Path Id="e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPath" Value="C:\Projects\TransfermarktScraper\TransfermarktScraper.Domain\bin\Debug\net9.0\TransfermarktScraper.Domain.dll" />
     <Path Id="e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPathUri" Value="file:///C:/Projects/TransfermarktScraper/TransfermarktScraper.Domain/bin/Debug/net9.0/TransfermarktScraper.Domain.dll" />
+    <Path Id="ProgramFiles" Value="C:\Program Files" />
     <Path Id="ProgramFilesUri" Value="file:///C:/Program Files" />
   </Paths>
 </DirectedGraph>

@@ -1,66 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<DirectedGraph DataVirtualized="True" Layout="Sugiyama" ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+<DirectedGraph DataVirtualized="True" GraphDirection="LeftToRight" Layout="Sugiyama" ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
   <Nodes>
-    <Node Id="@10" Category="CodeSchema_Class" Bounds="70.5083333333334,93,140.61,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="FootExtensions" />
-    <Node Id="@11" Category="CodeSchema_Enum" Bounds="368.386666666667,133.5,122.243333333333,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="MatchResult" />
-    <Node Id="@12" Category="CodeSchema_Class" Bounds="70.5083333333333,120,181.866666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="MatchResultExtensions" />
-    <Node Id="@13" Category="CodeSchema_Enum" Bounds="368.386666666667,160.5,153.5,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="NotPlayingReason" />
-    <Node Id="@14" Category="CodeSchema_Class" Bounds="70.5083333333334,147,208.03,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="NotPlayingReasonExtension" />
-    <Node Id="@15" Category="CodeSchema_Enum" Bounds="368.386666666667,187.5,99.1000000000001,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="Position" />
-    <Node Id="@16" Category="CodeSchema_Class" Bounds="70.5083333333333,174,158.723333333333,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="PositionExtensions" />
-    <Node Id="@17" Category="CodeSchema_Enum" Bounds="523.886666666667,79.5,76.6433333333334,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="Tier" />
-    <Node Id="@18" Category="CodeSchema_Class" Bounds="70.5083333333334,201,136.266666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="TierExtensions" />
-    <Node Id="@2" Category="CodeSchema_Assembly" AssemblyTimestamp="06/22/2025 04:53:48" Bounds="0,0,629.87,252" CodeSchemaProperty_StrongName="TransfermarktScraper.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" CommonLabel="TransfermarktScraper.Domain" DelayedChildNodesState="Incomplete" DelayedCrossGroupLinksState="Fetched" FilePath="$(e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPath)" Group="Expanded" Label="TransfermarktScraper.Domain.Enums" />
-    <Node Id="@4" Category="CodeSchema_Namespace" Bounds="359.046666666667,53.5,250.823333333333,165" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="6" Group="Expanded" Label="TransfermarktScraper.Domain.Enums" LayoutSettings="List" />
-    <Node Id="@6" Category="CodeSchema_Namespace" Bounds="20,40,309.046666666667,192" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="6" Group="Expanded" Label="TransfermarktScraper.Domain.Enums.Extensions" LayoutSettings="List" />
-    <Node Id="@7" Category="CodeSchema_Enum" Bounds="368.386666666667,79.5,78.2733333333333,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="Cup" />
-    <Node Id="@8" Category="CodeSchema_Class" Bounds="70.5083333333334,66,137.896666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="CupExtensions" />
-    <Node Id="@9" Category="CodeSchema_Enum" Bounds="368.386666666667,106.5,80.9866666666667,25" CodeSchemaProperty_IsFinal="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="Foot" />
+    <Node Id="@10" Category="CodeSchema_Class" Bounds="70.4028778537076,176.500294492357,135.726666666667,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ExporterClient" />
+    <Node Id="@11" Category="CodeSchema_Interface" Bounds="421.06136323319,92.4942387811718,118.75,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="IClubClient" />
+    <Node Id="@12" Category="CodeSchema_Interface" Bounds="421.06785723319,119.53283882348,160.463333333333,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ICompetitionClient" />
+    <Node Id="@13" Category="CodeSchema_Interface" Bounds="421.032499899856,146.505438821172,136.656666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ICountryClient" />
+    <Node Id="@14" Category="CodeSchema_Interface" Bounds="421.065941899856,173.51103880348,138.92,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="IExporterClient" />
+    <Node Id="@15" Category="CodeSchema_Interface" Bounds="421.032499899856,200.472638781172,114.316666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ILogClient" />
+    <Node Id="@16" Category="CodeSchema_Interface" Bounds="421.063811899857,227.478238801172,131.063333333333,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="IMasterClient" />
+    <Node Id="@17" Category="CodeSchema_Interface" Bounds="421.032499899857,254.472838801172,126.56,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="IPlayerClient" />
+    <Node Id="@18" Category="CodeSchema_Interface" Bounds="421.032499899856,281.500438861172,146.786666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="IPlayerStatClient" />
+    <Node Id="@19" Category="CodeSchema_Interface" Bounds="583.463340566523,92.5272388411718,137.21,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ISettingsClient" />
+    <Node Id="@2" Category="CodeSchema_Assembly" AssemblyTimestamp="06/24/2025 12:19:29" Bounds="44.4028778537076,26.4950888037334,702.268454896232,309.005405688623" CodeSchemaProperty_StrongName="TransfermarktScraper.Web, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" CommonLabel="TransfermarktScraper.Web" DelayedChildNodesState="Incomplete" DelayedCrossGroupLinksState="Fetched" FilePath="$(8dc2f5d2-0d72-44d5-b18e-2034cb82ca6c.OutputPath)" Group="Expanded" Label="TransfermarktScraper.Web.Clients" />
+    <Node Id="@20" Category="CodeSchema_Class" Bounds="70.4028778537076,203.500294492357,111.123333333333,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="LogClient" />
+    <Node Id="@21" Category="CodeSchema_Class" Bounds="70.4028778537076,230.500294492357,127.87,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="MasterClient" />
+    <Node Id="@22" Category="CodeSchema_Class" Bounds="70.4028778537076,257.500294492357,123.366666666667,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="PlayerClient" />
+    <Node Id="@23" Category="CodeSchema_Class" Bounds="70.4028778537076,284.500294492357,143.593333333333,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="PlayerStatClient" />
+    <Node Id="@24" Category="CodeSchema_Class" Bounds="229.672877853708,95.5002944923569,134.016666666667,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="SettingsClient" />
+    <Node Id="@4" Category="CodeSchema_Namespace" Bounds="64.4028778537076,69.5001944923569,305.286666666667,246.0002" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="9" Group="Expanded" Label="TransfermarktScraper.Web.Clients.Impl" LayoutSettings="List" UseManualLocation="True" />
+    <Node Id="@6" Category="CodeSchema_Namespace" Bounds="415.032499899856,66.4951888037334,311.638832850084,246.005350057438" DelayedChildNodesState="Fetched" DelayedCrossGroupLinksState="Fetched" FetchedChildrenCount="9" Group="Expanded" Label="TransfermarktScraper.Web.Clients.Interfaces" LayoutSettings="List" UseManualLocation="True" />
+    <Node Id="@7" Category="CodeSchema_Class" Bounds="70.4028778537076,95.5002944923569,115.556666666667,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="ClubClient" />
+    <Node Id="@8" Category="CodeSchema_Class" Bounds="70.4028778537076,122.500294492357,157.27,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="CompetitionClient" />
+    <Node Id="@9" Category="CodeSchema_Class" Bounds="70.4028778537076,149.500294492357,133.463333333333,25" CodeSchemaProperty_IsPublic="True" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Label="CountryClient" />
   </Nodes>
   <Links>
-    <Link Source="@10" Target="@9" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
-    <Link Source="@12" Target="@11" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
-    <Link Source="@14" Target="@13" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
-    <Link Source="@16" Target="@15" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
-    <Link Source="@18" Target="@17" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
+    <Link Source="@10" Target="@14" Category="Implements" Weight="1" />
     <Link Source="@2" Target="@4" Category="Contains" FetchingParent="@2" />
     <Link Source="@2" Target="@6" Category="Contains" FetchingParent="@2" />
-    <Link Source="@4" Target="@11" Category="Contains" FetchingParent="@4" />
-    <Link Source="@4" Target="@13" Category="Contains" FetchingParent="@4" />
-    <Link Source="@4" Target="@15" Category="Contains" FetchingParent="@4" />
-    <Link Source="@4" Target="@17" Category="Contains" FetchingParent="@4" />
+    <Link Source="@20" Target="@15" Category="Implements" Weight="1" />
+    <Link Source="@21" Target="@16" Category="Implements" Weight="1" />
+    <Link Source="@22" Target="@17" Category="Implements" Weight="1" />
+    <Link Source="@23" Target="@18" Category="Implements" Bounds="213.996211187041,294.702167078937,198.036615109744,1.68664655096819" Weight="1" />
+    <Link Source="@24" Target="@19" Category="Implements" Weight="1" />
+    <Link Source="@4" Target="@10" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@20" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@21" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@22" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@23" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@24" Category="Contains" FetchingParent="@4" />
     <Link Source="@4" Target="@7" Category="Contains" FetchingParent="@4" />
+    <Link Source="@4" Target="@8" Category="Contains" FetchingParent="@4" />
     <Link Source="@4" Target="@9" Category="Contains" FetchingParent="@4" />
-    <Link Source="@6" Target="@10" Category="Contains" FetchingParent="@6" />
+    <Link Source="@6" Target="@11" Category="Contains" FetchingParent="@6" />
     <Link Source="@6" Target="@12" Category="Contains" FetchingParent="@6" />
+    <Link Source="@6" Target="@13" Category="Contains" FetchingParent="@6" />
     <Link Source="@6" Target="@14" Category="Contains" FetchingParent="@6" />
+    <Link Source="@6" Target="@15" Category="Contains" FetchingParent="@6" />
     <Link Source="@6" Target="@16" Category="Contains" FetchingParent="@6" />
+    <Link Source="@6" Target="@17" Category="Contains" FetchingParent="@6" />
     <Link Source="@6" Target="@18" Category="Contains" FetchingParent="@6" />
-    <Link Source="@6" Target="@8" Category="Contains" FetchingParent="@6" />
-    <Link Source="@8" Target="@7" Category="References" IsSourceVirtualized="True" Weight="5">
-      <Category Ref="CodeSchema_ReturnTypeLink" />
-    </Link>
+    <Link Source="@6" Target="@19" Category="Contains" FetchingParent="@6" />
+    <Link Source="@7" Target="@11" Category="Implements" Weight="1" />
+    <Link Source="@8" Target="@12" Category="Implements" Weight="1" />
+    <Link Source="@9" Target="@13" Category="Implements" Weight="1" />
   </Links>
   <Categories>
     <Category Id="CodeSchema_Assembly" Label="Assembly" BasedOn="File" CanBeDataDriven="True" DefaultAction="Microsoft.Contains" Icon="CodeSchema_Assembly" NavigationActionLabel="Assemblies" />
     <Category Id="CodeSchema_Class" Label="Class" BasedOn="CodeSchema_Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Class" NavigationActionLabel="Classes" />
-    <Category Id="CodeSchema_Enum" Label="Enum" BasedOn="CodeSchema_Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Enum" NavigationActionLabel="Enums" />
+    <Category Id="CodeSchema_Interface" Label="Interface" BasedOn="CodeSchema_Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Interface" NavigationActionLabel="Interfaces" />
     <Category Id="CodeSchema_Namespace" Label="Namespace" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Type" Icon="CodeSchema_Namespace" NavigationActionLabel="Namespaces" />
-    <Category Id="CodeSchema_ReturnTypeLink" Label="Return" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Return types" OutgoingActionLabel="Return types" />
     <Category Id="CodeSchema_Type" Label="Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Class" NavigationActionLabel="Types" />
     <Category Id="Contains" Label="Contains" Description="Whether the source of the link contains the target object" CanBeDataDriven="False" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Contained By" IsContainment="True" OutgoingActionLabel="Contains" />
     <Category Id="File" Label="File" CanBeDataDriven="True" DefaultAction="Microsoft.Contains" Icon="File" NavigationActionLabel="Files" />
-    <Category Id="References" Label="References" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Referenced By" OutgoingActionLabel="References" />
+    <Category Id="Implements" Label="Implements" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Implemented by" OutgoingActionLabel="Implements" />
   </Categories>
   <Properties>
     <Property Id="AssemblyTimestamp" DataType="System.DateTime" />
@@ -68,7 +70,6 @@
     <Property Id="CanBeDataDriven" Label="CanBeDataDriven" Description="CanBeDataDriven" DataType="System.Boolean" />
     <Property Id="CanLinkedNodesBeDataDriven" Label="CanLinkedNodesBeDataDriven" Description="CanLinkedNodesBeDataDriven" DataType="System.Boolean" />
     <Property Id="CodeSchemaProperty_IsAbstract" Label="Is Abstract" Description="Flag to indicate member is 'Abstract' does not provide a full implementation" DataType="System.Boolean" />
-    <Property Id="CodeSchemaProperty_IsFinal" Label="Is Final" Description="Flag to indicate the member is 'Final' and cannot be derived from" DataType="System.Boolean" />
     <Property Id="CodeSchemaProperty_IsPublic" Label="Is Public" Description="Flag to indicate the scope is Public" DataType="System.Boolean" />
     <Property Id="CodeSchemaProperty_StrongName" Label="StrongName" Description="StrongName" DataType="System.String" />
     <Property Id="CommonLabel" DataType="System.String" />
@@ -80,19 +81,20 @@
     <Property Id="FetchedChildrenCount" DataType="System.Int32" />
     <Property Id="FetchingParent" DataType="Microsoft.VisualStudio.GraphModel.GraphNodeId" />
     <Property Id="FilePath" Label="File Path" Description="File Path" DataType="System.String" />
+    <Property Id="GraphDirection" DataType="Microsoft.VisualStudio.Diagrams.Layout.LayoutOrientation" />
     <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
     <Property Id="GroupLabel" DataType="System.String" />
     <Property Id="Icon" Label="Icon" Description="Icon" DataType="System.String" />
     <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
     <Property Id="IsContainment" DataType="System.Boolean" />
     <Property Id="IsEnabled" DataType="System.Boolean" />
-    <Property Id="IsSourceVirtualized" Label="Link Source Virtualized" Description="If true, the link source end contains data for virtualized nodes/links (i.e. not actually created in the graph)." DataType="System.Boolean" />
     <Property Id="Label" Label="Label" Description="Displayable label of an Annotatable object" DataType="System.String" />
     <Property Id="Layout" DataType="System.String" />
     <Property Id="LayoutSettings" DataType="Microsoft.VisualStudio.Diagrams.View.GroupLayoutStyle" />
     <Property Id="NavigationActionLabel" Label="NavigationActionLabel" Description="NavigationActionLabel" DataType="System.String" />
     <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
     <Property Id="TargetType" DataType="System.Type" />
+    <Property Id="UseManualLocation" DataType="System.Boolean" />
     <Property Id="Value" DataType="System.String" />
     <Property Id="ValueLabel" DataType="System.String" />
     <Property Id="Visibility" Label="Visibility" Description="Defines whether a node in the graph is visible or not" DataType="System.Windows.Visibility" />
@@ -105,24 +107,30 @@
     <Name Id="Type" Label="Type" ValueType="System.Object" />
   </QualifiedNames>
   <IdentifierAliases>
-    <Alias n="1" Uri="Assembly=$(e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPathUri)" />
+    <Alias n="1" Uri="Assembly=$(8dc2f5d2-0d72-44d5-b18e-2034cb82ca6c.OutputPathUri)" />
     <Alias n="2" Id="(@1)" />
-    <Alias n="3" Id="Namespace=TransfermarktScraper.Domain.Enums" />
+    <Alias n="3" Id="Namespace=TransfermarktScraper.Web.Clients.Impl" />
     <Alias n="4" Id="(@1 @3)" />
-    <Alias n="5" Id="Namespace=TransfermarktScraper.Domain.Enums.Extensions" />
+    <Alias n="5" Id="Namespace=TransfermarktScraper.Web.Clients.Interfaces" />
     <Alias n="6" Id="(@1 @5)" />
-    <Alias n="7" Id="(@1 @3 Type=Cup)" />
-    <Alias n="8" Id="(@1 @5 Type=CupExtensions)" />
-    <Alias n="9" Id="(@1 @3 Type=Foot)" />
-    <Alias n="10" Id="(@1 @5 Type=FootExtensions)" />
-    <Alias n="11" Id="(@1 @3 Type=MatchResult)" />
-    <Alias n="12" Id="(@1 @5 Type=MatchResultExtensions)" />
-    <Alias n="13" Id="(@1 @3 Type=NotPlayingReason)" />
-    <Alias n="14" Id="(@1 @5 Type=NotPlayingReasonExtension)" />
-    <Alias n="15" Id="(@1 @3 Type=Position)" />
-    <Alias n="16" Id="(@1 @5 Type=PositionExtensions)" />
-    <Alias n="17" Id="(@1 @3 Type=Tier)" />
-    <Alias n="18" Id="(@1 @5 Type=TierExtensions)" />
+    <Alias n="7" Id="(@1 @3 Type=ClubClient)" />
+    <Alias n="8" Id="(@1 @3 Type=CompetitionClient)" />
+    <Alias n="9" Id="(@1 @3 Type=CountryClient)" />
+    <Alias n="10" Id="(@1 @3 Type=ExporterClient)" />
+    <Alias n="11" Id="(@1 @5 Type=IClubClient)" />
+    <Alias n="12" Id="(@1 @5 Type=ICompetitionClient)" />
+    <Alias n="13" Id="(@1 @5 Type=ICountryClient)" />
+    <Alias n="14" Id="(@1 @5 Type=IExporterClient)" />
+    <Alias n="15" Id="(@1 @5 Type=ILogClient)" />
+    <Alias n="16" Id="(@1 @5 Type=IMasterClient)" />
+    <Alias n="17" Id="(@1 @5 Type=IPlayerClient)" />
+    <Alias n="18" Id="(@1 @5 Type=IPlayerStatClient)" />
+    <Alias n="19" Id="(@1 @5 Type=ISettingsClient)" />
+    <Alias n="20" Id="(@1 @3 Type=LogClient)" />
+    <Alias n="21" Id="(@1 @3 Type=MasterClient)" />
+    <Alias n="22" Id="(@1 @3 Type=PlayerClient)" />
+    <Alias n="23" Id="(@1 @3 Type=PlayerStatClient)" />
+    <Alias n="24" Id="(@1 @3 Type=SettingsClient)" />
   </IdentifierAliases>
   <Styles>
     <Style TargetType="Node" GroupLabel="Results" ValueLabel="True">
@@ -342,7 +350,7 @@
     </Style>
   </Styles>
   <Paths>
-    <Path Id="e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPath" Value="C:\Projects\TransfermarktScraper\TransfermarktScraper.Domain\bin\Debug\net9.0\TransfermarktScraper.Domain.dll" />
-    <Path Id="e7529c43-b864-48bb-a3e1-6dd885ffc3e9.OutputPathUri" Value="file:///C:/Projects/TransfermarktScraper/TransfermarktScraper.Domain/bin/Debug/net9.0/TransfermarktScraper.Domain.dll" />
+    <Path Id="8dc2f5d2-0d72-44d5-b18e-2034cb82ca6c.OutputPath" Value="C:\Projects\TransfermarktScraper\TransfermarktScraper.Web\bin\Debug\net9.0\TransfermarktScraper.Web.dll" />
+    <Path Id="8dc2f5d2-0d72-44d5-b18e-2034cb82ca6c.OutputPathUri" Value="file:///C:/Projects/TransfermarktScraper/TransfermarktScraper.Web/bin/Debug/net9.0/TransfermarktScraper.Web.dll" />
   </Paths>
 </DirectedGraph>
